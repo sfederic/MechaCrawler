@@ -15,13 +15,14 @@ FCollisionQueryParams moveParams;
 FVector rootAxes[4];
 
 float moveDistance = 100.f;
-float traceDistance = 125.f;
+float traceDistance = 100.f;
 
 bool falling = false;
 
 AMecha::AMecha()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.TickGroup = TG_PrePhysics; //Seems to fix fall through floor effect (for now)
 	moveParams.AddIgnoredActor(this);
 }
 
@@ -54,8 +55,6 @@ void AMecha::Tick(float DeltaTime)
 	rootAxes[2] = RootComponent->GetRightVector();
 	rootAxes[3] = -RootComponent->GetRightVector();
 
-	//float forwardAngle = FMath::Acos(FVector::DotProduct(camera->GetForwardVector(), rootAxes[3]));
-	//float rightAngle = FMath::Acos(FVector::DotProduct(camera->GetRightVector(), rootAxes[2]));
 	float forwardAngle = INFINITY;
 	float rightAngle = INFINITY;
 
@@ -88,6 +87,8 @@ void AMecha::Tick(float DeltaTime)
 		FVector loc = GetActorLocation();
 		if (!GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
 		{
+			//GLog->Logf(TEXT("Grav: %s\n"), *moveHit.GetActor()->GetName());
+
 			nextLoc = loc - (RootComponent->GetUpVector() * moveDistance);
 			nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 			nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
@@ -119,7 +120,7 @@ void AMecha::Tick(float DeltaTime)
 		MoveRight(1.0f);
 	}
 
-	if (controller->IsInputKeyDown(EKeys::SpaceBar))
+	if (controller->IsInputKeyDown(EKeys::LeftMouseButton)) 
 	{
 		FHitResult shootHit;
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * 1000.f,
@@ -172,6 +173,8 @@ void AMecha::MoveForward(float val)
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
 				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+
+				return;
 			}
 			else
 			{
@@ -219,6 +222,8 @@ void AMecha::MoveBack(float val)
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
 				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+
+				return;
 			}
 			else
 			{
@@ -266,6 +271,8 @@ void AMecha::MoveLeft(float val)
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
 				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+
+				return;
 			}
 			else
 			{
@@ -313,6 +320,8 @@ void AMecha::MoveRight(float val)
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
 				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+
+				return;
 			}
 			else
 			{
