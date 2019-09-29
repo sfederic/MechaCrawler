@@ -85,16 +85,15 @@ void AMecha::Tick(float DeltaTime)
 	if (currentLoc == nextLoc && currentRot == nextRot)
 	{
 		FVector loc = GetActorLocation();
+
 		if (!GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
 		{
-			//GLog->Logf(TEXT("Grav: %s\n"), *moveHit.GetActor()->GetName());
+			falling = true;
 
 			nextLoc = loc - (RootComponent->GetUpVector() * moveDistance);
 			nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 			nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
 			nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
-
-			falling = true;
 		}
 		else
 		{
@@ -102,7 +101,9 @@ void AMecha::Tick(float DeltaTime)
 		}
 	}
 
+	///MOVE'N
 	APlayerController* controller = (APlayerController*)GetController();
+
 	if(controller->IsInputKeyDown(EKeys::W))
 	{
 		MoveForward(1.0f);
@@ -120,17 +121,19 @@ void AMecha::Tick(float DeltaTime)
 		MoveRight(1.0f);
 	}
 
+	//SHOOT'N
 	if (controller->IsInputKeyDown(EKeys::LeftMouseButton)) 
 	{
 		FHitResult shootHit;
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * 1000.f,
-			ECC_Destructible, moveParams))
+			ECC_Destructible))
 		{
 			UDestructibleComponent* dc = Cast<UDestructibleComponent>(shootHit.GetComponent());
 			if (dc)
 			{
 				dc->ApplyDamage(damageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), damageStrength);
-				dc->GetOwner()->SetLifeSpan(2.f);
+				dc->GetOwner()->SetLifeSpan(1.f);
+				dc->GetOwner()->Tags.Add("Destroy");
 			}
 		}
 	}
@@ -165,29 +168,27 @@ void AMecha::MoveForward(float val)
 
 		if (currentLoc == nextLoc && currentRot == nextRot)
 		{
-			if (!GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc + (forwardAxis * traceDistance), ECC_WorldStatic, moveParams))
+			//TODO: move traces look like shit, find a way to ignore channels/set channels
+			TArray<FHitResult> results;
+			if (GetWorld()->LineTraceMultiByChannel(results, loc, loc + (forwardAxis * traceDistance), ECC_WorldStatic, moveParams))
 			{
-				moveAgain:
-
-				nextLoc = loc + (forwardAxis * moveDistance);
-				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+				for (int i = 0; i < results.Num(); i++)
+				{
+					if (!results[i].GetActor()->Tags.Contains("Destroy"))
+					{
+						goto move;
+					}
+				}
 
 				return;
-			}
-			else
-			{
-				if (moveHit.GetActor()->Tags.Contains("Destroy"))
-				{
-					goto moveAgain; 
-				}
+
+				move:
 
 				if (rightAxis.Equals(RootComponent->GetRightVector()))
 				{
 					nextRot *= FQuat(FVector::RightVector, FMath::DegreesToRadians(-90.f));
 				}
-				else if(rightAxis.Equals(RootComponent->GetForwardVector()))
+				else if (rightAxis.Equals(RootComponent->GetForwardVector()))
 				{
 					nextRot *= FQuat(FVector::ForwardVector, FMath::DegreesToRadians(-90.f));
 				}
@@ -202,6 +203,13 @@ void AMecha::MoveForward(float val)
 
 				nextRot.Normalize();
 			}
+			else
+			{
+				nextLoc = loc + (forwardAxis * moveDistance);
+				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+			}
 		}
 	}
 }
@@ -214,23 +222,20 @@ void AMecha::MoveBack(float val)
 
 		if (currentLoc == nextLoc && currentRot == nextRot)
 		{
-			if (!GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc - (forwardAxis * traceDistance), ECC_WorldStatic, moveParams))
+			TArray<FHitResult> results;
+			if (GetWorld()->LineTraceMultiByChannel(results, loc, loc - (forwardAxis * traceDistance), ECC_WorldStatic, moveParams))
 			{
-				moveAgain:
-
-				nextLoc = loc - (forwardAxis * moveDistance);
-				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+				for (int i = 0; i < results.Num(); i++)
+				{
+					if (!results[i].GetActor()->Tags.Contains("Destroy"))
+					{
+						goto move;
+					}
+				}
 
 				return;
-			}
-			else
-			{
-				if (moveHit.GetActor()->Tags.Contains("Destroy"))
-				{
-					goto moveAgain;
-				}
+
+				move:
 
 				if (rightAxis.Equals(RootComponent->GetRightVector()))
 				{
@@ -251,6 +256,13 @@ void AMecha::MoveBack(float val)
 
 				nextRot.Normalize();
 			}
+			else
+			{
+				nextLoc = loc - (forwardAxis * moveDistance);
+				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+			}
 		}
 	}
 }
@@ -263,23 +275,20 @@ void AMecha::MoveLeft(float val)
 
 		if (currentLoc == nextLoc && currentRot == nextRot)
 		{
-			if (!GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc - (rightAxis * traceDistance), ECC_WorldStatic, moveParams))
+			TArray<FHitResult> results;
+			if (GetWorld()->LineTraceMultiByChannel(results, loc, loc - (rightAxis * traceDistance), ECC_WorldStatic, moveParams))
 			{
-				moveAgain:
-
-				nextLoc = loc - (rightAxis * moveDistance);
-				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+				for (int i = 0; i < results.Num(); i++)
+				{
+					if (!results[i].GetActor()->Tags.Contains("Destroy"))
+					{
+						goto move;
+					}
+				}
 
 				return;
-			}
-			else
-			{
-				if (moveHit.GetActor()->Tags.Contains("Destroy"))
-				{
-					goto moveAgain;
-				}
+
+				move:
 
 				if (forwardAxis.Equals(RootComponent->GetRightVector()))
 				{
@@ -299,6 +308,13 @@ void AMecha::MoveLeft(float val)
 				}
 
 				nextRot.Normalize();
+			}
+			else
+			{
+				nextLoc = loc - (rightAxis * moveDistance);
+				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 			}
 		}
 	}
@@ -312,24 +328,20 @@ void AMecha::MoveRight(float val)
 
 		if (currentLoc == nextLoc && currentRot == nextRot)
 		{
-			if (!GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc + (rightAxis * traceDistance), ECC_WorldStatic, moveParams))
+			TArray<FHitResult> results;
+			if (GetWorld()->LineTraceMultiByChannel(results, loc, loc + (rightAxis * traceDistance), ECC_WorldStatic, moveParams))
 			{
-				moveAgain:
-
-				nextLoc = loc + (rightAxis * moveDistance);
-				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+				for (int i = 0; i < results.Num(); i++)
+				{
+					if (!results[i].GetActor()->Tags.Contains("Destroy"))
+					{
+						goto move;
+					}
+				}
 
 				return;
-			}
-			else
-			{
-				if (moveHit.GetActor()->Tags.Contains("Destroy"))
-				{
-					GLog->Log("yes");
-					goto moveAgain;
-				}
+
+			move:
 
 				if (forwardAxis.Equals(RootComponent->GetRightVector()))
 				{
@@ -349,6 +361,13 @@ void AMecha::MoveRight(float val)
 				}
 
 				nextRot.Normalize();
+			}
+			else
+			{
+				nextLoc = loc + (rightAxis * moveDistance);
+				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 			}
 		}
 	}
