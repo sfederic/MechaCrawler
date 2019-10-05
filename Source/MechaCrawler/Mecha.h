@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "Blueprint/UserWidget.h"
 #include "Mecha.generated.h"
 
 UCLASS()
@@ -26,6 +27,11 @@ public:
 	void MoveRight(float val);
 	void LookYaw(float val);
 	void LookPitch(float val);
+
+	AHUD* mainHUD;
+
+	UPROPERTY(EditAnywhere)
+	UUserWidget* widget;
 
 	FVector nextLoc;
 	FVector currentLoc;

@@ -7,6 +7,8 @@
 #include "Camera/CameraComponent.h"
 #include "DestructibleComponent.h"
 
+#include "PlayerHUD.h"
+
 UCameraComponent* camera;
 
 FHitResult moveHit;
@@ -26,8 +28,10 @@ AMecha::AMecha()
 	moveParams.AddIgnoredActor(this);
 }
 
+
 void AMecha::BeginPlay()
 {
+
 	Super::BeginPlay();
 	
 	rootAxes[0] = RootComponent->GetForwardVector();
@@ -44,6 +48,9 @@ void AMecha::BeginPlay()
 	camera = FindComponentByClass<UCameraComponent>();
 	check(camera);
 	cameraRot = camera->GetComponentRotation();
+
+	APlayerController* controller = (APlayerController*)GetController();
+	controller->ClientSetHUD(APlayerHUD::StaticClass());
 }
 
 void AMecha::Tick(float DeltaTime)

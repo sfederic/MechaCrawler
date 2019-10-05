@@ -6,12 +6,9 @@
 #include "GameFramework/GameModeBase.h"
 #include "MechaCrawlerGameModeBase.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class MECHACRAWLER_API AMechaCrawlerGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
 };
