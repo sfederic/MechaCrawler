@@ -9,6 +9,6 @@ public class MechaCrawlerTarget : TargetRules
 	{
 		Type = TargetType.Game;
 
-		ExtraModuleNames.AddRange( new string[] { "MechaCrawler" } );
+        ExtraModuleNames.AddRange( new string[] { "MechaCrawler" } );
 	}
 }

@@ -9,6 +9,6 @@ public class MechaCrawlerEditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
 
-		ExtraModuleNames.AddRange( new string[] { "MechaCrawler" } );
+        ExtraModuleNames.AddRange( new string[] { "MechaCrawler" } );
 	}
 }

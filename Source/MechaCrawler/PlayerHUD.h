@@ -6,6 +6,8 @@
 #include "GameFramework/HUD.h"
 #include "PlayerHUD.generated.h"
 
+extern int textIndex;
+
 UCLASS()
 class MECHACRAWLER_API APlayerHUD : public AHUD
 {
@@ -17,8 +19,7 @@ protected:
 public:
 	virtual void DrawHUD() override;
 
-	FString text;
-
 	UPROPERTY(EditAnywhere)
 	UTexture* texture;
+
 };

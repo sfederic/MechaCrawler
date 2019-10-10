@@ -6,10 +6,11 @@
 #include "Engine/World.h"
 #include "Camera/CameraComponent.h"
 #include "DestructibleComponent.h"
-
 #include "PlayerHUD.h"
+#include "Door.h"
 
 UCameraComponent* camera;
+APlayerController* controller;
 
 FHitResult moveHit;
 FCollisionQueryParams moveParams;
@@ -17,14 +18,14 @@ FCollisionQueryParams moveParams;
 FVector rootAxes[4];
 
 float moveDistance = 100.f;
-float traceDistance = 100.f;
+float traceDistance = 125.f; //If traceDistance is equal to moveDistance, players falls through.
 
 bool falling = false;
 
 AMecha::AMecha()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	PrimaryActorTick.TickGroup = TG_PrePhysics; //Seems to fix fall through floor effect (for now)
+	PrimaryActorTick.TickGroup = TG_PrePhysics; //Seems to fix fall through floor effect. Other Actors needs the same.
 	moveParams.AddIgnoredActor(this);
 }
 
@@ -49,8 +50,7 @@ void AMecha::BeginPlay()
 	check(camera);
 	cameraRot = camera->GetComponentRotation();
 
-	APlayerController* controller = (APlayerController*)GetController();
-	controller->ClientSetHUD(APlayerHUD::StaticClass());
+	controller = (APlayerController*)GetController();
 }
 
 void AMecha::Tick(float DeltaTime)
@@ -109,8 +109,6 @@ void AMecha::Tick(float DeltaTime)
 	}
 
 	///MOVE'N
-	APlayerController* controller = (APlayerController*)GetController();
-
 	if(controller->IsInputKeyDown(EKeys::W))
 	{
 		MoveForward(1.0f);
@@ -129,6 +127,20 @@ void AMecha::Tick(float DeltaTime)
 	}
 
 	//SHOOT'N
+	if (controller->IsInputKeyDown(EKeys::LeftMouseButton))
+	{
+		FHitResult shootHit;
+		if (GetWorld()->LineTraceSingleByChannel(shootHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * 1000.f,
+			ECC_WorldStatic))
+		{
+			if (shootHit.GetActor()->IsA(ADoor::StaticClass()))
+			{
+				ADoor* door = Cast<ADoor>(shootHit.GetActor());
+				door->Activate();
+			}
+		}
+	}
+
 	if (controller->IsInputKeyDown(EKeys::LeftMouseButton)) 
 	{
 		FHitResult shootHit;
@@ -139,7 +151,7 @@ void AMecha::Tick(float DeltaTime)
 			if (dc)
 			{
 				dc->ApplyDamage(damageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), damageStrength);
-				dc->GetOwner()->SetLifeSpan(1.f);
+				dc->GetOwner()->SetLifeSpan(5.f);
 				dc->GetOwner()->Tags.Add("Destroy");
 			}
 		}
