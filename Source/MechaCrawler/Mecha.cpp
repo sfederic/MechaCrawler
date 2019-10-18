@@ -19,6 +19,7 @@ FVector rootAxes[4];
 
 float moveDistance = 100.f;
 float traceDistance = 125.f; //If traceDistance is equal to moveDistance, players falls through.
+float previousMoveSpeed;
 
 bool falling = false;
 
@@ -35,6 +36,9 @@ void AMecha::BeginPlay()
 
 	Super::BeginPlay();
 	
+	previousMoveSpeed = moveSpeed;
+
+
 	rootAxes[0] = RootComponent->GetForwardVector();
 	rootAxes[1] = -RootComponent->GetForwardVector();
 	rootAxes[2] = RootComponent->GetRightVector();
@@ -97,6 +101,8 @@ void AMecha::Tick(float DeltaTime)
 		{
 			falling = true;
 
+			moveSpeed += FApp::GetDeltaTime() + 100.0f;
+
 			nextLoc = loc - (RootComponent->GetUpVector() * moveDistance);
 			nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 			nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
@@ -104,6 +110,7 @@ void AMecha::Tick(float DeltaTime)
 		}
 		else
 		{
+			moveSpeed = previousMoveSpeed;
 			falling = false;
 		}
 	}
