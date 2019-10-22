@@ -2,14 +2,20 @@
 
 
 #include "Enemy.h"
+#include "DrawDebugHelpers.h"
 
 float moveTimer;
 FVector nextLoc;
 
+FCollisionQueryParams params;
+FHitResult hit;
+
 AEnemy::AEnemy()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.TickGroup = TG_PrePhysics;
 
+	params.AddIgnoredActor(this);
 }
 
 
@@ -25,33 +31,41 @@ void AEnemy::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	moveTimer += FApp::GetDeltaTime();
-	if (moveTimer > 3.0f)
+
+	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + GetActorForwardVector() * 125.f, FColor::Red);
+	DrawDebugLine(GetWorld(), nextLoc, nextLoc - (GetActorUpVector() * 125.f), FColor::Purple);
+
+	if (moveTimer > 1.5f)
 	{
 		moveTimer = 0.f;
 
-		/*FVector center = levelBounds->Bounds.GetBox().GetCenter();
-		GLog->Logf(TEXT("center %f %f %f"), center.X, center.Y, center.Z);
-		FVector extent = levelBounds->Bounds.GetBox().GetExtent();
-		GLog->Logf(TEXT("extent %f %f %f"), extent.X, extent.Y, extent.Z);*/
-		
-		FVector offset = FMath::RandPointInBox(levelBounds->Bounds.GetBox());
-		offset.X = FMath::RoundToFloat(offset.X);
-		offset.Y = FMath::RoundToFloat(offset.Y);
-		offset.Z = FMath::RoundToFloat(offset.Z);
-
-		GLog->Logf(TEXT("loc %f %f %f"), offset.X, offset.Y, offset.Z);
-
-		FHitResult hit;
-		if (GetWorld()->LineTraceSingleByChannel(hit, offset, offset, ECC_WorldStatic))
+		if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + (GetActorForwardVector() * 125.f), ECC_WorldStatic, params))
 		{
-			return;
+			GLog->Logf(TEXT("enemy wall hit"));
+
+			float randomRotations[4] = { 90.f, 180.f, 270.f, 360.f };
+			int rotationIndex = (int)FMath::RandRange(0.f, 4.f);
+			SetActorRotation(GetActorRotation() + FRotator(0.f, randomRotations[rotationIndex], 0.f));
 		}
-		else 
+		else
 		{
-			nextLoc = offset;
+			redoMove:
+
+			float randomRotations[4] = { 90.f, 180.f, 270.f, 360.f };
+			int rotationIndex = (int)FMath::RandRange(0.f, 4.f);
+
+			nextLoc = GetActorLocation() + GetActorForwardVector() * 100.f;
+			nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+			nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+			nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+			SetActorRotation(GetActorRotation() + FRotator(0.f, randomRotations[rotationIndex], 0.f));
+
+			if (!GetWorld()->LineTraceSingleByChannel(hit, nextLoc, nextLoc - GetActorUpVector() * 125.f, ECC_WorldStatic))
+			{
+				goto redoMove;
+			}
 		}
 	}
 
-	FMath::VInterpConstantTo(GetActorLocation(), nextLoc, DeltaTime, 300.0f);
+	SetActorLocation(FMath::VInterpConstantTo(GetActorLocation(), nextLoc, DeltaTime, moveSpeed));
 }
-

@@ -9,6 +9,8 @@
 #include "PlayerHUD.h"
 #include "Door.h"
 
+class AEnemy;
+
 UCameraComponent* camera;
 APlayerController* controller;
 
@@ -27,6 +29,7 @@ AMecha::AMecha()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.TickGroup = TG_PrePhysics; //Seems to fix fall through floor effect. Other Actors needs the same.
+
 	moveParams.AddIgnoredActor(this);
 }
 
