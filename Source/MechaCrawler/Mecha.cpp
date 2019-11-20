@@ -7,7 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include "DestructibleComponent.h"
 #include "PlayerHUD.h"
-#include "Door.h"
+#include "Activate.h"
 
 class AEnemy;
 
@@ -36,11 +36,9 @@ AMecha::AMecha()
 
 void AMecha::BeginPlay()
 {
-
 	Super::BeginPlay();
 	
 	previousMoveSpeed = moveSpeed;
-
 
 	rootAxes[0] = RootComponent->GetForwardVector();
 	rootAxes[1] = -RootComponent->GetForwardVector();
@@ -143,11 +141,12 @@ void AMecha::Tick(float DeltaTime)
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * 1000.f,
 			ECC_WorldStatic))
 		{
-			if (shootHit.GetActor()->IsA(ADoor::StaticClass()))
+			/*IActivate* useable = Cast<IActivate>(shootHit.GetActor());
+			if (useable)
 			{
-				ADoor* door = Cast<ADoor>(shootHit.GetActor());
-				door->Activate();
-			}
+				GLog->Log(TEXT("Interactive actor"));
+				useable->Execute_Use(nullptr);
+			}*/
 		}
 	}
 

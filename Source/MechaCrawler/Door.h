@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "InteractiveActor.h"
+#include "Activate.h"
 #include "Door.generated.h"
 
 UCLASS()
-class MECHACRAWLER_API ADoor : public AActor
+class MECHACRAWLER_API ADoor : public AActor, public IActivate
 {
 	GENERATED_BODY()
 	
@@ -19,7 +19,9 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-	void Activate();
+
+	UFUNCTION()
+	virtual void ReactToTrigger() override;
 
 	FVector currentLoc;
 	FVector nextLoc;

@@ -21,5 +21,4 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UTexture* texture;
-
 };

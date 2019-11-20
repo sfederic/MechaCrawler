@@ -18,12 +18,13 @@ void APlayerHUD::BeginPlay()
 	text = FString(TEXT("\"You did know you can shoot those bricks right?\""));
 	textIndex = 0;
 	newText.Reset();
+	UE_LOG(LogTemp, Warning, TEXT("HELLO"));
 }
 
 void APlayerHUD::DrawHUD()
 {
 	Super::DrawHUD();
-
+	
 	if (textIndex < text.Len())
 	{
 		textScrollTimer += FApp::GetDeltaTime();

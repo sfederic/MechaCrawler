@@ -25,7 +25,7 @@ void ADoor::Tick(float DeltaTime)
 	SetActorLocation(currentLoc);
 }
 
-void ADoor::Activate()
+void ADoor::ReactToTrigger()
 {
 	if (openState == false && currentLoc == nextLoc)
 	{

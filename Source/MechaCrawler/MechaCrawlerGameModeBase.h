@@ -11,4 +11,9 @@ class MECHACRAWLER_API AMechaCrawlerGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 
+protected:
+	virtual void BeginPlay() override;
+
+public:
+	virtual void Tick(float DeltaTime) override;
 };

@@ -28,6 +28,7 @@ public:
 	void LookYaw(float val);
 	void LookPitch(float val);
 
+	UPROPERTY(EditAnywhere)
 	AHUD* mainHUD;
 
 	UPROPERTY(EditAnywhere)
