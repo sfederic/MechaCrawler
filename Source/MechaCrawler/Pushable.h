@@ -4,23 +4,32 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Activate.h"
 #include "Pushable.generated.h"
 
 UCLASS()
-class MECHACRAWLER_API APushable : public AActor
+class MECHACRAWLER_API APushable : public AActor, public IActivate
 {
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	APushable();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	virtual void Use() override;
 
+	FHitResult moveHit;
+	FCollisionQueryParams moveParams;
+
+	UPROPERTY(VisibleAnywhere)
+	FVector nextLoc;
+
+	UPROPERTY(EditAnywhere)
+	float moveSpeed;
+
+	float moveDistance = 100.f;
 };

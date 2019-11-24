@@ -13,21 +13,28 @@ UCameraComponent* camera;
 APlayerController* controller;
 
 FHitResult lookHit;
+
+FHitResult useHit;
+float useDistance = 150.f;
+
+FHitResult shootHit;
+float shootDistance = 1000.f;
+
 FHitResult moveHit;
 FCollisionQueryParams moveParams;
+float moveDistance = 100.f;
+float traceDistance = 125.f; //If traceDistance is equal to moveDistance, players falls through
+float previousMoveSpeed;
 
 FVector rootAxes[4];
-
-float moveDistance = 100.f;
-float traceDistance = 125.f; //If traceDistance is equal to moveDistance, players falls through.
-float previousMoveSpeed;
 
 bool falling = false;
 
 AMecha::AMecha()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	PrimaryActorTick.TickGroup = TG_PrePhysics; //Seems to fix fall through floor effect. Other Actors needs the same.
+	PrimaryActorTick.bStartWithTickEnabled = true; //Seems to fix fall through on play start when Mech starts on object
+	PrimaryActorTick.TickGroup = TG_PrePhysics; //Seems to fix fall through floor effect. Other Actors needs the same
 
 	moveParams.AddIgnoredActor(this);
 }
@@ -37,7 +44,7 @@ void AMecha::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	widget = CreateWidget<UUserWidget>(GetWorld(), widgetClass);
+	useWidget = CreateWidget<UUserWidget>(GetWorld(), widgetClass);
 
 	previousMoveSpeed = moveSpeed;
 
@@ -94,7 +101,7 @@ void AMecha::Tick(float DeltaTime)
 	forwardAxis = rootAxes[forwardAxisIndex];
 	rightAxis = rootAxes[rightAxisIndex];
 
-	//Gravity
+	//GRAVITY
 	if (currentLoc == nextLoc && currentRot == nextRot)
 	{
 		FVector loc = GetActorLocation();
@@ -103,7 +110,8 @@ void AMecha::Tick(float DeltaTime)
 		{
 			falling = true;
 
-			//moveSpeed += FApp::GetDeltaTime() + 100.0f;
+			//TODO: Acellerating fallspeed mucks with linetrace collision. Might add back in.
+			moveSpeed += FApp::GetDeltaTime() + 100.0f;
 
 			nextLoc = loc - (RootComponent->GetUpVector() * moveDistance);
 			nextLoc.X = FMath::RoundToFloat(nextLoc.X);
@@ -135,41 +143,40 @@ void AMecha::Tick(float DeltaTime)
 		MoveRight(1.0f);
 	}
 
-	//UI 'USE'
-	if (widget)
+	//'USE' UI
+	if (useWidget)
 	{
 		if (GetWorld()->LineTraceSingleByChannel(lookHit, camera->GetComponentLocation(),
-			camera->GetComponentLocation() + camera->GetForwardVector() * 1000.f, ECC_WorldStatic))
+			camera->GetComponentLocation() + camera->GetForwardVector() * useDistance, ECC_WorldStatic))
 		{
 			if (lookHit.GetActor()->Tags.Contains(Tags::Useable))
 			{
-				if (widget->IsInViewport() == false)
+				if (useWidget->IsInViewport() == false)
 				{
-					widget->AddToViewport();
+					useWidget->AddToViewport();
 				}
 			}
-			else if (widget->IsInViewport() == true)
+			else if (useWidget->IsInViewport() == true)
 			{
-				widget->RemoveFromViewport();
+				useWidget->RemoveFromViewport();
 			}
 		}
 		else
 		{
-			if (widget->IsInViewport() == true)
+			if (useWidget->IsInViewport() == true)
 			{
-				widget->RemoveFromViewport();
+				useWidget->RemoveFromViewport();
 			}
 		}
 	}
 
-	//SHOOT'N
-	if (controller->IsInputKeyDown(EKeys::LeftMouseButton))
+	//USE'N
+	if (controller->IsInputKeyDown(EKeys::SpaceBar))
 	{
-		FHitResult shootHit;
-		if (GetWorld()->LineTraceSingleByChannel(shootHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * 1000.f,
+		if (GetWorld()->LineTraceSingleByChannel(useHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * useDistance,
 			ECC_WorldStatic))
 		{
-			IActivate* useable = Cast<IActivate>(shootHit.GetActor());
+			IActivate* useable = Cast<IActivate>(useHit.GetActor());
 			if (useable)
 			{
 				useable->Use();
@@ -177,12 +184,11 @@ void AMecha::Tick(float DeltaTime)
 		}
 	}
 
+	//SHOOT'N
 	if (controller->IsInputKeyDown(EKeys::LeftMouseButton)) 
 	{
-		FHitResult shootHit;
-
-		if (GetWorld()->LineTraceSingleByChannel(shootHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * 1000.f,
-			ECC_Destructible))
+		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(), 
+			GetActorLocation() + camera->GetForwardVector() * shootDistance, ECC_Destructible))
 		{
 			UDestructibleComponent* dc = Cast<UDestructibleComponent>(shootHit.GetComponent());
 			if (dc)
