@@ -14,5 +14,5 @@ class MECHACRAWLER_API IActivate
 
 public:
 	UFUNCTION()
-	virtual void ReactToTrigger();
+	virtual void Use() = 0;
 };

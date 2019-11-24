@@ -21,7 +21,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION()
-	virtual void ReactToTrigger() override;
+	virtual void Use() override;
 
 	FVector currentLoc;
 	FVector nextLoc;

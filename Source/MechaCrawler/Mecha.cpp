@@ -6,14 +6,13 @@
 #include "Engine/World.h"
 #include "Camera/CameraComponent.h"
 #include "DestructibleComponent.h"
-#include "PlayerHUD.h"
 #include "Activate.h"
-
-class AEnemy;
+#include "GlobalTags.h"
 
 UCameraComponent* camera;
 APlayerController* controller;
 
+FHitResult lookHit;
 FHitResult moveHit;
 FCollisionQueryParams moveParams;
 
@@ -38,6 +37,8 @@ void AMecha::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	widget = CreateWidget<UUserWidget>(GetWorld(), widgetClass);
+
 	previousMoveSpeed = moveSpeed;
 
 	rootAxes[0] = RootComponent->GetForwardVector();
@@ -102,7 +103,7 @@ void AMecha::Tick(float DeltaTime)
 		{
 			falling = true;
 
-			moveSpeed += FApp::GetDeltaTime() + 100.0f;
+			//moveSpeed += FApp::GetDeltaTime() + 100.0f;
 
 			nextLoc = loc - (RootComponent->GetUpVector() * moveDistance);
 			nextLoc.X = FMath::RoundToFloat(nextLoc.X);
@@ -111,7 +112,7 @@ void AMecha::Tick(float DeltaTime)
 		}
 		else
 		{
-			moveSpeed = previousMoveSpeed;
+			//moveSpeed = previousMoveSpeed;
 			falling = false;
 		}
 	}
@@ -134,6 +135,33 @@ void AMecha::Tick(float DeltaTime)
 		MoveRight(1.0f);
 	}
 
+	//UI 'USE'
+	if (widget)
+	{
+		if (GetWorld()->LineTraceSingleByChannel(lookHit, camera->GetComponentLocation(),
+			camera->GetComponentLocation() + camera->GetForwardVector() * 1000.f, ECC_WorldStatic))
+		{
+			if (lookHit.GetActor()->Tags.Contains(Tags::Useable))
+			{
+				if (widget->IsInViewport() == false)
+				{
+					widget->AddToViewport();
+				}
+			}
+			else if (widget->IsInViewport() == true)
+			{
+				widget->RemoveFromViewport();
+			}
+		}
+		else
+		{
+			if (widget->IsInViewport() == true)
+			{
+				widget->RemoveFromViewport();
+			}
+		}
+	}
+
 	//SHOOT'N
 	if (controller->IsInputKeyDown(EKeys::LeftMouseButton))
 	{
@@ -141,18 +169,18 @@ void AMecha::Tick(float DeltaTime)
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * 1000.f,
 			ECC_WorldStatic))
 		{
-			/*IActivate* useable = Cast<IActivate>(shootHit.GetActor());
+			IActivate* useable = Cast<IActivate>(shootHit.GetActor());
 			if (useable)
 			{
-				GLog->Log(TEXT("Interactive actor"));
-				useable->Execute_Use(nullptr);
-			}*/
+				useable->Use();
+			}
 		}
 	}
 
 	if (controller->IsInputKeyDown(EKeys::LeftMouseButton)) 
 	{
 		FHitResult shootHit;
+
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * 1000.f,
 			ECC_Destructible))
 		{
@@ -161,7 +189,7 @@ void AMecha::Tick(float DeltaTime)
 			{
 				dc->ApplyDamage(damageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), damageStrength);
 				dc->GetOwner()->SetLifeSpan(5.f);
-				dc->GetOwner()->Tags.Add("Destroy");
+				dc->GetOwner()->Tags.Add(Tags::Destroy);
 			}
 		}
 	}
@@ -202,7 +230,7 @@ void AMecha::MoveForward(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
-					if (!results[i].GetActor()->Tags.Contains("Destroy"))
+					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy))
 					{
 						goto move;
 					}
@@ -255,7 +283,7 @@ void AMecha::MoveBack(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
-					if (!results[i].GetActor()->Tags.Contains("Destroy"))
+					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy))
 					{
 						goto move;
 					}
@@ -308,7 +336,7 @@ void AMecha::MoveLeft(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
-					if (!results[i].GetActor()->Tags.Contains("Destroy"))
+					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy))
 					{
 						goto move;
 					}
@@ -361,7 +389,7 @@ void AMecha::MoveRight(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
-					if (!results[i].GetActor()->Tags.Contains("Destroy"))
+					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy))
 					{
 						goto move;
 					}

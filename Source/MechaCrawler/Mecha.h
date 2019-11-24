@@ -28,12 +28,6 @@ public:
 	void LookYaw(float val);
 	void LookPitch(float val);
 
-	UPROPERTY(EditAnywhere)
-	AHUD* mainHUD;
-
-	UPROPERTY(EditAnywhere)
-	UUserWidget* widget;
-
 	FVector nextLoc;
 	FVector currentLoc;
 
@@ -41,6 +35,12 @@ public:
 	FQuat nextRot;
 
 	FRotator cameraRot;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> widgetClass;
+
+	UPROPERTY()
+	UUserWidget* useWidget;
 
 	UPROPERTY(VisibleAnywhere)
 	FVector forwardAxis;
