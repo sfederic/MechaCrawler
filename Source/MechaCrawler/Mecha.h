@@ -62,4 +62,25 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float damageStrength;
+
+	int forwardAxisIndex;
+	int rightAxisIndex;
+
+	FHitResult lookHit;
+
+	FHitResult useHit;
+	float useDistance = 150.f;
+
+	FHitResult shootHit;
+	float shootDistance = 1000.f;
+
+	FHitResult moveHit;
+	FCollisionQueryParams moveParams;
+	float moveDistance = 100.f;
+	float traceDistance = 125.f; //If traceDistance is equal to moveDistance, players falls through
+	float previousMoveSpeed;
+
+	FVector rootAxes[4];
+
+	bool falling = false;
 };

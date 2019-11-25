@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Pushable.h"
-#include "Engine/World.h"
+//#include "Engine/World.h"
 
 APushable::APushable()
 {
@@ -29,7 +29,7 @@ void APushable::Tick(float DeltaTime)
 	//FALLING/GRAVITY
 	if (nextLoc.Equals(GetActorLocation()))
 	{
-		if (GetWorld()->LineTraceSingleByChannel(moveHit, GetActorLocation(),
+		if (!GetWorld()->LineTraceSingleByChannel(moveHit, GetActorLocation(),
 			GetActorLocation() - GetActorUpVector() * (moveDistance + 25.f), ECC_WorldStatic, moveParams))
 		{
 			nextLoc -= GetActorUpVector() * moveDistance;
@@ -49,10 +49,13 @@ void APushable::Use()
 		if (!GetWorld()->LineTraceSingleByChannel(moveHit, GetActorLocation(), GetActorLocation() + GetActorForwardVector() * moveDistance,
 			ECC_WorldStatic, moveParams))
 		{
-			nextLoc += GetActorForwardVector() * moveDistance;
-			nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-			nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-			nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+			if (player)
+			{
+				nextLoc += player->rootAxes[player->forwardAxisIndex] * moveDistance; //Actually works. Wow.
+				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+			}
 		}
 	}
 }

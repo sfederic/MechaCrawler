@@ -12,24 +12,6 @@
 UCameraComponent* camera;
 APlayerController* controller;
 
-FHitResult lookHit;
-
-FHitResult useHit;
-float useDistance = 150.f;
-
-FHitResult shootHit;
-float shootDistance = 1000.f;
-
-FHitResult moveHit;
-FCollisionQueryParams moveParams;
-float moveDistance = 100.f;
-float traceDistance = 125.f; //If traceDistance is equal to moveDistance, players falls through
-float previousMoveSpeed;
-
-FVector rootAxes[4];
-
-bool falling = false;
-
 AMecha::AMecha()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -78,8 +60,8 @@ void AMecha::Tick(float DeltaTime)
 	float forwardAngle = INFINITY;
 	float rightAngle = INFINITY;
 
-	int forwardAxisIndex = 0;
-	int rightAxisIndex = 0;
+	forwardAxisIndex = 0;
+	rightAxisIndex = 0;
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -106,12 +88,12 @@ void AMecha::Tick(float DeltaTime)
 	{
 		FVector loc = GetActorLocation();
 
-		if (!GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
+		if (!GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc - (RootComponent->GetUpVector() * traceDistance + 25.f), ECC_WorldStatic, moveParams))
 		{
 			falling = true;
 
 			//TODO: Acellerating fallspeed mucks with linetrace collision. Might add back in.
-			moveSpeed += FApp::GetDeltaTime() + 100.0f;
+			//moveSpeed += FApp::GetDeltaTime() + 100.0f;
 
 			nextLoc = loc - (RootComponent->GetUpVector() * moveDistance);
 			nextLoc.X = FMath::RoundToFloat(nextLoc.X);
@@ -176,16 +158,21 @@ void AMecha::Tick(float DeltaTime)
 		if (GetWorld()->LineTraceSingleByChannel(useHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * useDistance,
 			ECC_WorldStatic))
 		{
-			IActivate* useable = Cast<IActivate>(useHit.GetActor());
-			if (useable)
+			AActor* useActor = useHit.GetActor();
+			if (useActor->Tags.Contains(Tags::Destroy) == false)
 			{
-				useable->Use();
+				GLog->Log(TEXT("Done son"));
+				IActivate* useable = Cast<IActivate>(useActor);
+				if (useable)
+				{
+					useable->Use();
+				}
 			}
 		}
 	}
 
 	//SHOOT'N
-	if (controller->IsInputKeyDown(EKeys::LeftMouseButton)) 
+	if (controller->IsInputKeyDown(EKeys::LeftMouseButton)) //TODO: Move all to BindAxis/action
 	{
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(), 
 			GetActorLocation() + camera->GetForwardVector() * shootDistance, ECC_Destructible))
