@@ -26,7 +26,7 @@ void AMecha::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	useWidget = CreateWidget<UUserWidget>(GetWorld(), widgetClass);
+	useWidget = CreateWidget<UActivateWidget>(GetWorld(), widgetClass);
 
 	previousMoveSpeed = moveSpeed;
 

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
-#include "ActivateWidget.h"
+//#include "ActivateWidget.h"
 #include "PlayerHUD.generated.h"
 
 
@@ -21,8 +21,8 @@ public:
 
 	int textIndex;
 
-	UPROPERTY(EditAnywhere, Category = "Widgets")
-	TSubclassOf<UUserWidget> widgetClass;
+	//UPROPERTY(EditAnywhere, Category = "Widgets")
+	//TSubclassOf<UUserWidget> widgetClass;
 
-	UActivateWidget* activateWidget;
+	//UActivateWidget* activateWidget;
 };

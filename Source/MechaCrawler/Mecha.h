@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "Blueprint/UserWidget.h"
+#include "ActivateWidget.h"
 #include "Mecha.generated.h"
 
 UCLASS()
@@ -40,7 +41,7 @@ public:
 	TSubclassOf<UUserWidget> widgetClass;
 
 	UPROPERTY()
-	UUserWidget* useWidget;
+	UActivateWidget* useWidget;
 
 	UPROPERTY(VisibleAnywhere)
 	FVector forwardAxis;

@@ -19,11 +19,11 @@ void APlayerHUD::BeginPlay()
 	textIndex = 0;
 	newText.Reset();
 
-	if (activateWidget)
+	/*if (activateWidget)
 	{
 		activateWidget = CreateWidget<UActivateWidget>(GetWorld(), widgetClass);
 		activateWidget->AddToViewport();
-	}
+	}*/
 }
 
 void APlayerHUD::DrawHUD()
