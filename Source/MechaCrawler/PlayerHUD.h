@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "ActivateWidget.h"
 #include "PlayerHUD.generated.h"
 
-extern int textIndex;
 
 UCLASS()
 class MECHACRAWLER_API APlayerHUD : public AHUD
@@ -19,6 +19,10 @@ protected:
 public:
 	virtual void DrawHUD() override;
 
-	UPROPERTY(EditAnywhere)
-	UTexture* texture;
+	int textIndex;
+
+	UPROPERTY(EditAnywhere, Category = "Widgets")
+	TSubclassOf<UUserWidget> widgetClass;
+
+	UActivateWidget* activateWidget;
 };

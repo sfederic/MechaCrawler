@@ -88,7 +88,7 @@ void AMecha::Tick(float DeltaTime)
 	{
 		FVector loc = GetActorLocation();
 
-		if (!GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc - (RootComponent->GetUpVector() * traceDistance + 25.f), ECC_WorldStatic, moveParams))
+		if (!GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
 		{
 			falling = true;
 
@@ -254,10 +254,18 @@ void AMecha::MoveForward(float val)
 			}
 			else
 			{
+				FVector previousLoc = nextLoc;
+
 				nextLoc = loc + (forwardAxis * moveDistance);
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
 				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+
+				if (!GetWorld()->LineTraceSingleByChannel(moveHit, nextLoc, nextLoc - GetActorUpVector() * maxFallDistance, ECC_WorldStatic, moveParams))
+				{
+					nextLoc = previousLoc;
+					return;
+				}
 			}
 		}
 	}
@@ -307,10 +315,18 @@ void AMecha::MoveBack(float val)
 			}
 			else
 			{
+				FVector previousLoc = nextLoc;
+
 				nextLoc = loc - (forwardAxis * moveDistance);
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
 				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+
+				if (!GetWorld()->LineTraceSingleByChannel(moveHit, nextLoc, nextLoc - GetActorUpVector() * maxFallDistance, ECC_WorldStatic, moveParams))
+				{
+					nextLoc = previousLoc;
+					return;
+				}
 			}
 		}
 	}
@@ -360,10 +376,18 @@ void AMecha::MoveLeft(float val)
 			}
 			else
 			{
+				FVector previousLoc = nextLoc;
+
 				nextLoc = loc - (rightAxis * moveDistance);
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
 				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+
+				if (!GetWorld()->LineTraceSingleByChannel(moveHit, nextLoc, nextLoc - GetActorUpVector() * maxFallDistance, ECC_WorldStatic, moveParams))
+				{
+					nextLoc = previousLoc;
+					return;
+				}
 			}
 		}
 	}
@@ -413,10 +437,18 @@ void AMecha::MoveRight(float val)
 			}
 			else
 			{
+				FVector previousLoc = nextLoc;
+
 				nextLoc = loc + (rightAxis * moveDistance);
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
 				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+
+				if (!GetWorld()->LineTraceSingleByChannel(moveHit, nextLoc, nextLoc - GetActorUpVector() * maxFallDistance, ECC_WorldStatic, moveParams))
+				{
+					nextLoc = previousLoc;
+					return;
+				}
 			}
 		}
 	}

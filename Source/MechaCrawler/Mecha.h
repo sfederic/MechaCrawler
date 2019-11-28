@@ -79,6 +79,7 @@ public:
 	float moveDistance = 100.f;
 	float traceDistance = 125.f; //If traceDistance is equal to moveDistance, players falls through
 	float previousMoveSpeed;
+	float maxFallDistance = 10000.f;
 
 	FVector rootAxes[4];
 

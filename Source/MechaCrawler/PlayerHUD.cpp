@@ -18,13 +18,19 @@ void APlayerHUD::BeginPlay()
 	text = FString(TEXT("\"You did know you can shoot those bricks right?\""));
 	textIndex = 0;
 	newText.Reset();
+
+	if (activateWidget)
+	{
+		activateWidget = CreateWidget<UActivateWidget>(GetWorld(), widgetClass);
+		activateWidget->AddToViewport();
+	}
 }
 
 void APlayerHUD::DrawHUD()
 {
 	Super::DrawHUD();
 	
-	if (textIndex < text.Len())
+	/*if (textIndex < text.Len())
 	{
 		textScrollTimer += FApp::GetDeltaTime();
 
@@ -40,5 +46,5 @@ void APlayerHUD::DrawHUD()
 	if (textIndex != newText.Len())
 	{
 		DrawText(newText, FLinearColor::Black, 10.f, 10.f, nullptr, 2.0f);
-	}
+	}*/
 }

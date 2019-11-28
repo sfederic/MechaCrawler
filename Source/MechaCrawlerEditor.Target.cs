@@ -9,6 +9,12 @@ public class MechaCrawlerEditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
 
+        bUseAdaptiveUnityBuild = true;
+        bAdaptiveUnityDisablesOptimizations = true;
+        bAdaptiveUnityDisablesPCH = false;
+        bAdaptiveUnityCreatesDedicatedPCH = true;
+        bAdaptiveUnityEnablesEditAndContinue = true;
+
         ExtraModuleNames.AddRange( new string[] { "MechaCrawler" } );
 	}
 }
