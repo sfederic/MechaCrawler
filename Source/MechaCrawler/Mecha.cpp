@@ -26,7 +26,11 @@ void AMecha::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	useWidget = CreateWidget<UActivateWidget>(GetWorld(), widgetClass);
+	useWidget = CreateWidget<UActivateWidget>(GetWorld(), useWidgetClass);
+	if (useWidget)
+	{
+		useWidget->useText = FString("RMB: Use");
+	}
 
 	previousMoveSpeed = moveSpeed;
 
@@ -136,11 +140,17 @@ void AMecha::Tick(float DeltaTime)
 				if (useWidget->IsInViewport() == false)
 				{
 					useWidget->AddToViewport();
+					
+					if(lookHit.GetActor()->Tags.Contains(Tags::Pushable))
+					{
+						useWidget->useText = "RMB: Push";
+					}
 				}
 			}
 			else if (useWidget->IsInViewport() == true)
 			{
 				useWidget->RemoveFromViewport();
+				useWidget->useText = "RMB: Use";
 			}
 		}
 		else
@@ -148,12 +158,13 @@ void AMecha::Tick(float DeltaTime)
 			if (useWidget->IsInViewport() == true)
 			{
 				useWidget->RemoveFromViewport();
+				useWidget->useText = "RMB: Use";
 			}
 		}
 	}
 
 	//USE'N
-	if (controller->IsInputKeyDown(EKeys::SpaceBar))
+	if (controller->IsInputKeyDown(EKeys::RightMouseButton))
 	{
 		if (GetWorld()->LineTraceSingleByChannel(useHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * useDistance,
 			ECC_WorldStatic))
@@ -161,7 +172,6 @@ void AMecha::Tick(float DeltaTime)
 			AActor* useActor = useHit.GetActor();
 			if (useActor->Tags.Contains(Tags::Destroy) == false)
 			{
-				GLog->Log(TEXT("Done son"));
 				IActivate* useable = Cast<IActivate>(useActor);
 				if (useable)
 				{

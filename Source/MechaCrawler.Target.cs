@@ -9,11 +9,11 @@ public class MechaCrawlerTarget : TargetRules
 	{
 		Type = TargetType.Game;
 
-        bUseAdaptiveUnityBuild = true;
+        /*bUseAdaptiveUnityBuild = true;
         bAdaptiveUnityDisablesOptimizations = true;
         bAdaptiveUnityDisablesPCH = false;
         bAdaptiveUnityCreatesDedicatedPCH = true;
-        bAdaptiveUnityEnablesEditAndContinue = true;
+        bAdaptiveUnityEnablesEditAndContinue = true;*/
 
         ExtraModuleNames.AddRange( new string[] { "MechaCrawler" } );
 	}

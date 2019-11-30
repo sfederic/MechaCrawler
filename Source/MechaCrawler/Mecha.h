@@ -38,7 +38,7 @@ public:
 	FRotator cameraRot;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> widgetClass;
+	TSubclassOf<UUserWidget> useWidgetClass;
 
 	UPROPERTY()
 	UActivateWidget* useWidget;

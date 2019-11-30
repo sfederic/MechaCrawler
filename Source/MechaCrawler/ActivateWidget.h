@@ -15,6 +15,6 @@ class MECHACRAWLER_API UActivateWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	FString useText;
 };

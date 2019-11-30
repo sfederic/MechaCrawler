@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Activate.h"
-#include "Mecha.h"
 #include "Pushable.generated.h"
 
 UCLASS()
@@ -26,14 +25,11 @@ public:
 	FHitResult moveHit;
 	FCollisionQueryParams moveParams;
 
-	UPROPERTY(EditAnywhere)
-	AMecha* player;
-
 	UPROPERTY(VisibleAnywhere)
 	FVector nextLoc;
 
 	UPROPERTY(EditAnywhere)
 	float moveSpeed;
 
-	float moveDistance = 100.f;
+	float moveDistance;
 };

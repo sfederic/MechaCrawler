@@ -1,13 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Pushable.h"
-//#include "Engine/World.h"
+#include "Kismet/GameplayStatics.h" 
+#include "Mecha.h"
 
 APushable::APushable()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
 	moveParams.AddIgnoredActor(this);
+	moveDistance = 100.f;
 }
 
 void APushable::BeginPlay()
@@ -46,15 +47,19 @@ void APushable::Use()
 {
 	if (nextLoc.Equals(GetActorLocation()))
 	{
-		if (!GetWorld()->LineTraceSingleByChannel(moveHit, GetActorLocation(), GetActorLocation() + GetActorForwardVector() * moveDistance,
-			ECC_WorldStatic, moveParams))
+		APawn* pawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+		AMecha* player = Cast<AMecha>(pawn);
+		if (player)
 		{
-			if (player)
+			FVector playerForward = player->forwardAxis;
+			if (!GetWorld()->LineTraceSingleByChannel(moveHit, GetActorLocation(), GetActorLocation() + playerForward * moveDistance,
+				ECC_WorldStatic, moveParams))
 			{
-				nextLoc += player->rootAxes[player->forwardAxisIndex] * moveDistance; //Actually works. Wow.
+				nextLoc += player->rootAxes[player->forwardAxisIndex] * moveDistance;
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
 				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+				UE_LOG(LogTemp, Warning, TEXT("Working"));
 			}
 		}
 	}
