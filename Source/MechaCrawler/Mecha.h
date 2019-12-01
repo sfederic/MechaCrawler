@@ -41,6 +41,8 @@ public:
 
 	FRotator cameraRot;
 
+	UParticleSystemComponent* wayPoint;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> useWidgetClass;
 

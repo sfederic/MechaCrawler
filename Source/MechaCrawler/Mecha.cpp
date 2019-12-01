@@ -8,6 +8,8 @@
 #include "DestructibleComponent.h"
 #include "Activate.h"
 #include "Scannable.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Particles/ParticleSystem.h"
 #include "GlobalTags.h"
 
 UCameraComponent* camera;
@@ -21,7 +23,6 @@ AMecha::AMecha()
 
 	moveParams.AddIgnoredActor(this);
 }
-
 
 void AMecha::BeginPlay()
 {
@@ -42,6 +43,14 @@ void AMecha::BeginPlay()
 	if (scanWidget == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Scan widget not set in Mecha.cpp"));
+	}
+
+	wayPoint = FindComponentByClass<UParticleSystemComponent>();
+	check(wayPoint);
+	if (wayPoint)
+	{
+		wayPoint->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, false));
+		wayPoint->SetVisibility(false);
 	}
 
 	previousMoveSpeed = moveSpeed;
@@ -208,7 +217,7 @@ void AMecha::Tick(float DeltaTime)
 	}
 
 	//USING
-	if (controller->IsInputKeyDown(EKeys::RightMouseButton))
+	if (controller->IsInputKeyDown(EKeys::RightMouseButton) && !scanning)
 	{
 		if (GetWorld()->LineTraceSingleByChannel(useHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * useDistance,
 			ECC_WorldStatic))
@@ -263,7 +272,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAxis("Mouse Y", this, &AMecha::LookPitch);
 	
 	InputComponent->BindAction("Scan", EInputEvent::IE_Pressed, this, &AMecha::SetScan);
-	//InputComponent->BindAction("RightMouse", EInputEvent::IE_Pressed, this, &AMecha::RightMousePressed);
+	InputComponent->BindAction("RightMouse", EInputEvent::IE_Pressed, this, &AMecha::RightMousePressed);
 	//InputComponent->BindAction("RightMouse", EInputEvent::IE_Released, this, &AMecha::RightMouseReleased);
 }
 
@@ -543,34 +552,16 @@ void AMecha::SetScan()
 
 void AMecha::RightMousePressed()
 {
-	if (scanning)
+	//WAYPOINT
+	if(wayPoint && scanning) 
 	{
-		if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(),
+		FHitResult wayPointHit;
+		if (GetWorld()->LineTraceSingleByChannel(wayPointHit, camera->GetComponentLocation(),
 			camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_WorldStatic))
 		{
-			IScannable* iScan = Cast<IScannable>(scanHit.GetActor());
-			if (iScan)
-			{
-				if (scanWidget)
-				{
-					UScanData* data = iScan->Scan();
-					if (data)
-					{
-						scanWidget->scanEntry = data->scanText;
-					}
-				}
-			}
-		}
-	}
-}
-
-void AMecha::RightMouseReleased()
-{
-	if (scanning && scanWidget)
-	{
-		if (scanWidget->IsInViewport())
-		{
-			scanWidget->RemoveFromViewport();
+			wayPoint->SetVisibility(true); //Only here because initial visibility is off
+			wayPoint->SetWorldLocation(wayPointHit.ImpactPoint);
+			wayPoint->SetWorldRotation(wayPointHit.ImpactNormal.Rotation());
 		}
 	}
 }

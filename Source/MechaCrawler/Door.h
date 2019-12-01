@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "InteractiveActor.h"
+#include "GridActor.h"
 #include "Activate.h"
 #include "Scannable.h"
 #include "ScanData.h"
@@ -10,7 +10,7 @@
 
 
 UCLASS()
-class MECHACRAWLER_API ADoor : public AActor, public IActivate, public IScannable
+class MECHACRAWLER_API ADoor : public AGridActor, public IActivate, public IScannable
 {
 	GENERATED_BODY()
 	
@@ -22,18 +22,15 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-
 	UFUNCTION()
 	virtual void Use() override;
-
 	UFUNCTION()
 	virtual UScanData* Scan() override;
 
-	FVector currentLoc;
-	FVector nextLoc;
-
+	UPROPERTY(EditAnywhere)
+	FVector openDirection;
 	UPROPERTY(EditAnywhere)
 	float openSpeed;
-
+	float openDistance = 100.f;
 	bool openState;
 };

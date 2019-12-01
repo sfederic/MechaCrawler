@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "GridActor.h"
 #include "Activate.h"
 #include "Mecha.h"
 #include "GravitySwitch.generated.h"
@@ -20,7 +20,7 @@ enum class EDirections : uint8
 };
 
 UCLASS()
-class MECHACRAWLER_API AGravitySwitch : public AActor, public IActivate
+class MECHACRAWLER_API AGravitySwitch : public AGridActor, public IActivate
 {
 	GENERATED_BODY()
 	

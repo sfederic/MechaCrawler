@@ -3,13 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "GridActor.h"
 #include "Activate.h"
 #include "Scannable.h"
 #include "Pushable.generated.h"
 
 UCLASS()
-class MECHACRAWLER_API APushable : public AActor, public IActivate, public IScannable
+class MECHACRAWLER_API APushable : public AGridActor, public IActivate, public IScannable
 {
 	GENERATED_BODY()
 	
@@ -26,9 +26,6 @@ public:
 
 	FHitResult moveHit;
 	FCollisionQueryParams moveParams;
-
-	UPROPERTY(VisibleAnywhere)
-	FVector nextLoc;
 
 	UPROPERTY(EditAnywhere)
 	float moveSpeed;
