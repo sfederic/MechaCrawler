@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Activate.h"
+#include "Scannable.h"
 #include "Pushable.generated.h"
 
 UCLASS()
-class MECHACRAWLER_API APushable : public AActor, public IActivate
+class MECHACRAWLER_API APushable : public AActor, public IActivate, public IScannable
 {
 	GENERATED_BODY()
 	
@@ -21,6 +22,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void Use() override;
+	virtual UScanData* Scan() override;
 
 	FHitResult moveHit;
 	FCollisionQueryParams moveParams;

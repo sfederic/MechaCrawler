@@ -4,10 +4,13 @@
 
 #include "InteractiveActor.h"
 #include "Activate.h"
+#include "Scannable.h"
+#include "ScanData.h"
 #include "Door.generated.h"
 
+
 UCLASS()
-class MECHACRAWLER_API ADoor : public AActor, public IActivate
+class MECHACRAWLER_API ADoor : public AActor, public IActivate, public IScannable
 {
 	GENERATED_BODY()
 	
@@ -22,6 +25,9 @@ public:
 
 	UFUNCTION()
 	virtual void Use() override;
+
+	UFUNCTION()
+	virtual UScanData* Scan() override;
 
 	FVector currentLoc;
 	FVector nextLoc;

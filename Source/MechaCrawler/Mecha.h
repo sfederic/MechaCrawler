@@ -6,6 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "Blueprint/UserWidget.h"
 #include "ActivateWidget.h"
+#include "ScanWidget.h"
 #include "Mecha.generated.h"
 
 UCLASS()
@@ -28,6 +29,9 @@ public:
 	void MoveRight(float val);
 	void LookYaw(float val);
 	void LookPitch(float val);
+	void SetScan();
+	void RightMousePressed();
+	void RightMouseReleased();
 
 	FVector nextLoc;
 	FVector currentLoc;
@@ -39,6 +43,12 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> useWidgetClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> scanWidgetClass;
+
+	UPROPERTY()
+	UScanWidget* scanWidget;
 
 	UPROPERTY()
 	UActivateWidget* useWidget;
@@ -75,6 +85,9 @@ public:
 	FHitResult shootHit;
 	float shootDistance = 1000.f;
 
+	FHitResult scanHit;
+	float scanDistance = 1000.0f;
+
 	FHitResult moveHit;
 	FCollisionQueryParams moveParams;
 	float moveDistance = 100.f;
@@ -85,4 +98,5 @@ public:
 	FVector rootAxes[4];
 
 	bool falling = false;
+	bool scanning = false;
 };

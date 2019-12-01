@@ -7,6 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include "DestructibleComponent.h"
 #include "Activate.h"
+#include "Scannable.h"
 #include "GlobalTags.h"
 
 UCameraComponent* camera;
@@ -26,10 +27,21 @@ void AMecha::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	//INIT WIDGETS
 	useWidget = CreateWidget<UActivateWidget>(GetWorld(), useWidgetClass);
 	if (useWidget)
 	{
 		useWidget->useText = FString("RMB: Use");
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Use widget not set in Mecha.cpp"));
+	}
+
+	scanWidget = CreateWidget<UScanWidget>(GetWorld(), scanWidgetClass);
+	if (scanWidget == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Scan widget not set in Mecha.cpp"));
 	}
 
 	previousMoveSpeed = moveSpeed;
@@ -45,6 +57,7 @@ void AMecha::BeginPlay()
 	currentRot = FQuat(GetActorRotation());
 	nextRot = currentRot;
 
+	//INIT CAMERA
 	camera = FindComponentByClass<UCameraComponent>();
 	check(camera);
 	cameraRot = camera->GetComponentRotation();
@@ -56,6 +69,7 @@ void AMecha::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//MOVEMENT AXIS
 	rootAxes[0] = RootComponent->GetForwardVector();
 	rootAxes[1] = -RootComponent->GetForwardVector();
 	rootAxes[2] = RootComponent->GetRightVector();
@@ -111,7 +125,7 @@ void AMecha::Tick(float DeltaTime)
 		}
 	}
 
-	///MOVE'N
+	///MOVING
 	if(controller->IsInputKeyDown(EKeys::W))
 	{
 		MoveForward(1.0f);
@@ -129,9 +143,39 @@ void AMecha::Tick(float DeltaTime)
 		MoveRight(1.0f);
 	}
 
-	//'USE' UI
-	if (useWidget)
+	//SCANNING
+	if (scanning && scanWidget)
 	{
+		if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(),
+			camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_WorldStatic))
+		{
+			IScannable* iScan = Cast<IScannable>(scanHit.GetActor());
+			if (iScan)
+			{
+				UScanData* data = iScan->Scan();
+				if (data)
+				{
+					scanWidget->scanEntry = data->scanText;
+				}
+			}
+		}
+		else
+		{
+			scanWidget->scanEntry = FString(TEXT(""));
+		}
+	}
+
+	//'USE' UI
+	if (useWidget && scanning == false)
+	{
+		if (scanWidget)
+		{
+			if (scanWidget->IsInViewport())
+			{
+				scanWidget->RemoveFromViewport();
+			}
+		}
+
 		if (GetWorld()->LineTraceSingleByChannel(lookHit, camera->GetComponentLocation(),
 			camera->GetComponentLocation() + camera->GetForwardVector() * useDistance, ECC_WorldStatic))
 		{
@@ -163,7 +207,7 @@ void AMecha::Tick(float DeltaTime)
 		}
 	}
 
-	//USE'N
+	//USING
 	if (controller->IsInputKeyDown(EKeys::RightMouseButton))
 	{
 		if (GetWorld()->LineTraceSingleByChannel(useHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * useDistance,
@@ -181,7 +225,7 @@ void AMecha::Tick(float DeltaTime)
 		}
 	}
 
-	//SHOOT'N
+	//SHOOTING
 	if (controller->IsInputKeyDown(EKeys::LeftMouseButton)) //TODO: Move all to BindAxis/action
 	{
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(), 
@@ -217,6 +261,10 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAxis("Right", this, &AMecha::MoveRight);*/
 	InputComponent->BindAxis("Mouse X", this, &AMecha::LookYaw);
 	InputComponent->BindAxis("Mouse Y", this, &AMecha::LookPitch);
+	
+	InputComponent->BindAction("Scan", EInputEvent::IE_Pressed, this, &AMecha::SetScan);
+	//InputComponent->BindAction("RightMouse", EInputEvent::IE_Pressed, this, &AMecha::RightMousePressed);
+	//InputComponent->BindAction("RightMouse", EInputEvent::IE_Released, this, &AMecha::RightMouseReleased);
 }
 
 void AMecha::MoveForward(float val)
@@ -473,4 +521,56 @@ void AMecha::LookPitch(float val)
 {
 	cameraRot.Pitch -= cameraSpeed * val;
 	cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch, -70.f, 70.f);
+}
+
+void AMecha::SetScan()
+{
+	if (scanWidget && useWidget)
+	{
+		if (scanning == true)
+		{
+			scanWidget->RemoveFromViewport();
+			scanning = false;
+		}
+		else if (scanning == false)
+		{
+			scanWidget->AddToViewport();
+			useWidget->RemoveFromViewport();
+			scanning = true;
+		}
+	}
+}
+
+void AMecha::RightMousePressed()
+{
+	if (scanning)
+	{
+		if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(),
+			camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_WorldStatic))
+		{
+			IScannable* iScan = Cast<IScannable>(scanHit.GetActor());
+			if (iScan)
+			{
+				if (scanWidget)
+				{
+					UScanData* data = iScan->Scan();
+					if (data)
+					{
+						scanWidget->scanEntry = data->scanText;
+					}
+				}
+			}
+		}
+	}
+}
+
+void AMecha::RightMouseReleased()
+{
+	if (scanning && scanWidget)
+	{
+		if (scanWidget->IsInViewport())
+		{
+			scanWidget->RemoveFromViewport();
+		}
+	}
 }

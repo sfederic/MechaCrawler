@@ -38,3 +38,8 @@ void ADoor::Use()
 		openState = false;
 	}
 }
+
+UScanData* ADoor::Scan()
+{
+	return FindComponentByClass<UScanData>();
+}

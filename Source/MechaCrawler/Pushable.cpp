@@ -49,6 +49,7 @@ void APushable::Use()
 	{
 		APawn* pawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 		AMecha* player = Cast<AMecha>(pawn);
+
 		if (player)
 		{
 			FVector playerForward = player->forwardAxis;
@@ -59,8 +60,12 @@ void APushable::Use()
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
 				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
-				UE_LOG(LogTemp, Warning, TEXT("Working"));
 			}
 		}
 	}
+}
+
+UScanData* APushable::Scan()
+{
+	return FindComponentByClass<UScanData>();
 }
