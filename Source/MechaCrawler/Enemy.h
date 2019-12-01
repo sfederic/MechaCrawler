@@ -3,12 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "GridActor.h"
 #include "Components/BoxComponent.h"
 #include "Enemy.generated.h"
 
 UCLASS()
-class MECHACRAWLER_API AEnemy : public AActor
+class MECHACRAWLER_API AEnemy : public AGridActor
 {
 	GENERATED_BODY()
 	

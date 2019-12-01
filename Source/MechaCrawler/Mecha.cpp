@@ -284,7 +284,7 @@ void AMecha::MoveForward(float val)
 
 		if (currentLoc == nextLoc && currentRot == nextRot)
 		{
-			//TODO: move traces look like shit, find a way to ignore channels/set channels
+			//TODO: move traces look like shit, find a way to ignore channels/set channels (Am I talking about destruction here? Who is this guy?)
 			TArray<FHitResult> results;
 			if (GetWorld()->LineTraceMultiByChannel(results, loc, loc + (forwardAxis * traceDistance), ECC_WorldStatic, moveParams))
 			{
@@ -553,7 +553,7 @@ void AMecha::SetScan()
 void AMecha::RightMousePressed()
 {
 	//WAYPOINT
-	if(wayPoint && scanning) 
+	if(wayPoint) 
 	{
 		FHitResult wayPointHit;
 		if (GetWorld()->LineTraceSingleByChannel(wayPointHit, camera->GetComponentLocation(),
