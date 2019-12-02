@@ -2,6 +2,7 @@
 
 #include "ChargeEnemy.h"
 #include "Engine/World.h"
+#include "Mecha.h"
 #include "DrawDebugHelpers.h"
 
 AChargeEnemy::AChargeEnemy()
@@ -28,18 +29,22 @@ void AChargeEnemy::Tick(float DeltaTime)
 		FHitResult attackHit;
 		FCollisionQueryParams params;
 		params.AddIgnoredActor(this);
+
 		if (GetWorld()->LineTraceSingleByChannel(attackHit, GetActorLocation(),
 			GetActorLocation() + GetActorForwardVector() * attackDistance, ECC_WorldStatic, params))
 		{
-			AActor* actor = attackHit.GetActor();
-			if (actor)
+			AMecha* player = Cast<AMecha>(attackHit.GetActor());
+			if (player)
 			{
-				nextLoc = actor->GetActorLocation();
-				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+				if (player->nextLoc.Equals(player->GetActorLocation()))
+				{
+					nextLoc = player->GetActorLocation() - GetActorForwardVector() * 100.f;
+					nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+					nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+					nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
-				charging = true;
+					charging = true;
+				}
 			}
 		}
 	}
@@ -47,16 +52,13 @@ void AChargeEnemy::Tick(float DeltaTime)
 	if (charging)
 	{
 		SetActorLocation(FMath::VInterpConstantTo(GetActorLocation(), nextLoc, DeltaTime, chargeMoveSpeed));
-		chargingColor = FColor::Red;
+		if (nextLoc == GetActorLocation())
+		{
+			charging = false;
+		}
 	}
-	else if (charging && (!initialLoc.Equals(GetActorLocation())))
+	else if (!charging)
 	{
 		SetActorLocation(FMath::VInterpConstantTo(GetActorLocation(), initialLoc, DeltaTime, retractMoveSpeed));
-	}
-
-	if (initialLoc.Equals(GetActorLocation()))
-	{
-		charging = false;
-		chargingColor == FColor::Blue;
 	}
 }
