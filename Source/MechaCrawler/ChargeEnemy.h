@@ -8,6 +8,7 @@
 
 /*
 * Enemy that charges the player. Works like a Piston. Charges then returns to intial position when seeing player.
+* TODO: If 'retractSpeed' is too slow, it'll let the LineTrace's messup. Maybe take this class out of the game.
 */
 
 UCLASS()
