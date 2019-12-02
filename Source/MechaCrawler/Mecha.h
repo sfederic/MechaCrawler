@@ -31,7 +31,8 @@ public:
 	void LookPitch(float val);
 	void SetScan();
 	void RightMousePressed();
-	void RightMouseReleased();
+	void LeftMousePressed();
+	void SetWayPoint();
 
 	FVector nextLoc;
 	FVector currentLoc;
@@ -71,10 +72,10 @@ public:
 	float rotateSpeed;
 
 	UPROPERTY(EditAnywhere)
-	float damageAmount;
+	float destrutibleDamageAmount;
 
 	UPROPERTY(EditAnywhere)
-	float damageStrength;
+	float destructibleDamageStrength;
 
 	int forwardAxisIndex;
 	int rightAxisIndex;
@@ -82,7 +83,7 @@ public:
 	FHitResult lookHit;
 
 	FHitResult useHit;
-	float useDistance = 150.f;
+	float useDistance = 100.f;
 
 	FHitResult shootHit;
 	float shootDistance = 1000.f;

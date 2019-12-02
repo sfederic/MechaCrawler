@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GridActor.h"
 #include "Activate.h"
-#include "Mecha.h"
 #include "GravitySwitch.generated.h"
 
 UENUM()
@@ -33,9 +32,6 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void Use() override;
-
-	UPROPERTY(EditAnywhere)
-	AMecha* player;
 
 	UPROPERTY(EditAnywhere)
 	EDirections gravity;

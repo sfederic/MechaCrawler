@@ -12,14 +12,14 @@ UCLASS()
 class MECHACRAWLER_API APushable : public AGridActor, public IActivate, public IScannable
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	APushable();
 
 protected:
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void Use() override;
 	virtual UScanData* Scan() override;
@@ -28,7 +28,10 @@ public:
 	FCollisionQueryParams moveParams;
 
 	UPROPERTY(EditAnywhere)
-	float moveSpeed;
+		float moveSpeed;
 
 	float moveDistance;
+
+private:
+	float maxFallDistance = 10000.f;
 };

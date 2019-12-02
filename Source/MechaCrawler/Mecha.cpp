@@ -134,43 +134,26 @@ void AMecha::Tick(float DeltaTime)
 		}
 	}
 
-	///MOVING
-	if(controller->IsInputKeyDown(EKeys::W))
-	{
-		MoveForward(1.0f);
-	}
-	if (controller->IsInputKeyDown(EKeys::S))
-	{
-		MoveBack(1.0f);
-	}
-	if (controller->IsInputKeyDown(EKeys::A))
-	{
-		MoveLeft(1.0f);
-	}
-	if (controller->IsInputKeyDown(EKeys::D))
-	{
-		MoveRight(1.0f);
-	}
-
 	//SCANNING
 	if (scanning && scanWidget)
 	{
 		if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(),
 			camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_WorldStatic))
 		{
-			IScannable* iScan = Cast<IScannable>(scanHit.GetActor());
-			if (iScan)
+			AActor* actor = scanHit.GetActor();
 			{
-				UScanData* data = iScan->Scan();
-				if (data)
+				UScanData* scanData = actor->FindComponentByClass<UScanData>();
+				if (scanData)
 				{
-					scanWidget->scanEntry = data->scanText;
+					scanWidget->scanEntry = scanData->scanText;
+					scanWidget->scanNameEntry = scanData->scanName;
 				}
 			}
 		}
 		else
 		{
-			scanWidget->scanEntry = FString(TEXT(""));
+			scanWidget->scanEntry = FString(TEXT("No Scan data."));
+			scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
 		}
 	}
 
@@ -216,40 +199,6 @@ void AMecha::Tick(float DeltaTime)
 		}
 	}
 
-	//USING
-	if (controller->IsInputKeyDown(EKeys::RightMouseButton) && !scanning)
-	{
-		if (GetWorld()->LineTraceSingleByChannel(useHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * useDistance,
-			ECC_WorldStatic))
-		{
-			AActor* useActor = useHit.GetActor();
-			if (useActor->Tags.Contains(Tags::Destroy) == false)
-			{
-				IActivate* useable = Cast<IActivate>(useActor);
-				if (useable)
-				{
-					useable->Use();
-				}
-			}
-		}
-	}
-
-	//SHOOTING
-	if (controller->IsInputKeyDown(EKeys::LeftMouseButton)) //TODO: Move all to BindAxis/action
-	{
-		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(), 
-			GetActorLocation() + camera->GetForwardVector() * shootDistance, ECC_Destructible))
-		{
-			UDestructibleComponent* dc = Cast<UDestructibleComponent>(shootHit.GetComponent());
-			if (dc)
-			{
-				dc->ApplyDamage(damageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), damageStrength);
-				dc->GetOwner()->SetLifeSpan(5.f);
-				dc->GetOwner()->Tags.Add(Tags::Destroy);
-			}
-		}
-	}
-
 	//Actor/Camera Rotation & Movement
 	camera->SetRelativeRotation(cameraRot);
 
@@ -264,16 +213,17 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	/*InputComponent->BindAxis("Forward", this, &AMecha::MoveForward);
+	InputComponent->BindAxis("Forward", this, &AMecha::MoveForward);
 	InputComponent->BindAxis("Back", this, &AMecha::MoveBack);
 	InputComponent->BindAxis("Left", this, &AMecha::MoveLeft);
-	InputComponent->BindAxis("Right", this, &AMecha::MoveRight);*/
+	InputComponent->BindAxis("Right", this, &AMecha::MoveRight);
 	InputComponent->BindAxis("Mouse X", this, &AMecha::LookYaw);
 	InputComponent->BindAxis("Mouse Y", this, &AMecha::LookPitch);
 	
 	InputComponent->BindAction("Scan", EInputEvent::IE_Pressed, this, &AMecha::SetScan);
 	InputComponent->BindAction("RightMouse", EInputEvent::IE_Pressed, this, &AMecha::RightMousePressed);
-	//InputComponent->BindAction("RightMouse", EInputEvent::IE_Released, this, &AMecha::RightMouseReleased);
+	InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed);
+	InputComponent->BindAction("Space", EInputEvent::IE_Pressed, this, &AMecha::SetWayPoint);
 }
 
 void AMecha::MoveForward(float val)
@@ -550,10 +500,10 @@ void AMecha::SetScan()
 	}
 }
 
-void AMecha::RightMousePressed()
+void AMecha::SetWayPoint()
 {
 	//WAYPOINT
-	if(wayPoint) 
+	if (wayPoint)
 	{
 		FHitResult wayPointHit;
 		if (GetWorld()->LineTraceSingleByChannel(wayPointHit, camera->GetComponentLocation(),
@@ -562,6 +512,42 @@ void AMecha::RightMousePressed()
 			wayPoint->SetVisibility(true); //Only here because initial visibility is off
 			wayPoint->SetWorldLocation(wayPointHit.ImpactPoint);
 			wayPoint->SetWorldRotation(wayPointHit.ImpactNormal.Rotation());
+		}
+	}
+}
+
+void AMecha::RightMousePressed()
+{
+	//USING
+	if (!scanning)
+	{
+		if (GetWorld()->LineTraceSingleByChannel(useHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * useDistance,
+			ECC_WorldStatic))
+		{
+			AActor* useActor = useHit.GetActor();
+			if (useActor->Tags.Contains(Tags::Destroy) == false) //Keep this for interactiable actors that can be destroyed and respawned
+			{
+				IActivate* useable = Cast<IActivate>(useActor);
+				if (useable)
+				{
+					useable->Use();
+				}
+			}
+		}
+	}
+}
+
+void AMecha::LeftMousePressed()
+{
+	if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
+		GetActorLocation() + camera->GetForwardVector() * shootDistance, ECC_Destructible))
+	{
+		UDestructibleComponent* dc = Cast<UDestructibleComponent>(shootHit.GetComponent());
+		if (dc)
+		{
+			dc->ApplyDamage(destrutibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
+			dc->GetOwner()->SetLifeSpan(5.f);
+			dc->GetOwner()->Tags.Add(Tags::Destroy);
 		}
 	}
 }

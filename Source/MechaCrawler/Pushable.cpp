@@ -50,6 +50,8 @@ void APushable::Use()
 		APawn* pawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 		AMecha* player = Cast<AMecha>(pawn);
 
+		FVector prevLoc = nextLoc;
+
 		if (player)
 		{
 			FVector playerForward = player->forwardAxis;
@@ -60,6 +62,12 @@ void APushable::Use()
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
 				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+
+				if (!GetWorld()->LineTraceSingleByChannel(moveHit, nextLoc, nextLoc - GetActorUpVector() * maxFallDistance, ECC_WorldStatic, moveParams))
+				{
+					nextLoc = prevLoc;
+					return;
+				}
 			}
 		}
 	}

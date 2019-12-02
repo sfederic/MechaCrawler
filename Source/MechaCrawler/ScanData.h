@@ -23,4 +23,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString scanText;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString scanName;
 };

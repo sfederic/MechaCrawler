@@ -27,9 +27,10 @@ void AGravityTunnel::Tick(float DeltaTime)
 
 void AGravityTunnel::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	//TODO: OnOverlap wasn't catching non-player actors. Couldn't move pushable cubes into tunnel for example.
 
 	AMecha* player = Cast<AMecha>(OtherActor);
-	AGridActor* grid = Cast<AGridActor>(OtherActor);
+	//AGridActor* grid = Cast<AGridActor>(OtherActor);
 
 	if (player)
 	{
@@ -37,13 +38,14 @@ void AGravityTunnel::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor*
 		FHitResult hit;
 		FCollisionQueryParams params;
 		params.AddIgnoredActor(player);
+		params.AddIgnoredActor(this);
 
 		if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + GetActorForwardVector() * 1000.f, ECC_WorldStatic, params))
 		{
 			player->nextLoc = hit.GetActor()->GetActorLocation() + hit.ImpactNormal * 100.f;
 		}
 	}
-	else if(grid)
+	/*else if(grid)
 	{
 		FHitResult hit;
 		FCollisionQueryParams params;
@@ -51,8 +53,7 @@ void AGravityTunnel::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor*
 
 		if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + GetActorForwardVector() * 1000.f, ECC_WorldStatic, params))
 		{
-			GLog->Log(TEXT("ITS ON******************************************"));
 			grid->nextLoc = hit.GetActor()->GetActorLocation() + hit.ImpactNormal * 100.f;
 		}
-	}
+	}*/
 }
