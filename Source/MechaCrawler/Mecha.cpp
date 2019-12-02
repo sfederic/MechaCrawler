@@ -120,7 +120,7 @@ void AMecha::Tick(float DeltaTime)
 			falling = true;
 
 			//TODO: Acellerating fallspeed mucks with linetrace collision. Might add back in.
-			//moveSpeed += FApp::GetDeltaTime() + 100.0f;
+			moveSpeed += FApp::GetDeltaTime() + 100.0f;
 
 			nextLoc = loc - (RootComponent->GetUpVector() * moveDistance);
 			nextLoc.X = FMath::RoundToFloat(nextLoc.X);
@@ -129,7 +129,7 @@ void AMecha::Tick(float DeltaTime)
 		}
 		else
 		{
-			//moveSpeed = previousMoveSpeed;
+			moveSpeed = previousMoveSpeed;
 			falling = false;
 		}
 	}
