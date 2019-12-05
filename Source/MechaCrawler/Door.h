@@ -22,15 +22,19 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	virtual void Use() override;
 	UFUNCTION()
 	virtual UScanData* Scan() override;
 
 	UPROPERTY(EditAnywhere)
 	FVector openDirection;
+
 	UPROPERTY(EditAnywhere)
 	float openSpeed;
+
 	float openDistance = 100.f;
+
+	UPROPERTY(EditAnywhere)
 	bool openState;
 };

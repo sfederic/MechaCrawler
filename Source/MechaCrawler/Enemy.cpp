@@ -4,20 +4,14 @@
 #include "Enemy.h"
 #include "DrawDebugHelpers.h"
 
-float moveTimer;
-FVector nextLoc;
-
 FCollisionQueryParams params;
 FHitResult hit;
 
 AEnemy::AEnemy()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	PrimaryActorTick.TickGroup = TG_PrePhysics;
-
 	params.AddIgnoredActor(this);
 }
-
 
 void AEnemy::BeginPlay()
 {
@@ -35,21 +29,19 @@ void AEnemy::Tick(float DeltaTime)
 	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + GetActorForwardVector() * 125.f, FColor::Red);
 	DrawDebugLine(GetWorld(), nextLoc, nextLoc - (GetActorUpVector() * 125.f), FColor::Purple);
 
-	if (moveTimer > 1.5f)
+	if (moveTimer > 1.5f && nextLoc.Equals(GetActorLocation()))
 	{
 		moveTimer = 0.f;
 
 		if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + (GetActorForwardVector() * 125.f), ECC_WorldStatic, params))
 		{
-			GLog->Logf(TEXT("enemy wall hit"));
-
 			float randomRotations[4] = { 90.f, 180.f, 270.f, 360.f };
 			int rotationIndex = (int)FMath::RandRange(0.f, 4.f);
 			SetActorRotation(GetActorRotation() + FRotator(0.f, randomRotations[rotationIndex], 0.f));
 		}
 		else
 		{
-			redoMove:
+			//redoMove:
 
 			float randomRotations[4] = { 90.f, 180.f, 270.f, 360.f };
 			int rotationIndex = (int)FMath::RandRange(0.f, 4.f);
@@ -62,7 +54,7 @@ void AEnemy::Tick(float DeltaTime)
 
 			if (!GetWorld()->LineTraceSingleByChannel(hit, nextLoc, nextLoc - GetActorUpVector() * 125.f, ECC_WorldStatic))
 			{
-				goto redoMove;
+				//goto redoMove; TODO: Infinite loop. Fix later.
 			}
 		}
 	}

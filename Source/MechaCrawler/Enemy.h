@@ -23,4 +23,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float moveSpeed;
+
+	UPROPERTY(EditAnywhere)
+	float moveTimer;
 };
