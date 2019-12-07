@@ -22,8 +22,10 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
+
 	UFUNCTION(BlueprintCallable)
 	virtual void Use() override;
+
 	UFUNCTION()
 	virtual UScanData* Scan() override;
 

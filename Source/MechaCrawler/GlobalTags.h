@@ -8,4 +8,5 @@ namespace Tags
 	FName Useable = "Useable";
 	FName Pushable = "Pushable";
 	FName Scannable = "Scannable";
+	FName Pickup = "Pickup";
 }

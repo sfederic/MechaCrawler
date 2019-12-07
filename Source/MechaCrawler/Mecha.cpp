@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Mecha.h"
 #include "Components/InputComponent.h"
@@ -45,6 +45,13 @@ void AMecha::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("Scan widget not set in Mecha.cpp"));
 	}
 
+	inventoryWidget = CreateWidget<UInventoryWidget>(GetWorld(), inventoryWidgetClass);
+	if (inventoryWidget == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Inventory widget not set in Mecha.cpp"));
+	}
+
+	//WAYPOINT INIT
 	wayPoint = FindComponentByClass<UParticleSystemComponent>();
 	check(wayPoint);
 	if (wayPoint)
@@ -157,7 +164,7 @@ void AMecha::Tick(float DeltaTime)
 		}
 	}
 
-	//'USE' UI
+	//USE UI
 	if (useWidget && scanning == false)
 	{
 		if (scanWidget)
@@ -175,12 +182,16 @@ void AMecha::Tick(float DeltaTime)
 			{
 				if (useWidget->IsInViewport() == false)
 				{
-					useWidget->AddToViewport();
-					
 					if(lookHit.GetActor()->Tags.Contains(Tags::Pushable))
 					{
-						useWidget->useText = "RMB: Push";
+						useWidget->useText = "Right Mouse: Push";
 					}
+					else if (lookHit.GetActor()->Tags.Contains(Tags::Pickup))
+					{
+						useWidget->useText = "Right Mouse: Pickup";
+					}
+
+					useWidget->AddToViewport();
 				}
 			}
 			else if (useWidget->IsInViewport() == true)
@@ -224,6 +235,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAction("RightMouse", EInputEvent::IE_Pressed, this, &AMecha::RightMousePressed);
 	InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed);
 	InputComponent->BindAction("Space", EInputEvent::IE_Pressed, this, &AMecha::SetWayPoint);
+	InputComponent->BindAction("Enter", EInputEvent::IE_Pressed, this, &AMecha::OpenInventory);
 }
 
 void AMecha::MoveForward(float val)
@@ -240,7 +252,7 @@ void AMecha::MoveForward(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
-					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy))
+					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) || !results[i].GetActor()->Tags.Contains(Tags::Pickup))
 					{
 						goto move;
 					}
@@ -301,7 +313,7 @@ void AMecha::MoveBack(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
-					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy))
+					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) || !results[i].GetActor()->Tags.Contains(Tags::Pickup))
 					{
 						goto move;
 					}
@@ -362,7 +374,7 @@ void AMecha::MoveLeft(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
-					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy))
+					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) || !results[i].GetActor()->Tags.Contains(Tags::Pickup))
 					{
 						goto move;
 					}
@@ -423,7 +435,7 @@ void AMecha::MoveRight(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
-					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy))
+					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) || !results[i].GetActor()->Tags.Contains(Tags::Pickup))
 					{
 						goto move;
 					}
@@ -484,7 +496,7 @@ void AMecha::LookPitch(float val)
 
 void AMecha::SetScan()
 {
-	if (scanWidget && useWidget)
+	if (scanWidget && useWidget && (inventoryWidget->IsInViewport() == false))
 	{
 		if (scanning == true)
 		{
@@ -548,6 +560,27 @@ void AMecha::LeftMousePressed()
 			dc->ApplyDamage(destrutibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
 			dc->GetOwner()->SetLifeSpan(5.f);
 			dc->GetOwner()->Tags.Add(Tags::Destroy);
+		}
+	}
+}
+
+void AMecha::OpenInventory()
+{
+	if (inventoryWidget && controller)
+	{
+		if (inventoryWidget->IsInViewport() == false)
+		{
+			FInputModeGameAndUI input = FInputModeGameAndUI();
+			input.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
+			controller->SetInputMode(input);
+			controller->bShowMouseCursor = true;
+			inventoryWidget->AddToViewport();
+		}
+		else if (inventoryWidget->IsInViewport() == true)
+		{
+			controller->SetInputMode(FInputModeGameOnly());
+			controller->bShowMouseCursor = false;
+			inventoryWidget->RemoveFromViewport();
 		}
 	}
 }

@@ -7,6 +7,7 @@
 #include "Blueprint/UserWidget.h"
 #include "ActivateWidget.h"
 #include "ScanWidget.h"
+#include "InventoryWidget.h"
 #include "Mecha.generated.h"
 
 UCLASS()
@@ -33,6 +34,7 @@ public:
 	void RightMousePressed();
 	void LeftMousePressed();
 	void SetWayPoint();
+	void OpenInventory();
 
 	FVector nextLoc;
 	FVector currentLoc;
@@ -50,11 +52,17 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> scanWidgetClass;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> inventoryWidgetClass;
+
 	UPROPERTY()
 	UScanWidget* scanWidget;
 
 	UPROPERTY()
 	UActivateWidget* useWidget;
+
+	UPROPERTY()
+	UInventoryWidget* inventoryWidget;
 
 	UPROPERTY(VisibleAnywhere)
 	FVector forwardAxis;
@@ -83,7 +91,7 @@ public:
 	FHitResult lookHit;
 
 	FHitResult useHit;
-	float useDistance = 100.f;
+	float useDistance = 150.f;
 
 	FHitResult shootHit;
 	float shootDistance = 1000.f;
