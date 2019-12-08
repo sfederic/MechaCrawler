@@ -8,6 +8,7 @@
 #include "ActivateWidget.h"
 #include "ScanWidget.h"
 #include "InventoryWidget.h"
+#include "NoteNode.h"
 #include "Mecha.generated.h"
 
 UCLASS()
@@ -37,6 +38,9 @@ public:
 	void OpenInventory();
 	void Zoom();
 	void AddNote();
+	void DeleteAllNotes();
+	void ZoomIn(float val);
+	void ZoomOut(float val);
 
 	FVector nextLoc;
 	FVector currentLoc;
@@ -59,7 +63,7 @@ public:
 	TSubclassOf<UUserWidget> inventoryWidgetClass;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> noteWidgetClass;
+	TSubclassOf<ANoteNode> noteWidgetClass;
 
 	UPROPERTY()
 	UScanWidget* scanWidget;

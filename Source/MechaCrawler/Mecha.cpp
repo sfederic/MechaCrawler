@@ -1,6 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Mecha.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
@@ -11,7 +12,6 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Particles/ParticleSystem.h"
 #include "GlobalTags.h"
-#include "Components/WidgetComponent.h"
 
 UCameraComponent* camera;
 APlayerController* controller;
@@ -211,21 +211,6 @@ void AMecha::Tick(float DeltaTime)
 		}
 	}
 
-	//ZOOMING | TODO: Is there a better way to do this for comfort?
-	if (zoomed && camera)
-	{
-		if (controller->IsInputKeyDown(EKeys::Down))
-		{
-			camera->FieldOfView += 2.0f;
-		}
-		else if (controller->IsInputKeyDown(EKeys::Up))
-		{
-			camera->FieldOfView -= 2.0f;
-		}
-
-		camera->FieldOfView = FMath::Clamp(camera->FieldOfView, 5.0f, maxFOV);
-	}
-
 	//Actor/Camera Rotation & Movement
 	camera->SetRelativeRotation(cameraRot);
 
@@ -247,13 +232,18 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAxis("Mouse X", this, &AMecha::LookYaw);
 	InputComponent->BindAxis("Mouse Y", this, &AMecha::LookPitch);
 	
+	//Inputs bound to mouse axis instead of Up/Down. Find out why didn't work.
+	InputComponent->BindAxis("MouseWheelUp", this, &AMecha::ZoomIn);
+	InputComponent->BindAxis("MouseWheelDown", this, &AMecha::ZoomOut);
+	
 	InputComponent->BindAction("Scan", EInputEvent::IE_Pressed, this, &AMecha::SetScan);
 	InputComponent->BindAction("RightMouse", EInputEvent::IE_Pressed, this, &AMecha::RightMousePressed);
 	InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed);
 	InputComponent->BindAction("Space", EInputEvent::IE_Pressed, this, &AMecha::SetWayPoint);
 	InputComponent->BindAction("Enter", EInputEvent::IE_Pressed, this, &AMecha::OpenInventory);
-	InputComponent->BindAction("Zoom", EInputEvent::IE_Pressed, this, &AMecha::Zoom);
+	//InputComponent->BindAction("Zoom", EInputEvent::IE_Pressed, this, &AMecha::Zoom);
 	InputComponent->BindAction("Note", EInputEvent::IE_Pressed, this, &AMecha::AddNote);
+	InputComponent->BindAction("Backspace", EInputEvent::IE_Pressed, this, &AMecha::DeleteAllNotes);
 }
 
 void AMecha::MoveForward(float val)
@@ -602,6 +592,7 @@ void AMecha::OpenInventory()
 	}
 }
 
+//TODO: Set in binocular UI for later. Don't need for now.
 void AMecha::Zoom()
 {
 	if (camera)
@@ -625,14 +616,40 @@ void AMecha::AddNote()
 	if (GetWorld()->LineTraceSingleByChannel(noteHit, camera->GetComponentLocation(),
 		camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_WorldStatic, moveParams))
 	{
-		AActor* noteActor = noteHit.GetActor();
-		if (noteActor)
+		if (noteWidgetClass)
 		{
-			UWidgetComponent* widget = NewObject<UWidgetComponent>(noteActor, UWidgetComponent::StaticClass());
-			widget->SetupAttachment(noteActor->GetRootComponent());
-			widget->SetWorldTransform(FTransform());
-			widget->SetWidgetSpace(EWidgetSpace::Screen);
-			widget->SetWidgetClass(noteWidgetClass);
+			FTransform transform = FTransform();
+			transform.SetLocation(noteHit.ImpactPoint);
+			transform.SetRotation(FQuat(noteHit.ImpactNormal.Rotation()));
+			ANoteNode* noteNode = GetWorld()->SpawnActor<ANoteNode>(noteWidgetClass, transform);
 		}
+	}
+}
+
+void AMecha::DeleteAllNotes()
+{
+	TArray<AActor*> noteActorsToDelete;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANoteNode::StaticClass(), noteActorsToDelete);
+	for (int i = 0; i < noteActorsToDelete.Num(); i++)
+	{
+		noteActorsToDelete[i]->Destroy(); //TODO: Find a way to cap
+	}
+}
+
+void AMecha::ZoomIn(float val)
+{
+	if (camera)
+	{
+		camera->FieldOfView += 5.0f * val; //TODO: Figure out how feels with different mice (mouses?)
+		camera->FieldOfView = FMath::Clamp(camera->FieldOfView, 5.0f, maxFOV);
+	}
+}
+
+void AMecha::ZoomOut(float val)
+{
+	if (camera)
+	{
+		camera->FieldOfView -= 5.0f * val;
+		camera->FieldOfView = FMath::Clamp(camera->FieldOfView, 5.0f, maxFOV);
 	}
 }
