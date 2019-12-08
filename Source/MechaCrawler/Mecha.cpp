@@ -11,6 +11,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Particles/ParticleSystem.h"
 #include "GlobalTags.h"
+#include "Components/WidgetComponent.h"
 
 UCameraComponent* camera;
 APlayerController* controller;
@@ -210,6 +211,21 @@ void AMecha::Tick(float DeltaTime)
 		}
 	}
 
+	//ZOOMING | TODO: Is there a better way to do this for comfort?
+	if (zoomed && camera)
+	{
+		if (controller->IsInputKeyDown(EKeys::Down))
+		{
+			camera->FieldOfView += 2.0f;
+		}
+		else if (controller->IsInputKeyDown(EKeys::Up))
+		{
+			camera->FieldOfView -= 2.0f;
+		}
+
+		camera->FieldOfView = FMath::Clamp(camera->FieldOfView, 5.0f, maxFOV);
+	}
+
 	//Actor/Camera Rotation & Movement
 	camera->SetRelativeRotation(cameraRot);
 
@@ -236,6 +252,8 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed);
 	InputComponent->BindAction("Space", EInputEvent::IE_Pressed, this, &AMecha::SetWayPoint);
 	InputComponent->BindAction("Enter", EInputEvent::IE_Pressed, this, &AMecha::OpenInventory);
+	InputComponent->BindAction("Zoom", EInputEvent::IE_Pressed, this, &AMecha::Zoom);
+	InputComponent->BindAction("Note", EInputEvent::IE_Pressed, this, &AMecha::AddNote);
 }
 
 void AMecha::MoveForward(float val)
@@ -246,13 +264,13 @@ void AMecha::MoveForward(float val)
 
 		if (currentLoc == nextLoc && currentRot == nextRot)
 		{
-			//TODO: move traces look like shit, find a way to ignore channels/set channels (Am I talking about destruction here? Who is this guy?)
+			//TODO: move traces look like shit, find a way to ignore channels/set channels (Was I talking about destruction here?)
 			TArray<FHitResult> results;
 			if (GetWorld()->LineTraceMultiByChannel(results, loc, loc + (forwardAxis * traceDistance), ECC_WorldStatic, moveParams))
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
-					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) || !results[i].GetActor()->Tags.Contains(Tags::Pickup))
+					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) && !results[i].GetActor()->Tags.Contains(Tags::Pickup))
 					{
 						goto move;
 					}
@@ -313,7 +331,7 @@ void AMecha::MoveBack(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
-					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) || !results[i].GetActor()->Tags.Contains(Tags::Pickup))
+					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) && !results[i].GetActor()->Tags.Contains(Tags::Pickup))
 					{
 						goto move;
 					}
@@ -374,7 +392,7 @@ void AMecha::MoveLeft(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
-					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) || !results[i].GetActor()->Tags.Contains(Tags::Pickup))
+					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) && !results[i].GetActor()->Tags.Contains(Tags::Pickup))
 					{
 						goto move;
 					}
@@ -435,7 +453,7 @@ void AMecha::MoveRight(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
-					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) || !results[i].GetActor()->Tags.Contains(Tags::Pickup))
+					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) && !results[i].GetActor()->Tags.Contains(Tags::Pickup))
 					{
 						goto move;
 					}
@@ -514,7 +532,6 @@ void AMecha::SetScan()
 
 void AMecha::SetWayPoint()
 {
-	//WAYPOINT
 	if (wayPoint)
 	{
 		FHitResult wayPointHit;
@@ -581,6 +598,41 @@ void AMecha::OpenInventory()
 			controller->SetInputMode(FInputModeGameOnly());
 			controller->bShowMouseCursor = false;
 			inventoryWidget->RemoveFromViewport();
+		}
+	}
+}
+
+void AMecha::Zoom()
+{
+	if (camera)
+	{
+		if (zoomed == false)
+		{
+			zoomed = true;
+			camera->FieldOfView = initialZoomFOV;
+		}
+		else if (zoomed == true)
+		{
+			zoomed = false;
+			camera->FieldOfView = maxFOV;
+		}
+	}
+}
+
+void AMecha::AddNote()
+{
+	FHitResult noteHit;
+	if (GetWorld()->LineTraceSingleByChannel(noteHit, camera->GetComponentLocation(),
+		camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_WorldStatic, moveParams))
+	{
+		AActor* noteActor = noteHit.GetActor();
+		if (noteActor)
+		{
+			UWidgetComponent* widget = NewObject<UWidgetComponent>(noteActor, UWidgetComponent::StaticClass());
+			widget->SetupAttachment(noteActor->GetRootComponent());
+			widget->SetWorldTransform(FTransform());
+			widget->SetWidgetSpace(EWidgetSpace::Screen);
+			widget->SetWidgetClass(noteWidgetClass);
 		}
 	}
 }

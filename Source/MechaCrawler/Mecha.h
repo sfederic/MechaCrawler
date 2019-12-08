@@ -35,6 +35,8 @@ public:
 	void LeftMousePressed();
 	void SetWayPoint();
 	void OpenInventory();
+	void Zoom();
+	void AddNote();
 
 	FVector nextLoc;
 	FVector currentLoc;
@@ -46,6 +48,7 @@ public:
 
 	UParticleSystemComponent* wayPoint;
 
+	//WIDGET CLASSES
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> useWidgetClass;
 
@@ -54,6 +57,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> inventoryWidgetClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> noteWidgetClass;
 
 	UPROPERTY()
 	UScanWidget* scanWidget;
@@ -97,7 +103,7 @@ public:
 	float shootDistance = 1000.f;
 
 	FHitResult scanHit;
-	float scanDistance = 1000.0f;
+	float scanDistance = 10000.0f;
 
 	FHitResult moveHit;
 	FCollisionQueryParams moveParams;
@@ -105,9 +111,12 @@ public:
 	float traceDistance = 125.f; //If traceDistance is equal to moveDistance, players falls through
 	float previousMoveSpeed;
 	float maxFallDistance = 10000.f;
+	float maxFOV = 110.f;
+	float initialZoomFOV = 80.f;
 
 	FVector rootAxes[4];
 
 	bool falling = false;
 	bool scanning = false;
+	bool zoomed = false;
 };
