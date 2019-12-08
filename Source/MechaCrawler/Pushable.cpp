@@ -55,6 +55,11 @@ void APushable::Use()
 		if (player)
 		{
 			FVector playerForward = player->forwardAxis;
+			if (playerForward.Equals(FVector::UpVector))
+			{
+				return;
+			}
+
 			if (!GetWorld()->LineTraceSingleByChannel(moveHit, GetActorLocation(), GetActorLocation() + playerForward * moveDistance,
 				ECC_WorldStatic, moveParams))
 			{

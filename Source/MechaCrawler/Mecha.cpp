@@ -244,6 +244,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	//InputComponent->BindAction("Zoom", EInputEvent::IE_Pressed, this, &AMecha::Zoom);
 	InputComponent->BindAction("Note", EInputEvent::IE_Pressed, this, &AMecha::AddNote);
 	InputComponent->BindAction("Backspace", EInputEvent::IE_Pressed, this, &AMecha::DeleteAllNotes);
+	InputComponent->BindAction("View", EInputEvent::IE_Pressed, this, &AMecha::SetCameraView);
 }
 
 void AMecha::MoveForward(float val)
@@ -651,5 +652,20 @@ void AMecha::ZoomOut(float val)
 	{
 		camera->FieldOfView -= 5.0f * val;
 		camera->FieldOfView = FMath::Clamp(camera->FieldOfView, 5.0f, maxFOV);
+	}
+}
+
+void AMecha::SetCameraView()
+{
+	if (camera)
+	{
+		if (camera->ProjectionMode == ECameraProjectionMode::Perspective)
+		{
+			camera->ProjectionMode = ECameraProjectionMode::Orthographic;
+		}
+		else if (camera->ProjectionMode == ECameraProjectionMode::Orthographic)
+		{
+			camera->ProjectionMode = ECameraProjectionMode::Perspective;
+		}
 	}
 }

@@ -41,6 +41,7 @@ public:
 	void DeleteAllNotes();
 	void ZoomIn(float val);
 	void ZoomOut(float val);
+	void SetCameraView();
 
 	FVector nextLoc;
 	FVector currentLoc;
@@ -51,7 +52,8 @@ public:
 	FRotator cameraRot;
 
 	UParticleSystemComponent* wayPoint;
-
+	
+	//TODO: move into playerhud.h/cpp
 	//WIDGET CLASSES
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> useWidgetClass;
