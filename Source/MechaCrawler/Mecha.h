@@ -86,6 +86,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float moveSpeed;
+	float initialMoveSpeed;
 
 	UPROPERTY(EditAnywhere)
 	float cameraSpeed;
@@ -101,6 +102,7 @@ public:
 
 	int forwardAxisIndex;
 	int rightAxisIndex;
+	int upAxisIndex;
 
 	FHitResult lookHit;
 
@@ -122,10 +124,12 @@ public:
 	float maxFOV = 110.f;
 	float initialZoomFOV = 80.f;
 
-	FVector rootAxes[4];
+	FVector rootAxes[6];
 
+	UPROPERTY(VisibleAnywhere)
 	bool falling = false;
 	bool scanning = false;
 	bool zoomed = false;
+	UPROPERTY(VisibleAnywhere)
 	bool submerged = false;
 };

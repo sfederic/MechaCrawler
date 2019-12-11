@@ -9,4 +9,5 @@ namespace Tags
 	FName Pushable = "Pushable";
 	FName Scannable = "Scannable";
 	FName Pickup = "Pickup";
+	FName Water = "Water";
 }

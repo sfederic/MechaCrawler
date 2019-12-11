@@ -20,9 +20,11 @@ AMecha::AMecha()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true; //Seems to fix fall through on play start when Mech starts on object
-	PrimaryActorTick.TickGroup = TG_PrePhysics; //Seems to fix fall through floor effect. Other Actors needs the same
+	PrimaryActorTick.TickGroup = TG_PrePhysics; //Seems to fix fall through floor effect. Other GridActors needs the same
 
 	moveParams.AddIgnoredActor(this);
+
+	initialMoveSpeed = moveSpeed;
 }
 
 void AMecha::BeginPlay()
@@ -98,7 +100,7 @@ void AMecha::Tick(float DeltaTime)
 	forwardAxisIndex = 0;
 	rightAxisIndex = 0;
 
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		float tempForwardAngle = FMath::Acos(FVector::DotProduct(camera->GetForwardVector(), rootAxes[i]));
 		if (tempForwardAngle < forwardAngle)
@@ -118,27 +120,37 @@ void AMecha::Tick(float DeltaTime)
 	forwardAxis = rootAxes[forwardAxisIndex];
 	rightAxis = rootAxes[rightAxisIndex];
 
+	if (submerged)
+	{
+		moveSpeed = initialMoveSpeed;
+	}
+
 	//GRAVITY
 	if (currentLoc == nextLoc && currentRot == nextRot)
 	{
 		FVector loc = GetActorLocation();
 
-		if (!GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
+		if (submerged == false)
 		{
-			falling = true;
+			if (!GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
+			{
+				fall:
 
-			//TODO: Acellerating fallspeed mucks with linetrace collision. Might add back in. Might take out. Feels good though.
-			moveSpeed += FApp::GetDeltaTime() + 100.0f;
+				falling = true;
 
-			nextLoc = loc - (RootComponent->GetUpVector() * moveDistance);
-			nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-			nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-			nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
-		}
-		else
-		{
-			moveSpeed = previousMoveSpeed;
-			falling = false;
+				//TODO: Acellerating fallspeed mucks with linetrace collision. Might add back in. Might take out. Feels good though.
+				moveSpeed += FApp::GetDeltaTime() + 100.0f;
+
+				nextLoc = loc - (RootComponent->GetUpVector() * moveDistance);
+				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+			}
+			else
+			{
+				moveSpeed = previousMoveSpeed;
+				falling = false;
+			}
 		}
 	}
 
@@ -229,6 +241,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAxis("Back", this, &AMecha::MoveBack);
 	InputComponent->BindAxis("Left", this, &AMecha::MoveLeft);
 	InputComponent->BindAxis("Right", this, &AMecha::MoveRight);
+	InputComponent->BindAxis("Up", this, &AMecha::MoveUp);
 	InputComponent->BindAxis("Mouse X", this, &AMecha::LookYaw);
 	InputComponent->BindAxis("Mouse Y", this, &AMecha::LookPitch);
 	
@@ -261,6 +274,16 @@ void AMecha::MoveForward(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
+					/*if (results[i].GetActor()->Tags.Contains(Tags::Water))
+					{
+						nextLoc = loc + (forwardAxis * moveDistance);
+						nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+						nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+						nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+
+						return;
+					}*/
+
 					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) && !results[i].GetActor()->Tags.Contains(Tags::Pickup))
 					{
 						goto move;
@@ -494,9 +517,9 @@ void AMecha::MoveRight(float val)
 
 void AMecha::MoveUp(float val)
 {
-	if (submerged && val > 0.0f)
+	if (val > 0.0f && submerged)
 	{
-
+		nextLoc += FVector::UpVector * moveDistance;
 	}
 }
 
@@ -508,10 +531,7 @@ void AMecha::LookYaw(float val)
 void AMecha::LookPitch(float val)
 {
 	cameraRot.Pitch -= cameraSpeed * val;
-	if (!submerged)
-	{
-		cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch, -70.f, 70.f);
-	}
+	cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch, -70.f, 70.f);
 }
 
 void AMecha::SetScan()

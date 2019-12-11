@@ -36,6 +36,7 @@ void AWaterVolume::OnActorBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 	if (player)
 	{
 		player->submerged = true;
+		player->falling = false;
 	}
 }
 
