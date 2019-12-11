@@ -29,6 +29,8 @@ public:
 	void MoveBack(float val);
 	void MoveLeft(float val);
 	void MoveRight(float val);
+	void MoveUp(float val);
+	void MoveDown(float val);
 	void LookYaw(float val);
 	void LookPitch(float val);
 	void SetScan();
@@ -125,4 +127,5 @@ public:
 	bool falling = false;
 	bool scanning = false;
 	bool zoomed = false;
+	bool submerged = false;
 };

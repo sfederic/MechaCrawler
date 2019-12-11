@@ -28,7 +28,7 @@ AMecha::AMecha()
 void AMecha::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	//INIT WIDGETS
 	useWidget = CreateWidget<UActivateWidget>(GetWorld(), useWidgetClass);
 	if (useWidget)
@@ -492,6 +492,14 @@ void AMecha::MoveRight(float val)
 	}
 }
 
+void AMecha::MoveUp(float val)
+{
+	if (submerged && val > 0.0f)
+	{
+
+	}
+}
+
 void AMecha::LookYaw(float val)
 {
 	cameraRot.Yaw += cameraSpeed * val;
@@ -500,7 +508,10 @@ void AMecha::LookYaw(float val)
 void AMecha::LookPitch(float val)
 {
 	cameraRot.Pitch -= cameraSpeed * val;
-	cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch, -70.f, 70.f);
+	if (!submerged)
+	{
+		cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch, -70.f, 70.f);
+	}
 }
 
 void AMecha::SetScan()
