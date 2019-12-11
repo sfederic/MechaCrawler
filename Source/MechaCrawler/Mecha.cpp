@@ -23,13 +23,14 @@ AMecha::AMecha()
 	PrimaryActorTick.TickGroup = TG_PrePhysics; //Seems to fix fall through floor effect. Other GridActors needs the same
 
 	moveParams.AddIgnoredActor(this);
-
-	initialMoveSpeed = moveSpeed;
 }
 
 void AMecha::BeginPlay()
 {
 	Super::BeginPlay();
+
+	initialMoveSpeed = moveSpeed;
+
 
 	//INIT WIDGETS
 	useWidget = CreateWidget<UActivateWidget>(GetWorld(), useWidgetClass);

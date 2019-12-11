@@ -86,6 +86,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float moveSpeed;
+
 	float initialMoveSpeed;
 
 	UPROPERTY(EditAnywhere)
