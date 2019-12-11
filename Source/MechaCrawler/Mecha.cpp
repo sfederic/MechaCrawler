@@ -31,7 +31,6 @@ void AMecha::BeginPlay()
 
 	initialMoveSpeed = moveSpeed;
 
-
 	//INIT WIDGETS
 	useWidget = CreateWidget<UActivateWidget>(GetWorld(), useWidgetClass);
 	if (useWidget)
@@ -587,14 +586,22 @@ void AMecha::RightMousePressed()
 	}
 }
 
+//SHOOTING
 void AMecha::LeftMousePressed()
 {
 	if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
 		GetActorLocation() + camera->GetForwardVector() * shootDistance, ECC_Destructible))
 	{
 		UDestructibleComponent* dc = Cast<UDestructibleComponent>(shootHit.GetComponent());
+		ADestructibleActor* shotActor = Cast<ADestructibleActor>(dc->GetOwner());
+
 		if (dc)
 		{
+			if (instancedRebuildManager)
+			{
+				instancedRebuildManager->rebuildActors.Add(shotActor);
+			}
+
 			dc->ApplyDamage(destrutibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
 			dc->GetOwner()->SetLifeSpan(5.f);
 			dc->GetOwner()->Tags.Add(Tags::Destroy);
@@ -663,7 +670,25 @@ void AMecha::DeleteAllNotes()
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANoteNode::StaticClass(), noteActorsToDelete);
 	for (int i = 0; i < noteActorsToDelete.Num(); i++)
 	{
-		noteActorsToDelete[i]->Destroy(); //TODO: Find a way to cap
+		noteActorsToDelete[i]->Destroy(); //TODO: Find a way to cap?
+	}
+
+	if (instancedRebuildManager)
+	{
+		UWorld* world = GetWorld();
+
+		for (int i = 0; i < instancedRebuildManager->rebuildActors.Num(); i++)
+		{
+			ADestructibleActor* da = world->SpawnActor<ADestructibleActor>(rebuildActorClass,
+				instancedRebuildManager->rebuildActors[i]->GetActorLocation(),
+				instancedRebuildManager->rebuildActors[i]->GetActorRotation());
+			if (da)
+			{
+				GLog->Log(TEXT("Works"));
+			}
+		}
+
+		instancedRebuildManager->rebuildActors.Empty();
 	}
 }
 

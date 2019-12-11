@@ -9,6 +9,7 @@
 #include "ScanWidget.h"
 #include "InventoryWidget.h"
 #include "NoteNode.h"
+#include "RebuildManager.h"
 #include "Mecha.generated.h"
 
 UCLASS()
@@ -55,6 +56,12 @@ public:
 
 	UParticleSystemComponent* wayPoint;
 	
+	UPROPERTY(EditAnywhere)
+	ARebuildManager* instancedRebuildManager;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ADestructibleActor> rebuildActorClass;
+
 	//TODO: move into playerhud.h/cpp
 	//WIDGET CLASSES
 	UPROPERTY(EditAnywhere)
