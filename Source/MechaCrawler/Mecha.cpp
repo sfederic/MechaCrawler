@@ -134,8 +134,6 @@ void AMecha::Tick(float DeltaTime)
 		{
 			if (!GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
 			{
-				fall:
-
 				falling = true;
 
 				//TODO: Acellerating fallspeed mucks with linetrace collision. Might add back in. Might take out. Feels good though.
