@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "DestructibleActor.h"
+#include "DestructibleComponent.h"
 #include "RebuildManager.generated.h"
 
 UCLASS()
@@ -21,6 +22,11 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY()
+	//TODO: Delcaring UPROPERTY() keeps the array garbage collected. Keeping it off for now.
+	UPROPERTY(VisibleAnywhere)
 	TArray<ADestructibleActor*> rebuildActors;
+	UPROPERTY(VisibleAnywhere)
+	TArray<UDestructibleMesh*> rebuildMeshes;
+	UPROPERTY(VisibleAnywhere)
+	TArray<UMaterialInterface*> rebuildMaterials;
 };

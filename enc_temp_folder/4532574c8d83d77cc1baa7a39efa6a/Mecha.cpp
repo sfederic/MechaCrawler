@@ -605,7 +605,7 @@ void AMecha::LeftMousePressed()
 			}
 
 			dc->ApplyDamage(destrutibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
-			dc->GetOwner()->SetLifeSpan(1.f);
+			dc->GetOwner()->SetLifeSpan(3.f);
 			dc->GetOwner()->Tags.Add(Tags::Destroy);
 		}
 	}
