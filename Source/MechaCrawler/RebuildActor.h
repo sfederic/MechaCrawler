@@ -7,11 +7,10 @@
 #include "RebuildActor.generated.h"
 
 /**
- * 
+ * Instanced actor for keeping hold of destroyed actor pointers.
  */
 UCLASS()
 class MECHACRAWLER_API ARebuildActor : public ADestructibleActor
 {
 	GENERATED_BODY()
-	
 };

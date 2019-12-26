@@ -12,6 +12,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Particles/ParticleSystem.h"
 #include "GlobalTags.h"
+#include "TimerManager.h" //What was this things problem before?
 
 UCameraComponent* camera;
 APlayerController* controller;
@@ -159,6 +160,7 @@ void AMecha::Tick(float DeltaTime)
 			camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_WorldStatic))
 		{
 			AActor* actor = scanHit.GetActor();
+			if(actor)
 			{
 				UScanData* scanData = actor->FindComponentByClass<UScanData>();
 				if (scanData)
@@ -189,6 +191,11 @@ void AMecha::Tick(float DeltaTime)
 		if (GetWorld()->LineTraceSingleByChannel(lookHit, camera->GetComponentLocation(),
 			camera->GetComponentLocation() + camera->GetForwardVector() * useDistance, ECC_WorldStatic))
 		{
+			if (!lookHit.GetActor())
+			{
+				return;
+			}
+
 			if (lookHit.GetActor()->Tags.Contains(Tags::Useable))
 			{
 				if (useWidget->IsInViewport() == false)
@@ -242,6 +249,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAxis("Up", this, &AMecha::MoveUp);
 	InputComponent->BindAxis("Mouse X", this, &AMecha::LookYaw);
 	InputComponent->BindAxis("Mouse Y", this, &AMecha::LookPitch);
+	InputComponent->BindAxis("LeftMouse", this, &AMecha::LeftMousePressed);
 	
 	//Inputs bound to mouse axis instead of Up/Down. Find out why didn't work.
 	InputComponent->BindAxis("MouseWheelUp", this, &AMecha::ZoomIn);
@@ -249,7 +257,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	
 	InputComponent->BindAction("Scan", EInputEvent::IE_Pressed, this, &AMecha::SetScan);
 	InputComponent->BindAction("RightMouse", EInputEvent::IE_Pressed, this, &AMecha::RightMousePressed);
-	InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed);
+	//InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed);
 	InputComponent->BindAction("Space", EInputEvent::IE_Pressed, this, &AMecha::SetWayPoint);
 	InputComponent->BindAction("Enter", EInputEvent::IE_Pressed, this, &AMecha::OpenInventory);
 	//InputComponent->BindAction("Zoom", EInputEvent::IE_Pressed, this, &AMecha::Zoom);
@@ -587,26 +595,39 @@ void AMecha::RightMousePressed()
 }
 
 //SHOOTING
-void AMecha::LeftMousePressed()
+void AMecha::LeftMousePressed(float val)
 {
-	if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
-		GetActorLocation() + camera->GetForwardVector() * shootDistance, ECC_Destructible))
+	if (val)
 	{
-		UDestructibleComponent* dc = Cast<UDestructibleComponent>(shootHit.GetComponent());
-		ADestructibleActor* shotActor = Cast<ADestructibleActor>(dc->GetOwner());
-
-		if (dc && shotActor)
+		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
+			GetActorLocation() + camera->GetForwardVector() * shootDistance, ECC_Destructible))
 		{
-			if (instancedRebuildManager)
+			if (!shootHit.GetActor())
 			{
-				instancedRebuildManager->rebuildActors.Add(shotActor);
-				instancedRebuildManager->rebuildMeshes.Add(dc->GetDestructibleMesh());
-				instancedRebuildManager->rebuildMaterials.Add(dc->GetMaterial(0));
+				return; //Works as a fallthrough for the rebuild mechanic.
 			}
 
-			dc->ApplyDamage(destrutibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
-			dc->GetOwner()->SetLifeSpan(1.f);
-			dc->GetOwner()->Tags.Add(Tags::Destroy);
+			if (shootHit.GetActor()->Tags.Contains(Tags::Destroy))
+			{
+				UDestructibleComponent* dc = Cast<UDestructibleComponent>(shootHit.GetComponent());
+
+				dc->ApplyDamage(destrutibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
+				return;
+			}
+
+			UDestructibleComponent* dc = Cast<UDestructibleComponent>(shootHit.GetComponent());
+			ADestructibleActor* shotActor = Cast<ADestructibleActor>(dc->GetOwner());
+
+			if (dc && shotActor)
+			{
+				if (instancedRebuildManager)
+				{
+					instancedRebuildManager->rebuildActors.Add(shotActor);
+				}
+
+				dc->ApplyDamage(destrutibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
+				dc->GetOwner()->Tags.Add(Tags::Destroy);
+			}
 		}
 	}
 }
@@ -666,31 +687,43 @@ void AMecha::AddNote()
 	}
 }
 
-//TESTING: Deletes all notes and rebuilds all destrucible actors
+//TODO: Deletes all notes and rebuilds all destrucible actors
 void AMecha::DeleteAllNotes()
 {
-	TArray<AActor*> noteActorsToDelete;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANoteNode::StaticClass(), noteActorsToDelete);
-	for (int i = 0; i < noteActorsToDelete.Num(); i++)
+	if (GetActorLocation().Equals(nextLoc))
 	{
-		noteActorsToDelete[i]->Destroy(); //TODO: Find a way to cap?
-	}
-
-	if (instancedRebuildManager)
-	{
-		UWorld* world = GetWorld();
-
-		for (int i = 0; i < instancedRebuildManager->rebuildActors.Num(); i++)
+		TArray<AActor*> noteActorsToDelete;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANoteNode::StaticClass(), noteActorsToDelete);
+		for (int i = 0; i < noteActorsToDelete.Num(); i++)
 		{
-			ADestructibleActor* da = world->SpawnActor<ADestructibleActor>(ADestructibleActor::StaticClass(),
-				instancedRebuildManager->rebuildActors[i]->GetActorTransform());
-			da->FindComponentByClass<UDestructibleComponent>()->SetDestructibleMesh(instancedRebuildManager->rebuildMeshes[i]);
-			da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, instancedRebuildManager->rebuildMaterials[i]);
+			noteActorsToDelete[i]->Destroy(); //TODO: Find a way to cap?
 		}
 
-		instancedRebuildManager->rebuildActors.Empty();
-		instancedRebuildManager->rebuildMeshes.Empty();
-		instancedRebuildManager->rebuildMaterials.Empty();
+		if (instancedRebuildManager)
+		{
+			UWorld* world = GetWorld();
+
+			for (int i = 0; i < instancedRebuildManager->rebuildActors.Num(); i++)
+			{
+				if (instancedRebuildManager->rebuildActors[i]->GetActorLocation().Equals(GetActorLocation()))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("REBUILD is clashing with player position"));
+					return;
+				}
+			}
+
+			for (int i = 0; i < instancedRebuildManager->rebuildActors.Num(); i++)
+			{
+				ADestructibleActor* da = world->SpawnActor<ADestructibleActor>(ADestructibleActor::StaticClass(),
+					instancedRebuildManager->rebuildActors[i]->GetActorTransform());
+				da->FindComponentByClass<UDestructibleComponent>()->SetDestructibleMesh(instancedRebuildManager->rebuildActors[i]->GetDestructibleComponent()->GetDestructibleMesh());
+				da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, instancedRebuildManager->rebuildActors[i]->GetDestructibleComponent()->GetMaterial(0));
+
+				instancedRebuildManager->rebuildActors[i]->Destroy();
+			}
+
+			instancedRebuildManager->rebuildActors.Empty();
+		}
 	}
 }
 
@@ -698,7 +731,7 @@ void AMecha::ZoomIn(float val)
 {
 	if (camera)
 	{
-		camera->FieldOfView += 5.0f * val; //TODO: Figure out how feels with different mice (mouses?)
+		camera->FieldOfView += 5.0f * val; //TODO: Figure out how feels with different mice (TODO: Google plural of mouses)
 		camera->FieldOfView = FMath::Clamp(camera->FieldOfView, 5.0f, maxFOV);
 	}
 }

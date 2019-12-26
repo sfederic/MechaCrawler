@@ -22,11 +22,9 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	//TODO: Delcaring UPROPERTY() keeps the array garbage collected. Keeping it off for now.
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
+	bool debugActors;
+
+	UPROPERTY()
 	TArray<ADestructibleActor*> rebuildActors;
-	UPROPERTY(VisibleAnywhere)
-	TArray<UDestructibleMesh*> rebuildMeshes;
-	UPROPERTY(VisibleAnywhere)
-	TArray<UMaterialInterface*> rebuildMaterials;
 };

@@ -36,7 +36,7 @@ public:
 	void LookPitch(float val);
 	void SetScan();
 	void RightMousePressed();
-	void LeftMousePressed();
+	void LeftMousePressed(float val);
 	void SetWayPoint();
 	void OpenInventory();
 	void Zoom();
@@ -84,6 +84,7 @@ public:
 
 	UPROPERTY()
 	UInventoryWidget* inventoryWidget;
+	//end move to playerhud.h/cpp
 
 	UPROPERTY(VisibleAnywhere)
 	FVector forwardAxis;
