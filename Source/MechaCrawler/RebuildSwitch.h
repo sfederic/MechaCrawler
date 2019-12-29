@@ -4,18 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "DestructibleActor.h"
-#include "DestructibleComponent.h"
-#include "IceBlock.h"
-#include "RebuildManager.generated.h"
+#include "RebuildSwitch.generated.h"
 
 UCLASS()
-class MECHACRAWLER_API ARebuildManager : public AActor
+class MECHACRAWLER_API ARebuildSwitch : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
-	ARebuildManager();
+	ARebuildSwitch();
 
 protected:
 	virtual void BeginPlay() override;
@@ -23,9 +20,9 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere)
-	bool debugActors;
+	bool switchActivated = false;
 
-	UPROPERTY()
-	TArray<ADestructibleActor*> rebuildActors;
+private:
+	class AMecha* rebuildSwitchPlayer;
+	class APawn* rebuildSwitchPlayerPawn;
 };

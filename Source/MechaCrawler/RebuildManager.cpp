@@ -17,8 +17,4 @@ void ARebuildManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (debugActors)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Actors %d\n"), rebuildActors.Num());
-	}
 }

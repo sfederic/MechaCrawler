@@ -45,6 +45,7 @@ public:
 	void ZoomIn(float val);
 	void ZoomOut(float val);
 	void SetCameraView();
+	void RebuildAllDestroyedActors();
 
 	FVector nextLoc;
 	FVector currentLoc;
@@ -53,6 +54,9 @@ public:
 	FQuat nextRot;
 
 	FRotator cameraRot;
+
+	class UCameraComponent* camera;
+	class APlayerController* controller;
 
 	UParticleSystemComponent* wayPoint;
 	
@@ -116,7 +120,7 @@ public:
 	FHitResult lookHit;
 
 	FHitResult useHit;
-	float useDistance = 150.f;
+	float useDistance = 175.f;
 
 	FHitResult shootHit;
 	float shootDistance = 1000.f;

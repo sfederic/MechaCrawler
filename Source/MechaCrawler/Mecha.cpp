@@ -14,8 +14,7 @@
 #include "GlobalTags.h"
 #include "TimerManager.h" //What was this things problem before?
 
-UCameraComponent* camera;
-APlayerController* controller;
+
 
 AMecha::AMecha()
 {
@@ -131,6 +130,21 @@ void AMecha::Tick(float DeltaTime)
 	{
 		FVector loc = GetActorLocation();
 
+		//For Water and obstacles that the player can pass through (Tagged as MoveThrough)
+		/*if (GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
+		{
+			if (moveHit.GetActor()->Tags.Contains(Tags::MoveThrough))
+			{
+				submerged = true;
+
+				nextLoc = loc - (RootComponent->GetUpVector() * moveDistance);
+				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+			}
+		}*/
+
+		//For normal gravity
 		if (submerged == false)
 		{
 			if (!GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
@@ -246,7 +260,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAxis("Back", this, &AMecha::MoveBack);
 	InputComponent->BindAxis("Left", this, &AMecha::MoveLeft);
 	InputComponent->BindAxis("Right", this, &AMecha::MoveRight);
-	InputComponent->BindAxis("Up", this, &AMecha::MoveUp);
+	//InputComponent->BindAxis("Up", this, &AMecha::MoveUp);
 	InputComponent->BindAxis("Mouse X", this, &AMecha::LookYaw);
 	InputComponent->BindAxis("Mouse Y", this, &AMecha::LookPitch);
 	InputComponent->BindAxis("LeftMouse", this, &AMecha::LeftMousePressed);
@@ -280,7 +294,7 @@ void AMecha::MoveForward(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
-					/*if (results[i].GetActor()->Tags.Contains(Tags::Water))
+					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
 					{
 						nextLoc = loc + (forwardAxis * moveDistance);
 						nextLoc.X = FMath::RoundToFloat(nextLoc.X);
@@ -288,7 +302,7 @@ void AMecha::MoveForward(float val)
 						nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 						return;
-					}*/
+					}
 
 					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) && !results[i].GetActor()->Tags.Contains(Tags::Pickup))
 					{
@@ -351,6 +365,16 @@ void AMecha::MoveBack(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
+					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
+					{
+						nextLoc = loc - (forwardAxis * moveDistance);
+						nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+						nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+						nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+
+						return;
+					}
+
 					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) && !results[i].GetActor()->Tags.Contains(Tags::Pickup))
 					{
 						goto move;
@@ -412,6 +436,16 @@ void AMecha::MoveLeft(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
+					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
+					{
+						nextLoc = loc - (rightAxis * moveDistance);
+						nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+						nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+						nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+
+						return;
+					}
+
 					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) && !results[i].GetActor()->Tags.Contains(Tags::Pickup))
 					{
 						goto move;
@@ -473,6 +507,16 @@ void AMecha::MoveRight(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
+					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
+					{
+						nextLoc = loc + (rightAxis * moveDistance);
+						nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+						nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+						nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+
+						return;
+					}
+
 					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) && !results[i].GetActor()->Tags.Contains(Tags::Pickup))
 					{
 						goto move;
@@ -616,7 +660,11 @@ void AMecha::LeftMousePressed(float val)
 			}
 
 			UDestructibleComponent* dc = Cast<UDestructibleComponent>(shootHit.GetComponent());
-			ADestructibleActor* shotActor = Cast<ADestructibleActor>(dc->GetOwner());
+			ADestructibleActor* shotActor = nullptr;
+			if (dc)
+			{
+				shotActor = Cast<ADestructibleActor>(dc->GetOwner());
+			}
 
 			if (dc && shotActor)
 			{
@@ -687,7 +735,6 @@ void AMecha::AddNote()
 	}
 }
 
-//TODO: Deletes all notes and rebuilds all destrucible actors
 void AMecha::DeleteAllNotes()
 {
 	if (GetActorLocation().Equals(nextLoc))
@@ -699,31 +746,7 @@ void AMecha::DeleteAllNotes()
 			noteActorsToDelete[i]->Destroy(); //TODO: Find a way to cap?
 		}
 
-		if (instancedRebuildManager)
-		{
-			UWorld* world = GetWorld();
-
-			for (int i = 0; i < instancedRebuildManager->rebuildActors.Num(); i++)
-			{
-				if (instancedRebuildManager->rebuildActors[i]->GetActorLocation().Equals(GetActorLocation()))
-				{
-					UE_LOG(LogTemp, Warning, TEXT("REBUILD is clashing with player position"));
-					return;
-				}
-			}
-
-			for (int i = 0; i < instancedRebuildManager->rebuildActors.Num(); i++)
-			{
-				ADestructibleActor* da = world->SpawnActor<ADestructibleActor>(ADestructibleActor::StaticClass(),
-					instancedRebuildManager->rebuildActors[i]->GetActorTransform());
-				da->FindComponentByClass<UDestructibleComponent>()->SetDestructibleMesh(instancedRebuildManager->rebuildActors[i]->GetDestructibleComponent()->GetDestructibleMesh());
-				da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, instancedRebuildManager->rebuildActors[i]->GetDestructibleComponent()->GetMaterial(0));
-
-				instancedRebuildManager->rebuildActors[i]->Destroy();
-			}
-
-			instancedRebuildManager->rebuildActors.Empty();
-		}
+		RebuildAllDestroyedActors();
 	}
 }
 
@@ -757,5 +780,34 @@ void AMecha::SetCameraView()
 		{
 			camera->ProjectionMode = ECameraProjectionMode::Perspective;
 		}
+	}
+}
+
+void AMecha::RebuildAllDestroyedActors()
+{
+	if (instancedRebuildManager)
+	{
+		UWorld* world = GetWorld();
+
+		for (int i = 0; i < instancedRebuildManager->rebuildActors.Num(); i++)
+		{
+			if (instancedRebuildManager->rebuildActors[i]->GetActorLocation().Equals(GetActorLocation()))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("REBUILD is clashing with player position"));
+				return;
+			}
+		}
+
+		for (int i = 0; i < instancedRebuildManager->rebuildActors.Num(); i++)
+		{
+			ADestructibleActor* da = world->SpawnActor<ADestructibleActor>(ADestructibleActor::StaticClass(),
+				instancedRebuildManager->rebuildActors[i]->GetActorTransform());
+			da->FindComponentByClass<UDestructibleComponent>()->SetDestructibleMesh(instancedRebuildManager->rebuildActors[i]->GetDestructibleComponent()->GetDestructibleMesh());
+			da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, instancedRebuildManager->rebuildActors[i]->GetDestructibleComponent()->GetMaterial(0));
+
+			instancedRebuildManager->rebuildActors[i]->Destroy();
+		}
+
+		instancedRebuildManager->rebuildActors.Empty();
 	}
 }
