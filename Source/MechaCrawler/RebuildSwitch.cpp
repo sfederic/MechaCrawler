@@ -4,11 +4,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "Mecha.h"
 #include "RebuildManager.h"
+#include "IceComponent.h"
 
 ARebuildSwitch::ARebuildSwitch()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
+	rebuildTimer = 0.0f;
 }
 
 void ARebuildSwitch::BeginPlay()
@@ -27,21 +28,14 @@ void ARebuildSwitch::Tick(float DeltaTime)
 	{
 		if (rebuildSwitchPlayer->GetActorLocation().Equals(GetActorLocation()))
 		{
-			rebuildSwitchPlayer->RebuildAllDestroyedActors();
+			rebuildTimer += FApp::GetDeltaTime();
+			rebuildSwitchPlayer->canMove = false; //TODO: need to make a visual post-pross effect for timer
 
-			TArray<AActor*> iceBlockActors;
-			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AIceBlock::StaticClass(), iceBlockActors);
-
-			for (int i = 0; i < iceBlockActors.Num(); i++)
+			if (rebuildTimer > 1.0f)
 			{
-				AIceBlock* iceBlock = Cast<AIceBlock>(iceBlockActors[i]);
-				if (iceBlock)
-				{
-					iceBlock->TurnToIce();
-				}
+				RebuildAll();
+				rebuildTimer = 0.f;
 			}
-
-			switchActivated = true;
 		}
 	}
 
@@ -49,4 +43,26 @@ void ARebuildSwitch::Tick(float DeltaTime)
 	{
 		switchActivated = false;
 	}
+}
+
+void ARebuildSwitch::RebuildAll()
+{
+	//FOR ALL GENERAL DEST. ACTORS
+	rebuildSwitchPlayer->RebuildAllDestroyedActors();
+
+	//FOR ICE BLOCK ACTORS
+	TArray<AActor*> iceBlockActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADestructibleActor::StaticClass(), iceBlockActors);
+
+	for (int i = 0; i < iceBlockActors.Num(); i++)
+	{
+		UIceComponent* iceBlock = iceBlockActors[i]->FindComponentByClass<UIceComponent>();
+		if (iceBlock)
+		{
+			iceBlock->TurnToIce();
+		}
+	}
+
+	rebuildSwitchPlayer->canMove = true;
+	switchActivated = true;
 }

@@ -46,6 +46,7 @@ public:
 	void ZoomOut(float val);
 	void SetCameraView();
 	void RebuildAllDestroyedActors();
+	void UseObject();
 
 	FVector nextLoc;
 	FVector currentLoc;
@@ -141,8 +142,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	bool falling = false;
+
 	bool scanning = false;
 	bool zoomed = false;
+
 	UPROPERTY(VisibleAnywhere)
 	bool submerged = false;
+
+	bool canMove = true;
 };

@@ -13,8 +13,7 @@
 #include "Particles/ParticleSystem.h"
 #include "GlobalTags.h"
 #include "TimerManager.h" //What was this things problem before?
-
-
+#include "IceComponent.h"
 
 AMecha::AMecha()
 {
@@ -171,7 +170,7 @@ void AMecha::Tick(float DeltaTime)
 	if (scanning && scanWidget)
 	{
 		if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(),
-			camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_WorldStatic))
+			camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_WorldDynamic))
 		{
 			AActor* actor = scanHit.GetActor();
 			if(actor)
@@ -191,56 +190,7 @@ void AMecha::Tick(float DeltaTime)
 		}
 	}
 
-	//USE UI
-	if (useWidget && scanning == false)
-	{
-		if (scanWidget)
-		{
-			if (scanWidget->IsInViewport())
-			{
-				scanWidget->RemoveFromViewport();
-			}
-		}
-
-		if (GetWorld()->LineTraceSingleByChannel(lookHit, camera->GetComponentLocation(),
-			camera->GetComponentLocation() + camera->GetForwardVector() * useDistance, ECC_WorldStatic))
-		{
-			if (!lookHit.GetActor())
-			{
-				return;
-			}
-
-			if (lookHit.GetActor()->Tags.Contains(Tags::Useable))
-			{
-				if (useWidget->IsInViewport() == false)
-				{
-					if(lookHit.GetActor()->Tags.Contains(Tags::Pushable))
-					{
-						useWidget->useText = "Right Mouse: Push";
-					}
-					else if (lookHit.GetActor()->Tags.Contains(Tags::Pickup))
-					{
-						useWidget->useText = "Right Mouse: Pickup";
-					}
-
-					useWidget->AddToViewport();
-				}
-			}
-			else if (useWidget->IsInViewport() == true)
-			{
-				useWidget->RemoveFromViewport();
-				useWidget->useText = "RMB: Use";
-			}
-		}
-		else
-		{
-			if (useWidget->IsInViewport() == true)
-			{
-				useWidget->RemoveFromViewport();
-				useWidget->useText = "RMB: Use";
-			}
-		}
-	}
+	UseObject(); //For 'Use' UI
 
 	//Actor/Camera Rotation & Movement
 	camera->SetRelativeRotation(cameraRot);
@@ -282,7 +232,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AMecha::MoveForward(float val)
 {
-	if (val != 0.f && falling == false)
+	if (val != 0.f && falling == false && canMove)
 	{
 		FVector loc = GetActorLocation();
 
@@ -294,7 +244,7 @@ void AMecha::MoveForward(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
-					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
+					/*if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
 					{
 						nextLoc = loc + (forwardAxis * moveDistance);
 						nextLoc.X = FMath::RoundToFloat(nextLoc.X);
@@ -302,7 +252,8 @@ void AMecha::MoveForward(float val)
 						nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 						return;
-					}
+					}*/
+
 
 					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) && !results[i].GetActor()->Tags.Contains(Tags::Pickup))
 					{
@@ -354,7 +305,7 @@ void AMecha::MoveForward(float val)
 
 void AMecha::MoveBack(float val)
 {
-	if (val != 0.f && falling == false)
+	if (val != 0.f && falling == false && canMove)
 	{
 		FVector loc = GetActorLocation();
 
@@ -425,7 +376,7 @@ void AMecha::MoveBack(float val)
 
 void AMecha::MoveLeft(float val)
 {
-	if (val != 0.f && falling == false)
+	if (val != 0.f && falling == false && canMove)
 	{
 		FVector loc = GetActorLocation();
 
@@ -496,7 +447,7 @@ void AMecha::MoveLeft(float val)
 
 void AMecha::MoveRight(float val)
 {
-	if (val != 0.f && falling == false)
+	if (val != 0.f && falling == false && canMove)
 	{
 		FVector loc = GetActorLocation();
 
@@ -622,16 +573,25 @@ void AMecha::RightMousePressed()
 	//USING
 	if (!scanning)
 	{
-		if (GetWorld()->LineTraceSingleByChannel(useHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * useDistance,
-			ECC_WorldStatic))
+		if (GetWorld()->LineTraceSingleByChannel(useHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * useDistance, ECC_WorldStatic))
 		{
 			AActor* useActor = useHit.GetActor();
-			if (useActor->Tags.Contains(Tags::Destroy) == false) //Keep this for interactiable actors that can be destroyed and respawned
+			if (useActor)
 			{
-				IActivate* useable = Cast<IActivate>(useActor);
-				if (useable)
+				UIceComponent* ice = useActor->FindComponentByClass<UIceComponent>();
+				if (ice)
 				{
-					useable->Use();
+					ice->TurnToWater();
+					return;
+				}
+
+				if (useActor->Tags.Contains(Tags::Destroy) == false) //Keep this for interactiable actors that can be destroyed and respawned
+				{
+					IActivate* useable = Cast<IActivate>(useActor);
+					if (useable)
+					{
+						useable->Use();
+					}
 				}
 			}
 		}
@@ -809,5 +769,59 @@ void AMecha::RebuildAllDestroyedActors()
 		}
 
 		instancedRebuildManager->rebuildActors.Empty();
+	}
+}
+
+void AMecha::UseObject()
+{
+	//USE UI
+	if (useWidget && scanning == false)
+	{
+		if (scanWidget)
+		{
+			if (scanWidget->IsInViewport())
+			{
+				scanWidget->RemoveFromViewport();
+			}
+		}
+
+		if (GetWorld()->LineTraceSingleByChannel(lookHit, camera->GetComponentLocation(),
+			camera->GetComponentLocation() + camera->GetForwardVector() * useDistance, ECC_WorldStatic))
+		{
+			if (!lookHit.GetActor())
+			{
+				return;
+			}
+
+			if (lookHit.GetActor()->Tags.Contains(Tags::Useable))
+			{
+				if (useWidget->IsInViewport() == false)
+				{
+					if (lookHit.GetActor()->Tags.Contains(Tags::Pushable))
+					{
+						useWidget->useText = "Right Mouse: Push";
+					}
+					else if (lookHit.GetActor()->Tags.Contains(Tags::Pickup))
+					{
+						useWidget->useText = "Right Mouse: Pickup";
+					}
+
+					useWidget->AddToViewport();
+				}
+			}
+			else if (useWidget->IsInViewport() == true)
+			{
+				useWidget->RemoveFromViewport();
+				useWidget->useText = "RMB: Use";
+			}
+		}
+		else
+		{
+			if (useWidget->IsInViewport() == true)
+			{
+				useWidget->RemoveFromViewport();
+				useWidget->useText = "RMB: Use";
+			}
+		}
 	}
 }

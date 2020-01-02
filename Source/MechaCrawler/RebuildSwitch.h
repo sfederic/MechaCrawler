@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "RebuildSwitch.generated.h"
 
+//TODO: Make sure that player can't go through re-spawned actors. Set a timer for this
+
 UCLASS()
 class MECHACRAWLER_API ARebuildSwitch : public AActor
 {
@@ -19,6 +21,9 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
+	void RebuildAll();
+
+	float rebuildTimer;
 
 	bool switchActivated = false;
 
