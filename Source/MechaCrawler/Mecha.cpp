@@ -14,6 +14,7 @@
 #include "GlobalTags.h"
 #include "TimerManager.h" //What was this things problem before?
 #include "IceComponent.h"
+#include "Enemy.h"
 
 AMecha::AMecha()
 {
@@ -604,6 +605,18 @@ void AMecha::LeftMousePressed(float val)
 	if (val)
 	{
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
+			GetActorLocation() + camera->GetForwardVector() * shootDistance, ECC_WorldStatic))
+		{
+			AActor* shotActor = shootHit.GetActor();
+			AEnemy* shotEnemy = Cast<AEnemy>(shotActor);
+			if (shotEnemy)
+			{
+				shotEnemy->healthBar->health -= 0.01f; //TODO: Change to weapon damage 
+				return;
+			}
+		}
+
+		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
 			GetActorLocation() + camera->GetForwardVector() * shootDistance, ECC_Destructible))
 		{
 			if (!shootHit.GetActor())
@@ -611,13 +624,14 @@ void AMecha::LeftMousePressed(float val)
 				return; //Works as a fallthrough for the rebuild mechanic.
 			}
 
-			if (shootHit.GetActor()->Tags.Contains(Tags::Destroy))
+			//Old tag method
+			/*if (shootHit.GetActor()->Tags.Contains(Tags::Destroy))
 			{
 				UDestructibleComponent* dc = Cast<UDestructibleComponent>(shootHit.GetComponent());
 
 				dc->ApplyDamage(destrutibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
 				return;
-			}
+			}*/
 
 			UDestructibleComponent* dc = Cast<UDestructibleComponent>(shootHit.GetComponent());
 			ADestructibleActor* shotActor = nullptr;
@@ -635,11 +649,6 @@ void AMecha::LeftMousePressed(float val)
 				{
 					instancedRebuildManager->rebuildActors.Add(shotActor);
 				}
-			}
-
-			if (shotActor)
-			{
-
 			}
 		}
 	}
