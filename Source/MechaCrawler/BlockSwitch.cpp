@@ -1,7 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "BlockSwitch.h"
+#include "GameFramework/Pawn.h"
 #include "Pushable.h"
+#include "Activate.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/MeshComponent.h"
 
@@ -19,6 +21,8 @@ void ABlockSwitch::BeginPlay()
 	check(mesh);
 
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APushable::StaticClass(), pushableActors);
+
+	player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 }
 
 void ABlockSwitch::Tick(float DeltaTime)
@@ -34,5 +38,20 @@ void ABlockSwitch::Tick(float DeltaTime)
 		}
 	}
 
+	if (player->GetActorLocation().Equals(this->GetActorLocation()))
+	{
+		mesh->SetMaterial(0, activatedMat);
+		return;
+	}
+	
 	mesh->SetMaterial(0, deactivatedMat);
+}
+
+void ABlockSwitch::ActivateConnection()
+{
+	if (connectedActor)
+	{
+		IActivate* connect = Cast<IActivate>(connectedActor);
+		connect->Use();
+	}
 }

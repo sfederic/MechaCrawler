@@ -2,6 +2,10 @@
 
 #include "Activate.generated.h"
 
+/*
+* For interactable and connected actors
+*/
+
 UINTERFACE(BlueprintType)
 class MECHACRAWLER_API UActivate : public UInterface
 {

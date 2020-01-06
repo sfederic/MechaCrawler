@@ -765,8 +765,6 @@ void AMecha::RebuildAllDestroyedActors()
 
 		for (int i = 0; i < instancedRebuildManager->rebuildActors.Num(); i++)
 		{
-			world->SpawnActor<TSubclassOf<ADestructibleActor>>();
-
 			ADestructibleActor* da = world->SpawnActor<ADestructibleActor>(ADestructibleActor::StaticClass(),
 				instancedRebuildManager->rebuildActors[i]->GetActorTransform());
 			da->FindComponentByClass<UDestructibleComponent>()->SetDestructibleMesh(instancedRebuildManager->rebuildActors[i]->GetDestructibleComponent()->GetDestructibleMesh());

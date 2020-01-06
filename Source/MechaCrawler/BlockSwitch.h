@@ -23,6 +23,7 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
+	void ActivateConnection();
 
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* activatedMat;	
@@ -31,5 +32,11 @@ public:
 	UMaterialInterface* deactivatedMat;
 
 	class UMeshComponent* mesh;
-	TArray<AActor*> pushableActors; //TODO: Should be enough to not warrant a manager class. "Should"
+	class APawn* player;
+	TArray<AActor*> pushableActors;
+
+	UPROPERTY(EditAnywhere)
+	AActor* connectedActor; //Acts as the actor the swithc is connected to (doors, switches, etc.)
+
+	bool activated = false;
 };
