@@ -626,15 +626,20 @@ void AMecha::LeftMousePressed(float val)
 				shotActor = Cast<ADestructibleActor>(dc->GetOwner());
 			}
 
-			if (dc && shotActor)
+			if (dc)
 			{
+				dc->ApplyDamage(destrutibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
+				dc->GetOwner()->Tags.Add(Tags::Destroy);
+
 				if (instancedRebuildManager)
 				{
 					instancedRebuildManager->rebuildActors.Add(shotActor);
 				}
+			}
 
-				dc->ApplyDamage(destrutibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
-				dc->GetOwner()->Tags.Add(Tags::Destroy);
+			if (shotActor)
+			{
+
 			}
 		}
 	}
@@ -760,6 +765,8 @@ void AMecha::RebuildAllDestroyedActors()
 
 		for (int i = 0; i < instancedRebuildManager->rebuildActors.Num(); i++)
 		{
+			world->SpawnActor<TSubclassOf<ADestructibleActor>>();
+
 			ADestructibleActor* da = world->SpawnActor<ADestructibleActor>(ADestructibleActor::StaticClass(),
 				instancedRebuildManager->rebuildActors[i]->GetActorTransform());
 			da->FindComponentByClass<UDestructibleComponent>()->SetDestructibleMesh(instancedRebuildManager->rebuildActors[i]->GetDestructibleComponent()->GetDestructibleMesh());

@@ -4,10 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "DestructibleActor.h"
 #include "GridActor.generated.h"
 
+/*
+* AGridActor is only for moveable actors that need a next location
+*/
+
 UCLASS()
-class MECHACRAWLER_API AGridActor : public AActor
+class MECHACRAWLER_API AGridActor : public ADestructibleActor
 {
 	GENERATED_BODY()
 	

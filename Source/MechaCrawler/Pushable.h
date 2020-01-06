@@ -28,7 +28,7 @@ public:
 	FCollisionQueryParams moveParams;
 
 	UPROPERTY(EditAnywhere)
-		float moveSpeed;
+	float moveSpeed;
 
 	float moveDistance;
 
