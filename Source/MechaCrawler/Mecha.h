@@ -47,6 +47,7 @@ public:
 	void SetCameraView();
 	void RebuildAllDestroyedActors();
 	void UseObject();
+	void ChangeWeapon();
 
 	FVector nextLoc;
 	FVector currentLoc;
@@ -58,6 +59,10 @@ public:
 
 	class UCameraComponent* camera;
 	class APlayerController* controller;
+
+	UPROPERTY()
+	TArray<UActorComponent*> weapons;
+	int currentWeaponIndex = 0;
 
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* destroyableWireframeMaterial;	
@@ -130,7 +135,9 @@ public:
 	float useDistance = 175.f;
 
 	FHitResult shootHit;
-	float shootDistance = 1000.f;
+
+	UPROPERTY(VisibleAnywhere)
+	float attackDistance;
 
 	FHitResult scanHit;
 	float scanDistance = 10000.0f;

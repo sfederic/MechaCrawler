@@ -15,13 +15,14 @@
 #include "TimerManager.h" //What was this things problem before?
 #include "IceComponent.h"
 #include "Enemy.h"
+#include "Weapon.h"
 
 AMecha::AMecha()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true; //Seems to fix fall through on play start when Mech starts on object
 	PrimaryActorTick.TickGroup = TG_PrePhysics; //Seems to fix fall through floor effect. Other GridActors needs the same
-
+	
 	moveParams.AddIgnoredActor(this);
 }
 
@@ -30,6 +31,20 @@ void AMecha::BeginPlay()
 	Super::BeginPlay();
 
 	initialMoveSpeed = moveSpeed;
+
+	//SETUP WEAPONS
+	weapons = GetComponentsByClass(UChildActorComponent::StaticClass());
+	for (int i = 0; i < weapons.Num(); i++)
+	{
+		UChildActorComponent* weapon = Cast<UChildActorComponent>(weapons[i]);
+		if (weapon)
+		{
+			weapon->SetVisibility(true);
+			AWeapon* weaponStats = Cast<AWeapon>(weapon->GetChildActor());
+			attackDistance = weaponStats->range;
+			break;
+		}
+	}
 
 	//INIT WIDGETS
 	useWidget = CreateWidget<UActivateWidget>(GetWorld(), useWidgetClass);
@@ -234,6 +249,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAction("Note", EInputEvent::IE_Pressed, this, &AMecha::AddNote);
 	InputComponent->BindAction("Backspace", EInputEvent::IE_Pressed, this, &AMecha::DeleteAllNotes);
 	InputComponent->BindAction("View", EInputEvent::IE_Pressed, this, &AMecha::SetCameraView);
+	InputComponent->BindAction("SwitchWeapon", EInputEvent::IE_Pressed, this, &AMecha::ChangeWeapon);
 }
 
 void AMecha::MoveForward(float val)
@@ -632,7 +648,7 @@ void AMecha::LeftMousePressed(float val)
 	if (val)
 	{
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
-			GetActorLocation() + camera->GetForwardVector() * shootDistance, ECC_WorldStatic))
+			GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_WorldStatic))
 		{
 			AActor* shotActor = shootHit.GetActor();
 			AEnemy* shotEnemy = Cast<AEnemy>(shotActor);
@@ -644,7 +660,7 @@ void AMecha::LeftMousePressed(float val)
 		}
 
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
-			GetActorLocation() + camera->GetForwardVector() * shootDistance, ECC_Destructible))
+			GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_Destructible))
 		{
 			if (!shootHit.GetActor())
 			{
@@ -869,5 +885,29 @@ void AMecha::UseObject()
 				useWidget->useText = "RMB: Use";
 			}
 		}
+	}
+}
+
+void AMecha::ChangeWeapon()
+{
+	UChildActorComponent* weapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
+	if (weapon)
+	{
+		weapon->SetVisibility(false);
+	}
+
+	currentWeaponIndex++;
+
+	if (currentWeaponIndex >= weapons.Num())
+	{
+		currentWeaponIndex = 0;
+	}
+
+	weapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
+	if (weapon)
+	{
+		weapon->SetVisibility(true);
+		AWeapon* weaponStats = Cast<AWeapon>(weapon->GetChildActor());
+		attackDistance = weaponStats->range;
 	}
 }
