@@ -685,7 +685,8 @@ void AMecha::LeftMousePressed(float val)
 
 			if (dc)
 			{
-				dc->ApplyDamage(destrutibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
+				dc->ApplyDamage(destructibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);	
+
 				dc->GetOwner()->Tags.Add(Tags::Destroy);
 				dc->GetOwner()->SetLifeSpan(2.0f);
 

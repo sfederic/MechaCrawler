@@ -120,7 +120,7 @@ public:
 	float rotateSpeed;
 
 	UPROPERTY(EditAnywhere)
-	float destrutibleDamageAmount;
+	float destructibleDamageAmount;
 
 	UPROPERTY(EditAnywhere)
 	float destructibleDamageStrength;
