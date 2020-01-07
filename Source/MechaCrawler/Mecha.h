@@ -70,8 +70,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* destroyableBaseMaterial;
 
+	//PARTICLES
 	UParticleSystemComponent* wayPoint;
-	
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* explosionParticle;
+
 	UPROPERTY(EditAnywhere)
 	ARebuildManager* instancedRebuildManager;
 

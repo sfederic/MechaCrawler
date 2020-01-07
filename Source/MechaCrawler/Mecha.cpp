@@ -685,10 +685,12 @@ void AMecha::LeftMousePressed(float val)
 
 			if (dc)
 			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), explosionParticle, shootHit.ImpactPoint);
+
 				dc->ApplyDamage(destructibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);	
 
 				dc->GetOwner()->Tags.Add(Tags::Destroy);
-				dc->GetOwner()->SetLifeSpan(2.0f);
+				dc->GetOwner()->SetLifeSpan(5.0f);
 
 				if (instancedRebuildManager)
 				{
