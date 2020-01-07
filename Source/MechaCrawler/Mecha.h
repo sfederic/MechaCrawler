@@ -59,6 +59,12 @@ public:
 	class UCameraComponent* camera;
 	class APlayerController* controller;
 
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface* destroyableWireframeMaterial;	
+	
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface* destroyableBaseMaterial;
+
 	UParticleSystemComponent* wayPoint;
 	
 	UPROPERTY(EditAnywhere)

@@ -125,6 +125,11 @@ void AMecha::Tick(float DeltaTime)
 		moveSpeed = initialMoveSpeed;
 	}
 
+	if (!GetWorld()->LineTraceSingleByChannel(moveHit, GetActorLocation(), GetActorLocation() - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
+	{
+		falling = true;
+	}
+
 	//GRAVITY
 	if (currentLoc == nextLoc && currentRot == nextRot)
 	{
@@ -233,7 +238,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AMecha::MoveForward(float val)
 {
-	if (val != 0.f && falling == false && canMove)
+	if ((val != 0.f) && (falling == false) && (canMove))
 	{
 		FVector loc = GetActorLocation();
 
@@ -306,7 +311,7 @@ void AMecha::MoveForward(float val)
 
 void AMecha::MoveBack(float val)
 {
-	if (val != 0.f && falling == false && canMove)
+	if ((val != 0.f) && (falling == false) && (canMove))
 	{
 		FVector loc = GetActorLocation();
 
@@ -377,7 +382,7 @@ void AMecha::MoveBack(float val)
 
 void AMecha::MoveLeft(float val)
 {
-	if (val != 0.f && falling == false && canMove)
+	if ((val != 0.f) && (falling == false) && (canMove))
 	{
 		FVector loc = GetActorLocation();
 
@@ -448,7 +453,7 @@ void AMecha::MoveLeft(float val)
 
 void AMecha::MoveRight(float val)
 {
-	if (val != 0.f && falling == false && canMove)
+	if ((val != 0.f) && (falling == false) && (canMove))
 	{
 		FVector loc = GetActorLocation();
 
@@ -538,6 +543,28 @@ void AMecha::LookPitch(float val)
 
 void AMecha::SetScan()
 {
+	//TODO: Find a better representation for actors that can be destroyed with scanner
+	if (!scanning)
+	{
+		TArray<AActor*> destroyableScanActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADestructibleActor::StaticClass(), destroyableScanActors);
+
+		for (int i = 0; i < destroyableScanActors.Num(); i++)
+		{
+			destroyableScanActors[i]->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, destroyableWireframeMaterial);
+		}
+	} 
+	else if (scanning)
+	{
+		TArray<AActor*> destroyableScanActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADestructibleActor::StaticClass(), destroyableScanActors);
+
+		for (int i = 0; i < destroyableScanActors.Num(); i++)
+		{
+			destroyableScanActors[i]->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, destroyableBaseMaterial);
+		}
+	}
+
 	if (scanWidget && useWidget && (inventoryWidget->IsInViewport() == false))
 	{
 		if (scanning == true)
@@ -644,6 +671,7 @@ void AMecha::LeftMousePressed(float val)
 			{
 				dc->ApplyDamage(destrutibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
 				dc->GetOwner()->Tags.Add(Tags::Destroy);
+				dc->GetOwner()->SetLifeSpan(2.0f);
 
 				if (instancedRebuildManager)
 				{
@@ -783,6 +811,10 @@ void AMecha::RebuildAllDestroyedActors()
 		}
 
 		instancedRebuildManager->rebuildActors.Empty();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Rebuild Manager not set in level"));
 	}
 }
 
