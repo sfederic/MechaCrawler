@@ -16,6 +16,7 @@
 #include "IceComponent.h"
 #include "Enemy.h"
 #include "Weapon.h"
+#include "DialogueComponent.h"
 
 AMecha::AMecha()
 {
@@ -29,6 +30,8 @@ AMecha::AMecha()
 void AMecha::BeginPlay()
 {
 	Super::BeginPlay();
+
+
 
 	initialMoveSpeed = moveSpeed;
 
@@ -47,6 +50,12 @@ void AMecha::BeginPlay()
 	}
 
 	//INIT WIDGETS
+	textBoxWidget = CreateWidget<UTextBoxWidget>(GetWorld(), textBoxWidgetClass);
+	if(textBoxWidget == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Dialogue Widget not set in Mecha.cpp"));
+	}
+
 	useWidget = CreateWidget<UActivateWidget>(GetWorld(), useWidgetClass);
 	if (useWidget)
 	{
@@ -250,6 +259,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAction("Backspace", EInputEvent::IE_Pressed, this, &AMecha::DeleteAllNotes);
 	InputComponent->BindAction("View", EInputEvent::IE_Pressed, this, &AMecha::SetCameraView);
 	InputComponent->BindAction("SwitchWeapon", EInputEvent::IE_Pressed, this, &AMecha::ChangeWeapon);
+	InputComponent->BindAction("ProgressText", EInputEvent::IE_Pressed, this, &AMecha::ProgressText);
 }
 
 void AMecha::MoveForward(float val)
@@ -629,6 +639,23 @@ void AMecha::RightMousePressed()
 					return;
 				}
 
+				UDialogueComponent* dialogueComponent = useActor->FindComponentByClass<UDialogueComponent>();
+				if (dialogueComponent && textBoxWidget)
+				{
+					FString context;
+					dialogueComponent->mainTextBoxTable->GetAllRows<FTextBox>(context, textBoxRows);
+					textBoxIndex = 0;
+					if (textBoxRows.Num() > 0)
+					{
+						textBoxWidget->name = textBoxRows[textBoxIndex]->name;
+						textBoxWidget->text = textBoxRows[textBoxIndex]->text;
+						textBoxWidget->image = textBoxRows[textBoxIndex]->image;
+						textBoxWidget->AddToViewport();
+					}
+
+					return;
+				}
+
 				if (useActor->Tags.Contains(Tags::Destroy) == false) //Keep this for interactiable actors that can be destroyed and respawned
 				{
 					IActivate* useable = Cast<IActivate>(useActor);
@@ -682,7 +709,7 @@ void AMecha::LeftMousePressed(float val)
 			{
 				shotActor = Cast<ADestructibleActor>(dc->GetOwner());
 			}
-
+			
 			if (dc)
 			{
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), explosionParticle, shootHit.ImpactPoint);
@@ -912,5 +939,26 @@ void AMecha::ChangeWeapon()
 		weapon->SetVisibility(true);
 		AWeapon* weaponStats = Cast<AWeapon>(weapon->GetChildActor());
 		attackDistance = weaponStats->range;
+	}
+}
+
+void AMecha::ProgressText()
+{
+	if (textBoxWidget->IsInViewport())
+	{
+		if (textBoxIndex < (textBoxRows.Num() - 1))
+		{
+			textBoxIndex++;
+			
+			textBoxWidget->name = textBoxRows[textBoxIndex]->name;
+			textBoxWidget->text = textBoxRows[textBoxIndex]->text;
+			textBoxWidget->image = textBoxRows[textBoxIndex]->image;
+		}
+		else
+		{
+			textBoxIndex = 0;
+			textBoxRows.Empty();
+			textBoxWidget->RemoveFromViewport();
+		}
 	}
 }

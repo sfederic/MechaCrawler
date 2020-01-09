@@ -8,6 +8,8 @@
 #include "ActivateWidget.h"
 #include "ScanWidget.h"
 #include "InventoryWidget.h"
+#include "TextBoxWidget.h"
+#include "TextBox.h"
 #include "NoteNode.h"
 #include "RebuildManager.h"
 #include "Mecha.generated.h"
@@ -48,6 +50,7 @@ public:
 	void RebuildAllDestroyedActors();
 	void UseObject();
 	void ChangeWeapon();
+	void ProgressText();
 
 	FVector nextLoc;
 	FVector currentLoc;
@@ -71,11 +74,11 @@ public:
 	UMaterialInterface* destroyableBaseMaterial;
 
 	//PARTICLES
-	UParticleSystemComponent* wayPoint;
-
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* explosionParticle;
+	UParticleSystemComponent* wayPoint;
 
+	//REBUILDS
 	UPROPERTY(EditAnywhere)
 	ARebuildManager* instancedRebuildManager;
 
@@ -84,6 +87,9 @@ public:
 
 	//TODO: move into playerhud.h/cpp
 	//WIDGET CLASSES
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> textBoxWidgetClass;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> useWidgetClass;
 
@@ -95,6 +101,11 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ANoteNode> noteWidgetClass;
+
+	UPROPERTY()
+	UTextBoxWidget* textBoxWidget;
+	int textBoxIndex = 0;
+	TArray<FTextBox*> textBoxRows;
 
 	UPROPERTY()
 	UScanWidget* scanWidget;
