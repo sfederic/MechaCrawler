@@ -640,7 +640,7 @@ void AMecha::RightMousePressed()
 				}
 
 				UDialogueComponent* dialogueComponent = useActor->FindComponentByClass<UDialogueComponent>();
-				if (dialogueComponent && textBoxWidget)
+				if (dialogueComponent && textBoxWidget->IsInViewport() == false)
 				{
 					FString context;
 					dialogueComponent->mainTextBoxTable->GetAllRows<FTextBox>(context, textBoxRows);
@@ -712,7 +712,21 @@ void AMecha::LeftMousePressed(float val)
 			
 			if (dc)
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), explosionParticle, shootHit.ImpactPoint);
+				UChildActorComponent* weapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
+				if (weapon)
+				{
+					AWeapon* weaponData = Cast<AWeapon>(weapon->GetChildActor());
+					if (weaponData)
+					{
+						if (weaponData->explosive)
+						{
+							if (dc->GetOwner()->Tags.Contains(Tags::Destroy) == false)
+							{
+								UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), explosionParticle, shootHit.ImpactPoint);
+							}
+						}
+					}
+				}
 
 				dc->ApplyDamage(destructibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);	
 

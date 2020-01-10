@@ -25,4 +25,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float range;
+
+	UPROPERTY(EditAnywhere)
+	bool explosive;
 };
