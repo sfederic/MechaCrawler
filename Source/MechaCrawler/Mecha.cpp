@@ -18,6 +18,7 @@
 #include "Weapon.h"
 #include "DialogueComponent.h"
 #include "ProceduralMeshComponent/Public/KismetProceduralMeshLibrary.h"
+#include "WeaponData.h"
 
 AMecha::AMecha()
 {
@@ -44,8 +45,8 @@ void AMecha::BeginPlay()
 		if (weapon)
 		{
 			weapon->SetVisibility(true);
-			AWeapon* weaponStats = Cast<AWeapon>(weapon->GetChildActor());
-			attackDistance = weaponStats->range;
+			UWeaponData* weaponData = weapon->GetChildActor()->FindComponentByClass<UWeaponData>);
+			attackDistance = weaponData->range;
 			break;
 		}
 	}
@@ -736,7 +737,7 @@ void AMecha::LeftMousePressed(float val)
 				UChildActorComponent* weapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
 				if (weapon)
 				{
-					AWeapon* weaponData = Cast<AWeapon>(weapon->GetChildActor());
+					UWeaponData* weaponData = weapon->GetChildActor()->FindComponentByClass<UWeaponData>();
 					if (weaponData)
 					{
 						if (weaponData->explosive)
@@ -972,8 +973,8 @@ void AMecha::ChangeWeapon()
 	if (weapon)
 	{
 		weapon->SetVisibility(true);
-		AWeapon* weaponStats = Cast<AWeapon>(weapon->GetChildActor());
-		attackDistance = weaponStats->range;
+		UWeaponData* weaponData = weapon->GetChildActor()->FindComponentByClass<UWeaponData>();
+		attackDistance = weaponData->range;
 	}
 }
 
