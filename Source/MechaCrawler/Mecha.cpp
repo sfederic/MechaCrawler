@@ -17,6 +17,7 @@
 #include "Enemy.h"
 #include "Weapon.h"
 #include "DialogueComponent.h"
+#include "ProceduralMeshComponent/Public/KismetProceduralMeshLibrary.h"
 
 AMecha::AMecha()
 {
@@ -675,13 +676,31 @@ void AMecha::LeftMousePressed(float val)
 	if (val)
 	{
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
-			GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_WorldStatic))
+			GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_MAX)) 
 		{
+			UE_LOG(LogTemp, Warning, TEXT("%s\n"), *shootHit.GetActor()->GetName());
+
 			AActor* shotActor = shootHit.GetActor();
 			AEnemy* shotEnemy = Cast<AEnemy>(shotActor);
 			if (shotEnemy)
 			{
 				shotEnemy->healthBar->health -= 0.01f; //TODO: Change to weapon damage 
+				return;
+			}
+
+			UProceduralMeshComponent* cutMesh = shootHit.GetActor()->FindComponentByClass<UProceduralMeshComponent>();
+			if (cutMesh)
+			{
+				cutMesh->GetOwner()->Tags.Add(Tags::Destroy);
+				cutMesh->SetSimulatePhysics(true);
+
+				UProceduralMeshComponent* newHalfCutMesh;
+				UKismetProceduralMeshLibrary::SliceProceduralMesh(cutMesh, shootHit.ImpactPoint, shootHit.ImpactPoint,
+					true, newHalfCutMesh, EProcMeshSliceCapOption::CreateNewSectionForCap, destroyableBaseMaterial); //TODO: Change material
+				newHalfCutMesh->SetSimulatePhysics(true);
+				newHalfCutMesh->AddImpulse(FVector(10000.f));
+				newHalfCutMesh->GetOwner()->Tags.Add(Tags::Destroy);
+
 				return;
 			}
 		}

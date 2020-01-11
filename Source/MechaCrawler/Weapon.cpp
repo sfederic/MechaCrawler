@@ -2,6 +2,7 @@
 
 #include "Weapon.h"
 
+
 // Sets default values
 AWeapon::AWeapon()
 {
@@ -12,7 +13,7 @@ AWeapon::AWeapon()
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 void AWeapon::Tick(float DeltaTime)
