@@ -63,6 +63,9 @@ public:
 	class UCameraComponent* camera;
 	class APlayerController* controller;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UCameraShake> cameraShake;
+
 	UPROPERTY()
 	TArray<UActorComponent*> weapons;
 	int currentWeaponIndex = 0;

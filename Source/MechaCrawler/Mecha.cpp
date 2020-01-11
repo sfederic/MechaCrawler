@@ -675,6 +675,8 @@ void AMecha::LeftMousePressed(float val)
 {
 	if (val)
 	{
+		UGameplayStatics::PlayWorldCameraShake(GetWorld(), cameraShake, FVector(0.f), 500.f, 1.f);
+
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
 			GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_MAX)) 
 		{
