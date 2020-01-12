@@ -45,8 +45,12 @@ void AMecha::BeginPlay()
 		if (weapon)
 		{
 			weapon->SetVisibility(true);
-			UWeaponData* weaponData = weapon->GetChildActor()->FindComponentByClass<UWeaponData>);
-			attackDistance = weaponData->range;
+			UWeaponData* weaponData = weapon->GetChildActor()->FindComponentByClass<UWeaponData>();
+			if (weaponData)
+			{
+				attackDistance = weaponData->range;
+			}
+
 			break;
 		}
 	}
@@ -262,6 +266,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAction("View", EInputEvent::IE_Pressed, this, &AMecha::SetCameraView);
 	InputComponent->BindAction("SwitchWeapon", EInputEvent::IE_Pressed, this, &AMecha::ChangeWeapon);
 	InputComponent->BindAction("ProgressText", EInputEvent::IE_Pressed, this, &AMecha::ProgressText);
+	InputComponent->BindAction("DashForward", EInputEvent::IE_Pressed, this, &AMecha::DashForward);
 }
 
 void AMecha::MoveForward(float val)
@@ -679,7 +684,7 @@ void AMecha::LeftMousePressed(float val)
 		UGameplayStatics::PlayWorldCameraShake(GetWorld(), cameraShake, FVector(0.f), 500.f, 1.f);
 
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
-			GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_MAX)) 
+			GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_WorldStatic)) 
 		{
 			UE_LOG(LogTemp, Warning, TEXT("%s\n"), *shootHit.GetActor()->GetName());
 
@@ -996,5 +1001,20 @@ void AMecha::ProgressText()
 			textBoxRows.Empty();
 			textBoxWidget->RemoveFromViewport();
 		}
+	}
+}
+
+void AMecha::DashForward() //TODO: Figure out if side dashes are needed.
+{
+	FHitResult dashHit;
+	const float dashDistance = 1000.f;
+	if (GetWorld()->LineTraceSingleByChannel(dashHit, GetActorLocation(), GetActorLocation() + forwardAxis * dashDistance, ECC_WorldStatic, moveParams))
+	{
+		nextLoc = dashHit.GetActor()->GetActorLocation() - (forwardAxis * 100.f);
+		nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+		nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+		nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+
+		moveSpeed = dashSpeed;
 	}
 }

@@ -51,6 +51,7 @@ public:
 	void UseObject();
 	void ChangeWeapon();
 	void ProgressText();
+	void DashForward();
 
 	FVector nextLoc;
 	FVector currentLoc;
@@ -168,6 +169,9 @@ public:
 	float maxFallDistance = 10000.f;
 	float maxFOV = 110.f;
 	float initialZoomFOV = 80.f;
+	
+	UPROPERTY(EditAnywhere)
+	float dashSpeed;
 
 	FVector rootAxes[6];
 
