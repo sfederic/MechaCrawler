@@ -3,23 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
-#include "RebuildActor.generated.h"
+#include "GridActor.h"
+#include "AirEnemy.generated.h"
 
 UCLASS()
-class MECHACRAWLER_API ARebuildActor : public AActor
+class MECHACRAWLER_API AAirEnemy : public AGridActor
 {
 	GENERATED_BODY()
-	
-public:	
-	ARebuildActor();
+
+public:
+	AAirEnemy();
 
 protected:
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	virtual void Tick(float DeltaTime) override;
-
-	float rebuildTimer = 0.f;
-	bool isRebuilding = false;
 };

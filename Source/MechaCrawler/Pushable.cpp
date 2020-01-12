@@ -15,6 +15,7 @@ void APushable::BeginPlay()
 {
 	Super::BeginPlay();
 
+	originalLoc = GetActorLocation();
 	nextLoc = GetActorLocation();
 
 	if (moveSpeed <= 0.f)
@@ -37,10 +38,23 @@ void APushable::Tick(float DeltaTime)
 			nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 			nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
 			nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+
+			falling = true;
+		}
+		else
+		{
+			falling = false;
 		}
 	}
 
-	SetActorLocation(FMath::VInterpConstantTo(GetActorLocation(), nextLoc, DeltaTime, moveSpeed));
+	if (falling)
+	{
+		SetActorLocation(FMath::VInterpConstantTo(GetActorLocation(), nextLoc, DeltaTime, fallSpeed));
+	}
+	else if(!falling)
+	{
+		SetActorLocation(FMath::VInterpConstantTo(GetActorLocation(), nextLoc, DeltaTime, moveSpeed));
+	}
 }
 
 void APushable::Use()

@@ -7,17 +7,6 @@
 #include "Activate.h"
 #include "GravitySwitch.generated.h"
 
-UENUM()
-enum class EDirections : uint8
-{
-	UP UMETA(DisplayName="Up"),
-	DOWN UMETA(DisplayName = "Down"),
-	RIGHT UMETA(DisplayName = "Right"),
-	LEFT UMETA(DisplayName = "Left"),
-	FORWARD UMETA(DisplayName = "Foward"),
-	BACK UMETA(DisplayName = "Back")
-};
-
 UCLASS()
 class MECHACRAWLER_API AGravitySwitch : public AGridActor, public IActivate
 {

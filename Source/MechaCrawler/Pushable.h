@@ -27,10 +27,17 @@ public:
 	FHitResult moveHit;
 	FCollisionQueryParams moveParams;
 
+	FVector originalLoc; //For respawning pushables. 13 secret Herbs and Transforms
+
 	UPROPERTY(EditAnywhere)
 	float moveSpeed;
 
+	UPROPERTY(EditAnywhere)
+	float fallSpeed;
+
 	float moveDistance;
+
+	bool falling;
 
 private:
 	float maxFallDistance = 10000.f;

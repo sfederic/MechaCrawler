@@ -4,19 +4,13 @@
 #include "Engine/World.h"
 #include "Misc/App.h"
 
-enum class EDirections : uint8
-{
-	FORWARD = 0,
-	BACK = 1,
-	RIGHT = 2,
-	LEFT = 3
-};
-
 AWallEnemy::AWallEnemy()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
 	moveParams.AddIgnoredActor(this);
+
+	moveTimer = FMath::RandRange(0.f, 2.f);
 }
 
 void AWallEnemy::BeginPlay()
@@ -26,10 +20,10 @@ void AWallEnemy::BeginPlay()
 	currentLoc = GetActorLocation();
 	nextLoc = GetActorLocation();
 
-	moveAxes[(int)EDirections::FORWARD] = GetActorForwardVector();
-	moveAxes[(int)EDirections::BACK] = -GetActorForwardVector();
-	moveAxes[(int)EDirections::RIGHT] = GetActorRightVector();
-	moveAxes[(int)EDirections::LEFT] = -GetActorRightVector();
+	moveAxes[0] = GetActorForwardVector();
+	moveAxes[1] = -GetActorForwardVector();
+	moveAxes[2] = GetActorRightVector();
+	moveAxes[3] = -GetActorRightVector();
 }
 
 void AWallEnemy::Tick(float DeltaTime)
@@ -38,12 +32,12 @@ void AWallEnemy::Tick(float DeltaTime)
 
 	currentLoc = GetActorLocation();
 
-	moveAxes[(int)EDirections::FORWARD] = GetActorForwardVector();
-	moveAxes[(int)EDirections::BACK] = -GetActorForwardVector();
-	moveAxes[(int)EDirections::RIGHT] = GetActorRightVector();
-	moveAxes[(int)EDirections::LEFT] = -GetActorRightVector();
+	moveAxes[0] = GetActorForwardVector();
+	moveAxes[1] = -GetActorForwardVector();
+	moveAxes[2] = GetActorRightVector();
+	moveAxes[3] = -GetActorRightVector();
 
-	if (moveTimer > 1.0f && GetActorLocation().Equals(nextLoc))
+	if (moveTimer > 2.0f && GetActorLocation().Equals(nextLoc))
 	{
 		//Check below enemy
 		FHitResult baseHit;

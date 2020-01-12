@@ -19,7 +19,6 @@
 #include "DialogueComponent.h"
 #include "ProceduralMeshComponent/Public/KismetProceduralMeshLibrary.h"
 #include "WeaponData.h"
-#include "RebuildActor.h"
 
 AMecha::AMecha()
 {
@@ -33,8 +32,6 @@ AMecha::AMecha()
 void AMecha::BeginPlay()
 {
 	Super::BeginPlay();
-
-
 
 	initialMoveSpeed = moveSpeed;
 
@@ -764,7 +761,10 @@ void AMecha::LeftMousePressed(float val)
 
 				if (instancedRebuildManager && dc->GetOwner()->Tags.Contains(Tags::Destroy) == false)
 				{
-					instancedRebuildManager->rebuildActors.Add(rebuildActor);
+					if (rebuildActor && rebuildActor->IsA<ADestructibleActor>())
+					{
+						instancedRebuildManager->rebuildActors.Add(rebuildActor);
+					}
 					instancedRebuildManager->rebuildTimers.Add(0.f);
 				}
 
@@ -901,6 +901,8 @@ void AMecha::RebuildAllDestroyedActors()
 
 			instancedRebuildManager->rebuildActors[i]->Destroy();
 		}
+
+		instancedRebuildManager->RebuildPushables();
 
 		instancedRebuildManager->rebuildActors.Empty();
 		instancedRebuildManager->rebuildTimers.Empty();

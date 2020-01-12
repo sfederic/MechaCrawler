@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "RebuildActor.h"
 #include "DestructibleActor.h"
 #include "GridActor.h"
 #include "DestructibleComponent.h"
 #include "IceBlock.h"
+#include "Pushable.h"
 #include "RebuildManager.generated.h"
 
 UCLASS()
@@ -25,9 +25,12 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	void RebuildTimers();
+	void RebuildPushables();
 
 	UPROPERTY(EditAnywhere)
 	bool debugActors;
+
+	class AMecha* player;
 
 	UPROPERTY()
 	TArray<ADestructibleActor*> rebuildActors;
@@ -37,4 +40,7 @@ public:
 
 	UPROPERTY()
 	TArray<AActor*> movingGridActors;
+
+	UPROPERTY()
+	TArray<AActor*> pushableActors;
 };
