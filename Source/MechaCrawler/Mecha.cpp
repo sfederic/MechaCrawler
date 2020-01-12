@@ -119,7 +119,7 @@ void AMecha::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	RebuildTimers();
+	instancedRebuildManager->RebuildTimers();
 
 	//MOVEMENT AXIS
 	rootAxes[0] = RootComponent->GetForwardVector();
@@ -1022,23 +1022,5 @@ void AMecha::DashForward() //TODO: Figure out if side dashes are needed.
 		nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 		moveSpeed = dashSpeed;
-	}
-}
-
-void AMecha::RebuildTimers()
-{
-	//REBUILD ACTOR TIMERS
-	for (int i = 0; i < instancedRebuildManager->rebuildActors.Num(); i++)
-	{
-		if (instancedRebuildManager->rebuildTimers[i] > 5.0f)
-		{
-			instancedRebuildManager->rebuildActors[i]->SetActorHiddenInGame(true);
-			instancedRebuildManager->rebuildActors[i]->SetActorEnableCollision(false);
-			instancedRebuildManager->rebuildActors[i]->SetActorTickEnabled(false);
-		}
-		else
-		{
-			instancedRebuildManager->rebuildTimers[i] += FApp::GetDeltaTime();
-		}
 	}
 }

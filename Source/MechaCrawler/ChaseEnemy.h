@@ -4,29 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "DestructibleActor.h"
-#include "GridActor.generated.h"
-
-/*
-* AGridActor is only for moveable actors that need a next location
-*/
+#include "ChaseEnemy.generated.h"
 
 UCLASS()
-class MECHACRAWLER_API AGridActor : public AActor
+class MECHACRAWLER_API AChaseEnemy : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
-	AGridActor();
+	AChaseEnemy();
 
 protected:
 	virtual void BeginPlay() override;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-	
-	UPROPERTY(VisibleAnywhere)
-	FVector currentLoc;
-	UPROPERTY(VisibleAnywhere)
-	FVector nextLoc;
+
 };

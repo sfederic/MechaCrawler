@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "RebuildActor.h"
 #include "DestructibleActor.h"
+#include "GridActor.h"
 #include "DestructibleComponent.h"
 #include "IceBlock.h"
 #include "RebuildManager.generated.h"
@@ -23,6 +24,7 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
+	void RebuildTimers();
 
 	UPROPERTY(EditAnywhere)
 	bool debugActors;
@@ -32,4 +34,7 @@ public:
 
 	UPROPERTY()
 	TArray<float> rebuildTimers;
+
+	UPROPERTY()
+	TArray<AActor*> movingGridActors;
 };

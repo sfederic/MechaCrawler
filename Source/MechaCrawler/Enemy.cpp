@@ -45,15 +45,18 @@ void AEnemy::Tick(float DeltaTime)
 	}
 
 	//TODO: Should this be moved to Mecha.cpp?
-	if ((healthBar->health <= 0.f) && (kill == false))
+	if (healthBar)
 	{
-		UDestructibleComponent* dc = FindComponentByClass<UDestructibleComponent>();
-		if (dc)
+		if ((healthBar->health <= 0.f) && (kill == false))
 		{
-			dc->ApplyDamage(1000.f, dc->GetComponentLocation(), dc->GetOwner()->GetActorForwardVector(), 10000.f);
-			//dc->GetOwner()->SetLifeSpan(1.f); //Some reason didn't work
-			healthBarComponent->SetHiddenInGame(true);
-			kill = true;
+			UDestructibleComponent* dc = FindComponentByClass<UDestructibleComponent>();
+			if (dc)
+			{
+				dc->ApplyDamage(1000.f, dc->GetComponentLocation(), dc->GetOwner()->GetActorForwardVector(), 10000.f);
+				//dc->GetOwner()->SetLifeSpan(1.f); //Some reason didn't work
+				healthBarComponent->SetHiddenInGame(true);
+				kill = true;
+			}
 		}
 	}
 
