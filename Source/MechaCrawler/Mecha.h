@@ -52,6 +52,7 @@ public:
 	void ChangeWeapon();
 	void ProgressText();
 	void DashForward();
+	void RebuildTimers();
 
 	FVector nextLoc;
 	FVector currentLoc;

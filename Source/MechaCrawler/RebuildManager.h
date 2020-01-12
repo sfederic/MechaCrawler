@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "RebuildActor.h"
 #include "DestructibleActor.h"
 #include "DestructibleComponent.h"
 #include "IceBlock.h"
@@ -28,4 +29,7 @@ public:
 
 	UPROPERTY()
 	TArray<ADestructibleActor*> rebuildActors;
+
+	UPROPERTY()
+	TArray<float> rebuildTimers;
 };

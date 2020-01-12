@@ -19,6 +19,7 @@
 #include "DialogueComponent.h"
 #include "ProceduralMeshComponent/Public/KismetProceduralMeshLibrary.h"
 #include "WeaponData.h"
+#include "RebuildActor.h"
 
 AMecha::AMecha()
 {
@@ -117,6 +118,8 @@ void AMecha::BeginPlay()
 void AMecha::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	RebuildTimers();
 
 	//MOVEMENT AXIS
 	rootAxes[0] = RootComponent->GetForwardVector();
@@ -681,7 +684,8 @@ void AMecha::LeftMousePressed(float val)
 {
 	if (val)
 	{
-		UGameplayStatics::PlayWorldCameraShake(GetWorld(), cameraShake, FVector(0.f), 500.f, 1.f);
+		//TODO: put cam shake into weapon blueprint
+		//UGameplayStatics::PlayWorldCameraShake(GetWorld(), cameraShake, FVector(0.f), 500.f, 1.f); 
 
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
 			GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_WorldStatic)) 
@@ -696,6 +700,7 @@ void AMecha::LeftMousePressed(float val)
 				return;
 			}
 
+			//MESH SLICING
 			UProceduralMeshComponent* cutMesh = shootHit.GetActor()->FindComponentByClass<UProceduralMeshComponent>();
 			if (cutMesh)
 			{
@@ -731,10 +736,10 @@ void AMecha::LeftMousePressed(float val)
 			}*/
 
 			UDestructibleComponent* dc = Cast<UDestructibleComponent>(shootHit.GetComponent());
-			ADestructibleActor* shotActor = nullptr;
+			ADestructibleActor* rebuildActor = nullptr;
 			if (dc)
 			{
-				shotActor = Cast<ADestructibleActor>(dc->GetOwner());
+				rebuildActor = Cast<ADestructibleActor>(dc->GetOwner());
 			}
 			
 			if (dc)
@@ -757,13 +762,13 @@ void AMecha::LeftMousePressed(float val)
 
 				dc->ApplyDamage(destructibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);	
 
-				dc->GetOwner()->Tags.Add(Tags::Destroy);
-				dc->GetOwner()->SetLifeSpan(5.0f);
-
-				if (instancedRebuildManager)
+				if (instancedRebuildManager && dc->GetOwner()->Tags.Contains(Tags::Destroy) == false)
 				{
-					instancedRebuildManager->rebuildActors.Add(shotActor);
+					instancedRebuildManager->rebuildActors.Add(rebuildActor);
+					instancedRebuildManager->rebuildTimers.Add(0.f);
 				}
+
+				dc->GetOwner()->Tags.Add(Tags::Destroy);
 			}
 		}
 	}
@@ -891,13 +896,14 @@ void AMecha::RebuildAllDestroyedActors()
 		{
 			ADestructibleActor* da = world->SpawnActor<ADestructibleActor>(ADestructibleActor::StaticClass(),
 				instancedRebuildManager->rebuildActors[i]->GetActorTransform());
-			da->FindComponentByClass<UDestructibleComponent>()->SetDestructibleMesh(instancedRebuildManager->rebuildActors[i]->GetDestructibleComponent()->GetDestructibleMesh());
-			da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, instancedRebuildManager->rebuildActors[i]->GetDestructibleComponent()->GetMaterial(0));
+			da->FindComponentByClass<UDestructibleComponent>()->SetDestructibleMesh(instancedRebuildManager->rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->GetDestructibleMesh());
+			da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, instancedRebuildManager->rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->GetMaterial(0));
 
 			instancedRebuildManager->rebuildActors[i]->Destroy();
 		}
 
 		instancedRebuildManager->rebuildActors.Empty();
+		instancedRebuildManager->rebuildTimers.Empty();
 	}
 	else
 	{
@@ -1016,5 +1022,23 @@ void AMecha::DashForward() //TODO: Figure out if side dashes are needed.
 		nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 		moveSpeed = dashSpeed;
+	}
+}
+
+void AMecha::RebuildTimers()
+{
+	//REBUILD ACTOR TIMERS
+	for (int i = 0; i < instancedRebuildManager->rebuildActors.Num(); i++)
+	{
+		if (instancedRebuildManager->rebuildTimers[i] > 5.0f)
+		{
+			instancedRebuildManager->rebuildActors[i]->SetActorHiddenInGame(true);
+			instancedRebuildManager->rebuildActors[i]->SetActorEnableCollision(false);
+			instancedRebuildManager->rebuildActors[i]->SetActorTickEnabled(false);
+		}
+		else
+		{
+			instancedRebuildManager->rebuildTimers[i] += FApp::GetDeltaTime();
+		}
 	}
 }
