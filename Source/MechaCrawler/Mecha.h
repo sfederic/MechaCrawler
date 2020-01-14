@@ -38,7 +38,7 @@ public:
 	void LookPitch(float val);
 	void SetScan();
 	void RightMousePressed();
-	void LeftMousePressed(float val);
+	void LeftMousePressed();
 	void SetWayPoint();
 	void OpenInventory();
 	void Zoom();

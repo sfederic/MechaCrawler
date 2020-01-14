@@ -249,12 +249,12 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	//InputComponent->BindAxis("Up", this, &AMecha::MoveUp);
 	InputComponent->BindAxis("Mouse X", this, &AMecha::LookYaw);
 	InputComponent->BindAxis("Mouse Y", this, &AMecha::LookPitch);
-	InputComponent->BindAxis("LeftMouse", this, &AMecha::LeftMousePressed);
 	
 	//Inputs bound to mouse axis instead of Up/Down. Find out why didn't work.
 	InputComponent->BindAxis("MouseWheelUp", this, &AMecha::ZoomIn);
 	InputComponent->BindAxis("MouseWheelDown", this, &AMecha::ZoomOut);
 	
+	InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed);
 	InputComponent->BindAction("Scan", EInputEvent::IE_Pressed, this, &AMecha::SetScan);
 	InputComponent->BindAction("RightMouse", EInputEvent::IE_Pressed, this, &AMecha::RightMousePressed);
 	//InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed);
@@ -677,9 +677,9 @@ void AMecha::RightMousePressed()
 }
 
 //SHOOTING
-void AMecha::LeftMousePressed(float val)
+void AMecha::LeftMousePressed()
 {
-	if (val)
+	//if (val)
 	{
 		//TODO: put cam shake into weapon blueprint
 		//UGameplayStatics::PlayWorldCameraShake(GetWorld(), cameraShake, FVector(0.f), 500.f, 1.f); 
@@ -689,11 +689,18 @@ void AMecha::LeftMousePressed(float val)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("%s\n"), *shootHit.GetActor()->GetName());
 
-			AActor* shotActor = shootHit.GetActor();
-			AEnemy* shotEnemy = Cast<AEnemy>(shotActor);
-			if (shotEnemy)
+			AActor* shotEnemy = shootHit.GetActor();
+			
+			if (shotEnemy->Tags.Contains(Tags::Enemy) && shotEnemy->Tags.Contains(Tags::Destroy) == false)
 			{
-				shotEnemy->healthBar->health -= 0.01f; //TODO: Change to weapon damage 
+				UDestructibleComponent* enemyDc = shotEnemy->FindComponentByClass<UDestructibleComponent>();
+				if (enemyDc)
+				{
+					enemyDc->ApplyDamage(destructibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
+					shotEnemy->SetLifeSpan(3.0);
+					shotEnemy->Tags.Add(Tags::Destroy);
+				}
+
 				return;
 			}
 
