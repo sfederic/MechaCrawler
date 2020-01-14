@@ -11,8 +11,19 @@
 * AGridActor is only for moveable actors that need a next location
 */
 
+UENUM()
+enum class EDirections : uint8
+{
+	UP UMETA(DisplayName = "Up"),
+	DOWN UMETA(DisplayName = "Down"),
+	RIGHT UMETA(DisplayName = "Right"),
+	LEFT UMETA(DisplayName = "Left"),
+	FORWARD UMETA(DisplayName = "Foward"),
+	BACK UMETA(DisplayName = "Back")
+};
+
 UCLASS()
-class MECHACRAWLER_API AGridActor : public ADestructibleActor
+class MECHACRAWLER_API AGridActor : public AActor
 {
 	GENERATED_BODY()
 	

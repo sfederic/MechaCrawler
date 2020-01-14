@@ -4,24 +4,24 @@
 
 #include "CoreMinimal.h"
 #include "GridActor.h"
-#include "Activate.h"
-#include "GravitySwitch.generated.h"
+#include "ShieldEnemy.generated.h"
 
 UCLASS()
-class MECHACRAWLER_API AGravitySwitch : public AGridActor, public IActivate
+class MECHACRAWLER_API AShieldEnemy : public AGridActor
 {
 	GENERATED_BODY()
 	
 public:	
-	AGravitySwitch();
+	AShieldEnemy();
 
 protected:
 	virtual void BeginPlay() override;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-	virtual void Use() override;
+
+	class APawn* player;
 
 	UPROPERTY(EditAnywhere)
-	EDirections gravity;
+	float rotateSpeed;
 };

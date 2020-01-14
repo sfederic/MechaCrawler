@@ -3,25 +3,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GridActor.h"
-#include "Activate.h"
-#include "GravitySwitch.generated.h"
+#include "GameFramework/Actor.h"
+#include "ChaseEnemy.generated.h"
 
 UCLASS()
-class MECHACRAWLER_API AGravitySwitch : public AGridActor, public IActivate
+class MECHACRAWLER_API AChaseEnemy : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
-	AGravitySwitch();
+	AChaseEnemy();
 
 protected:
 	virtual void BeginPlay() override;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-	virtual void Use() override;
 
-	UPROPERTY(EditAnywhere)
-	EDirections gravity;
 };

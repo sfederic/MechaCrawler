@@ -33,8 +33,6 @@ void AMecha::BeginPlay()
 {
 	Super::BeginPlay();
 
-
-
 	initialMoveSpeed = moveSpeed;
 
 	//SETUP WEAPONS
@@ -117,6 +115,8 @@ void AMecha::BeginPlay()
 void AMecha::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	instancedRebuildManager->RebuildTimers();
 
 	//MOVEMENT AXIS
 	rootAxes[0] = RootComponent->GetForwardVector();
@@ -249,12 +249,12 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	//InputComponent->BindAxis("Up", this, &AMecha::MoveUp);
 	InputComponent->BindAxis("Mouse X", this, &AMecha::LookYaw);
 	InputComponent->BindAxis("Mouse Y", this, &AMecha::LookPitch);
-	InputComponent->BindAxis("LeftMouse", this, &AMecha::LeftMousePressed);
 	
 	//Inputs bound to mouse axis instead of Up/Down. Find out why didn't work.
 	InputComponent->BindAxis("MouseWheelUp", this, &AMecha::ZoomIn);
 	InputComponent->BindAxis("MouseWheelDown", this, &AMecha::ZoomOut);
 	
+	InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed);
 	InputComponent->BindAction("Scan", EInputEvent::IE_Pressed, this, &AMecha::SetScan);
 	InputComponent->BindAction("RightMouse", EInputEvent::IE_Pressed, this, &AMecha::RightMousePressed);
 	//InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed);
@@ -677,25 +677,34 @@ void AMecha::RightMousePressed()
 }
 
 //SHOOTING
-void AMecha::LeftMousePressed(float val)
+void AMecha::LeftMousePressed()
 {
-	if (val)
+	//if (val)
 	{
-		UGameplayStatics::PlayWorldCameraShake(GetWorld(), cameraShake, FVector(0.f), 500.f, 1.f);
+		//TODO: put cam shake into weapon blueprint
+		//UGameplayStatics::PlayWorldCameraShake(GetWorld(), cameraShake, FVector(0.f), 500.f, 1.f); 
 
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
 			GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_WorldStatic)) 
 		{
 			UE_LOG(LogTemp, Warning, TEXT("%s\n"), *shootHit.GetActor()->GetName());
 
-			AActor* shotActor = shootHit.GetActor();
-			AEnemy* shotEnemy = Cast<AEnemy>(shotActor);
-			if (shotEnemy)
+			AActor* shotEnemy = shootHit.GetActor();
+			
+			if (shotEnemy->Tags.Contains(Tags::Enemy) && shotEnemy->Tags.Contains(Tags::Destroy) == false)
 			{
-				shotEnemy->healthBar->health -= 0.01f; //TODO: Change to weapon damage 
+				UDestructibleComponent* enemyDc = shotEnemy->FindComponentByClass<UDestructibleComponent>();
+				if (enemyDc)
+				{
+					enemyDc->ApplyDamage(destructibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
+					shotEnemy->SetLifeSpan(3.0);
+					shotEnemy->Tags.Add(Tags::Destroy);
+				}
+
 				return;
 			}
 
+			//MESH SLICING
 			UProceduralMeshComponent* cutMesh = shootHit.GetActor()->FindComponentByClass<UProceduralMeshComponent>();
 			if (cutMesh)
 			{
@@ -731,10 +740,10 @@ void AMecha::LeftMousePressed(float val)
 			}*/
 
 			UDestructibleComponent* dc = Cast<UDestructibleComponent>(shootHit.GetComponent());
-			ADestructibleActor* shotActor = nullptr;
+			ADestructibleActor* rebuildActor = nullptr;
 			if (dc)
 			{
-				shotActor = Cast<ADestructibleActor>(dc->GetOwner());
+				rebuildActor = Cast<ADestructibleActor>(dc->GetOwner());
 			}
 			
 			if (dc)
@@ -757,13 +766,16 @@ void AMecha::LeftMousePressed(float val)
 
 				dc->ApplyDamage(destructibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);	
 
-				dc->GetOwner()->Tags.Add(Tags::Destroy);
-				dc->GetOwner()->SetLifeSpan(5.0f);
-
-				if (instancedRebuildManager)
+				if (instancedRebuildManager && dc->GetOwner()->Tags.Contains(Tags::Destroy) == false)
 				{
-					instancedRebuildManager->rebuildActors.Add(shotActor);
+					if (rebuildActor && rebuildActor->IsA<ADestructibleActor>())
+					{
+						instancedRebuildManager->rebuildActors.Add(rebuildActor);
+					}
+					instancedRebuildManager->rebuildTimers.Add(0.f);
 				}
+
+				dc->GetOwner()->Tags.Add(Tags::Destroy);
 			}
 		}
 	}
@@ -891,13 +903,16 @@ void AMecha::RebuildAllDestroyedActors()
 		{
 			ADestructibleActor* da = world->SpawnActor<ADestructibleActor>(ADestructibleActor::StaticClass(),
 				instancedRebuildManager->rebuildActors[i]->GetActorTransform());
-			da->FindComponentByClass<UDestructibleComponent>()->SetDestructibleMesh(instancedRebuildManager->rebuildActors[i]->GetDestructibleComponent()->GetDestructibleMesh());
-			da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, instancedRebuildManager->rebuildActors[i]->GetDestructibleComponent()->GetMaterial(0));
+			da->FindComponentByClass<UDestructibleComponent>()->SetDestructibleMesh(instancedRebuildManager->rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->GetDestructibleMesh());
+			da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, instancedRebuildManager->rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->GetMaterial(0));
 
 			instancedRebuildManager->rebuildActors[i]->Destroy();
 		}
 
+		instancedRebuildManager->RebuildPushables();
+
 		instancedRebuildManager->rebuildActors.Empty();
+		instancedRebuildManager->rebuildTimers.Empty();
 	}
 	else
 	{

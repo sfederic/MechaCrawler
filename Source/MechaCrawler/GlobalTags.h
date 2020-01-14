@@ -10,4 +10,5 @@ namespace Tags
 	static const FName Scannable = "Scannable"; 
 	static const FName Pickup = "Pickup";
 	static const FName MoveThrough = "MoveThrough"; //Means player can walk through transparent actor
+	static const FName Enemy = "Enemy";
 }

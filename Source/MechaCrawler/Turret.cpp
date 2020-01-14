@@ -12,6 +12,11 @@ ATurret::ATurret()
 void ATurret::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (target == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("target not set in %s\n"), *GetNameSafe(this));
+	}
 }
 
 void ATurret::Tick(float DeltaTime)
@@ -23,5 +28,8 @@ void ATurret::Tick(float DeltaTime)
 		DrawDebugLine(this->GetWorld(), GetActorLocation(), target->GetActorLocation(), FColor::Red);
 	}
 
-	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target->GetActorLocation()));
+	if (target)
+	{
+		SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target->GetActorLocation()));
+	}
 }
