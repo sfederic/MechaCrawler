@@ -5,6 +5,7 @@
 #include "Kismet/KismetMathLibrary.h" 
 #include "GameFramework/Pawn.h"
 #include "Kismet/GameplayStatics.h"
+#include "GlobalTags.h"
 
 AShieldEnemy::AShieldEnemy()
 {
@@ -23,7 +24,9 @@ void AShieldEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FRotator rot = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), player->GetActorLocation());
-
-	SetActorRotation(FMath::RInterpConstantTo(GetActorRotation(), rot, DeltaTime, rotateSpeed));
+	if (!this->Tags.Contains(Tags::Destroy))
+	{
+		FRotator rot = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), player->GetActorLocation());
+		SetActorRotation(FMath::RInterpConstantTo(GetActorRotation(), rot, DeltaTime, rotateSpeed));
+	}
 }
