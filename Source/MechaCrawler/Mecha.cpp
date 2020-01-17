@@ -19,6 +19,7 @@
 #include "DialogueComponent.h"
 #include "ProceduralMeshComponent/Public/KismetProceduralMeshLibrary.h"
 #include "WeaponData.h"
+#include "Engine/PostProcessVolume.h"
 
 AMecha::AMecha()
 {
@@ -236,6 +237,34 @@ void AMecha::Tick(float DeltaTime)
 
 	currentLoc = FMath::VInterpConstantTo(currentLoc, nextLoc, DeltaTime, moveSpeed);
 	SetActorLocation(currentLoc);
+
+	//Rebuild Postprocess effect (fade out)
+	if (bFadeOutRebuild)
+	{
+		fadeOutTimer += FApp::GetDeltaTime();
+
+		const float fadeOutMultiplier = 30.f;
+
+		postProcessMain->Settings.bOverride_VignetteIntensity = 1;
+		postProcessMain->Settings.bOverride_DepthOfFieldVignetteSize = 1;
+
+		if (fadeOutTimer < 1.0f)
+		{
+			postProcessMain->Settings.VignetteIntensity += FApp::GetDeltaTime() * fadeOutMultiplier;
+			postProcessMain->Settings.DepthOfFieldVignetteSize += FApp::GetDeltaTime() * fadeOutMultiplier;
+		}
+		else if (fadeOutTimer > 1.0f)
+		{
+			postProcessMain->Settings.VignetteIntensity -= FApp::GetDeltaTime() * fadeOutMultiplier;
+			postProcessMain->Settings.DepthOfFieldVignetteSize -= FApp::GetDeltaTime() * fadeOutMultiplier;
+
+			if (fadeOutTimer > 2.0f)
+			{
+				bFadeOutRebuild = false;
+				fadeOutTimer = 0.f;
+			}
+		}
+	}
 }
 
 void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -579,22 +608,26 @@ void AMecha::SetScan()
 	//TODO: Find a better representation for actors that can be destroyed with scanner
 	if (!scanning)
 	{
+		postProcessMain->Settings.AddBlendable(scanPostProcess, 1.0f);
+
 		TArray<AActor*> destroyableScanActors;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADestructibleActor::StaticClass(), destroyableScanActors);
 
 		for (int i = 0; i < destroyableScanActors.Num(); i++)
 		{
-			destroyableScanActors[i]->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, destroyableWireframeMaterial);
+			//destroyableScanActors[i]->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, destroyableWireframeMaterial);
 		}
 	} 
 	else if (scanning)
 	{
+		postProcessMain->Settings.RemoveBlendable(scanPostProcess);
+
 		TArray<AActor*> destroyableScanActors;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADestructibleActor::StaticClass(), destroyableScanActors);
 
 		for (int i = 0; i < destroyableScanActors.Num(); i++)
 		{
-			destroyableScanActors[i]->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, destroyableBaseMaterial);
+			//destroyableScanActors[i]->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, destroyableBaseMaterial);
 		}
 	}
 
@@ -687,7 +720,7 @@ void AMecha::LeftMousePressed()
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
 			GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_WorldStatic)) 
 		{
-			UE_LOG(LogTemp, Warning, TEXT("%s\n"), *shootHit.GetActor()->GetName());
+			UE_LOG(LogTemp, Warning, TEXT("Shot Actor: %s\n"), *shootHit.GetActor()->GetName());
 
 			AActor* shotEnemy = shootHit.GetActor();
 			
@@ -886,6 +919,8 @@ void AMecha::SetCameraView()
 
 void AMecha::RebuildAllDestroyedActors()
 {
+	bFadeOutRebuild = true;
+
 	if (instancedRebuildManager)
 	{
 		UWorld* world = GetWorld();
@@ -904,7 +939,10 @@ void AMecha::RebuildAllDestroyedActors()
 			ADestructibleActor* da = world->SpawnActor<ADestructibleActor>(ADestructibleActor::StaticClass(),
 				instancedRebuildManager->rebuildActors[i]->GetActorTransform());
 			da->FindComponentByClass<UDestructibleComponent>()->SetDestructibleMesh(instancedRebuildManager->rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->GetDestructibleMesh());
-			da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, instancedRebuildManager->rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->GetMaterial(0));
+			UMaterialInterface* rebuildMat = instancedRebuildManager->rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->GetMaterial(0);
+			
+			da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, rebuildMat);
+			da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(1, rebuildMat);
 
 			instancedRebuildManager->rebuildActors[i]->Destroy();
 		}

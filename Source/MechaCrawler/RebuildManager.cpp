@@ -3,6 +3,7 @@
 #include "RebuildManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Mecha.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 ARebuildManager::ARebuildManager()
 {

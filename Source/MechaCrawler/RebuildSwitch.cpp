@@ -28,13 +28,15 @@ void ARebuildSwitch::Tick(float DeltaTime)
 	{
 		if (rebuildSwitchPlayer->GetActorLocation().Equals(GetActorLocation()))
 		{
-			rebuildTimer += FApp::GetDeltaTime();
-			rebuildSwitchPlayer->canMove = false; //TODO: need to make a visual post-pross effect for timer
+			rebuildSwitchPlayer->bFadeOutRebuild = true;
 
-			if (rebuildTimer > 1.0f)
+			rebuildTimer += FApp::GetDeltaTime();
+			rebuildSwitchPlayer->canMove = false;
+
+			if (rebuildTimer > 1.0f) //half of what is being used in Mecha.cpp
 			{
-				RebuildAll();
 				rebuildTimer = 0.f;
+				RebuildAll();
 			}
 		}
 	}

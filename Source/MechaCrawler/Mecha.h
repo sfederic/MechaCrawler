@@ -75,6 +75,12 @@ public:
 	UMaterialInterface* destroyableWireframeMaterial;	
 	
 	UPROPERTY(EditAnywhere)
+	class APostProcessVolume* postProcessMain;
+
+	UPROPERTY(EditAnywhere)
+	UMaterialInstance* scanPostProcess;
+
+	UPROPERTY(EditAnywhere)
 	UMaterialInterface* destroyableBaseMaterial;
 
 	//PARTICLES
@@ -185,4 +191,6 @@ public:
 	bool submerged = false;
 
 	bool canMove = true;
+	bool bFadeOutRebuild = false;
+	float fadeOutTimer = 0.f;
 };
