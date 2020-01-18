@@ -20,6 +20,8 @@
 #include "ProceduralMeshComponent/Public/KismetProceduralMeshLibrary.h"
 #include "WeaponData.h"
 #include "Engine/PostProcessVolume.h"
+#include "Components/StaticMeshComponent.h"
+#include "DestructibleMesh.h"
 
 AMecha::AMecha()
 {
@@ -861,10 +863,28 @@ void AMecha::AddNote()
 	{
 		if (noteWidgetClass)
 		{
+			//Place note
 			FTransform transform = FTransform();
 			transform.SetLocation(noteHit.ImpactPoint);
 			transform.SetRotation(FQuat(noteHit.ImpactNormal.Rotation()));
 			ANoteNode* noteNode = GetWorld()->SpawnActor<ANoteNode>(noteWidgetClass, transform);
+
+			//highlight actor
+			AActor* noteActor = noteHit.GetActor();
+
+			if (noteActor->Tags.Contains(Tags::ScanMarked) == false)
+			{
+				noteActor->Tags.Add(Tags::ScanMarked);
+				//bRenderCustomDepth needs to be true before runtime, not changed during to work
+				UStaticMeshComponent* mesh = noteActor->FindComponentByClass<UStaticMeshComponent>();
+				if (mesh)
+				{
+					if (mesh->bRenderCustomDepth == true)
+					{
+						mesh->SetCustomDepthStencilValue(1);
+					}
+				}
+			}
 		}
 	}
 }
@@ -873,11 +893,30 @@ void AMecha::DeleteAllNotes()
 {
 	if (GetActorLocation().Equals(nextLoc))
 	{
+		//Delete all notes
 		TArray<AActor*> noteActorsToDelete;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANoteNode::StaticClass(), noteActorsToDelete);
 		for (int i = 0; i < noteActorsToDelete.Num(); i++)
 		{
 			noteActorsToDelete[i]->Destroy(); //TODO: Find a way to cap?
+		}
+
+		//Unmark all actors
+		TArray<AActor*> markedActorsToUnmark;
+		UGameplayStatics::GetAllActorsWithTag(GetWorld(), Tags::ScanMarked, markedActorsToUnmark);
+		for (int i = 0; i < markedActorsToUnmark.Num(); i++)
+		{
+			markedActorsToUnmark[i]->Tags.Remove(Tags::ScanMarked);
+
+			//Couldn't get working for destructible meshes
+			UStaticMeshComponent* mesh = markedActorsToUnmark[i]->FindComponentByClass<UStaticMeshComponent>();
+			if (mesh)
+			{
+				if (mesh->bRenderCustomDepth == true)
+				{
+					mesh->SetCustomDepthStencilValue(0);
+				}
+			}
 		}
 
 		RebuildAllDestroyedActors();
