@@ -103,6 +103,7 @@ void AMecha::BeginPlay()
 	
 	currentLoc = GetActorLocation();
 	nextLoc = currentLoc;
+	lastLoc = currentLoc;
 
 	currentRot = FQuat(GetActorRotation());
 	nextRot = currentRot;
@@ -357,6 +358,7 @@ void AMecha::MoveForward(float val)
 			else
 			{
 				FVector previousLoc = nextLoc;
+				lastLoc = currentLoc;
 
 				nextLoc = loc + (forwardAxis * moveDistance);
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
@@ -428,6 +430,7 @@ void AMecha::MoveBack(float val)
 			else
 			{
 				FVector previousLoc = nextLoc;
+				lastLoc = currentLoc;
 
 				nextLoc = loc - (forwardAxis * moveDistance);
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
@@ -499,6 +502,7 @@ void AMecha::MoveLeft(float val)
 			else
 			{
 				FVector previousLoc = nextLoc;
+				lastLoc = currentLoc;
 
 				nextLoc = loc - (rightAxis * moveDistance);
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
@@ -570,6 +574,7 @@ void AMecha::MoveRight(float val)
 			else
 			{
 				FVector previousLoc = nextLoc;
+				lastLoc = currentLoc;
 
 				nextLoc = loc + (rightAxis * moveDistance);
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
@@ -986,7 +991,7 @@ void AMecha::RebuildAllDestroyedActors()
 			instancedRebuildManager->rebuildActors[i]->Destroy();
 		}
 
-		//Bye-bye generic programming
+		
 		instancedRebuildManager->RebuildPushables();
 		instancedRebuildManager->RebuildDoors();
 
@@ -1098,17 +1103,17 @@ void AMecha::ProgressText()
 	}
 }
 
-void AMecha::DashForward() //TODO: Figure out if side dashes are needed.
+void AMecha::DashForward() //TODO: Dash hit can move played to center of object. Has to go
 {
-	FHitResult dashHit;
+	/*FHitResult dashHit;
 	const float dashDistance = 1000.f;
 	if (GetWorld()->LineTraceSingleByChannel(dashHit, GetActorLocation(), GetActorLocation() + forwardAxis * dashDistance, ECC_WorldStatic, moveParams))
 	{
-		nextLoc = dashHit.GetActor()->GetActorLocation() - (forwardAxis * 100.f);
+		nextLoc = dashHit.ImpactPoint - (forwardAxis * 100.f);
 		nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 		nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
 		nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 		moveSpeed = dashSpeed;
-	}
+	}*/
 }

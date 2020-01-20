@@ -23,6 +23,8 @@ public:
 
 	FCollisionQueryParams moveParams;
 
+	class UBoxComponent* boxCollision;
+
 	FVector moveAxes[4];
 
 	UPROPERTY(EditAnywhere)

@@ -53,8 +53,12 @@ public:
 	void ProgressText();
 	void DashForward();
 
+	UPROPERTY(VisibleAnywhere)
 	FVector nextLoc;
+	UPROPERTY(VisibleAnywhere)
 	FVector currentLoc;
+	UPROPERTY(VisibleAnywhere)
+	FVector lastLoc;
 
 	FQuat currentRot;
 	FQuat nextRot;

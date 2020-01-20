@@ -3,6 +3,7 @@
 #include "WallEnemy.h"
 #include "Engine/World.h"
 #include "Misc/App.h"
+#include "Components/BoxComponent.h"
 
 AWallEnemy::AWallEnemy()
 {
@@ -24,6 +25,9 @@ void AWallEnemy::BeginPlay()
 	moveAxes[1] = -GetActorForwardVector();
 	moveAxes[2] = GetActorRightVector();
 	moveAxes[3] = -GetActorRightVector();
+
+	boxCollision = FindComponentByClass<UBoxComponent>();
+	boxCollision->OnComponentBeginOverlap.AddDynamic(this, &AWallEnemy::OnPlayerOverlapBegin);
 }
 
 void AWallEnemy::Tick(float DeltaTime)
