@@ -65,6 +65,9 @@ public:
 
 	FRotator cameraRot;
 
+	UPROPERTY(EditAnywhere)
+	class UMaterialParameterCollection* outlineParams;
+
 	class UCameraComponent* camera;
 	class APlayerController* controller;
 
@@ -197,4 +200,8 @@ public:
 	bool canMove = true;
 	bool bFadeOutRebuild = false;
 	float fadeOutTimer = 0.f;
+
+	bool bRebuildPulseEffect = false;
+	float rebuildPulseEffectTimer = 0.f;
+	float rebuildPulseEffectValue = 0.f;
 };

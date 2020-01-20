@@ -5,12 +5,13 @@
 #include "CoreMinimal.h"
 #include "Activate.h"
 #include "GridActor.h"
+#include "Rebuild.h"
 #include "GravityBox.generated.h"
 
 //Actor that moves in an elevator fashion along any axis. Needs to start flush against something
 
 UCLASS()
-class MECHACRAWLER_API AGravityBox : public AGridActor, public IActivate
+class MECHACRAWLER_API AGravityBox : public AGridActor, public IActivate, public IRebuild
 {
 	GENERATED_BODY()
 	
@@ -31,8 +32,6 @@ public:
 	FCollisionQueryParams cableParams;
 	class UBoxComponent* boxCollision;
 	UParticleSystemComponent* cable;
-
-	class APawn* player;
 
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* particleTemplate;

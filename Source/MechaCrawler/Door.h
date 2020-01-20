@@ -6,11 +6,12 @@
 #include "Activate.h"
 #include "Scannable.h"
 #include "ScanData.h"
+#include "Rebuild.h"
 #include "Door.generated.h"
 
 
 UCLASS()
-class MECHACRAWLER_API ADoor : public AGridActor, public IActivate, public IScannable
+class MECHACRAWLER_API ADoor : public AGridActor, public IActivate, public IScannable, public IRebuild
 {
 	GENERATED_BODY()
 	
@@ -22,6 +23,7 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
+	virtual void Rebuild() override;
 
 	UFUNCTION(BlueprintCallable)
 	virtual void Use() override;

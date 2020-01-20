@@ -96,3 +96,16 @@ UScanData* APushable::Scan()
 {
 	return FindComponentByClass<UScanData>();
 }
+
+void APushable::Rebuild()
+{
+	if (originalLoc.Equals(UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorLocation()) == false)
+	{
+		this->nextLoc = this->originalLoc;
+		this->SetActorLocation(this->originalLoc);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Rebuild clashing with player location %s"), *this->GetName());
+	}
+}

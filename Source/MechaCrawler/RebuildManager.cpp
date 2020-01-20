@@ -35,58 +35,17 @@ void ARebuildManager::Tick(float DeltaTime)
 void ARebuildManager::RebuildTimers()
 {
 	//REBUILD ACTOR TIMERS: Basically a cheap way to get around UE4's timers
-	if (rebuildActors.Num() > 0 && rebuildTimers.Num() > 0)
+	for (int i = 0; i < rebuildActors.Num(); i++)
 	{
-		for (int i = 0; i < rebuildActors.Num(); i++)
+		if (rebuildTimers[i] > 5.0f)
 		{
-			if (rebuildTimers[i] > 5.0f)
-			{
-				rebuildActors[i]->SetActorHiddenInGame(true);
-				rebuildActors[i]->SetActorEnableCollision(false);
-				rebuildActors[i]->SetActorTickEnabled(false);
-			}
-			else
-			{
-				rebuildTimers[i] += FApp::GetDeltaTime();
-			}
+			rebuildActors[i]->SetActorHiddenInGame(true);
+			rebuildActors[i]->SetActorEnableCollision(false);
+			rebuildActors[i]->SetActorTickEnabled(false);
+		}
+		else
+		{
+			rebuildTimers[i] += FApp::GetDeltaTime();
 		}
 	}
 }
-
-void ARebuildManager::RebuildPushables()
-{
-	for (int i = 0; i < pushableActors.Num(); i++)
-	{
-		APushable* pushActor = Cast<APushable>(pushableActors[i]);
-		if (pushActor)
-		{
-			if (pushActor->originalLoc.Equals(player->GetActorLocation()) == false)
-			{
-				pushActor->nextLoc = pushActor->originalLoc;
-				pushActor->SetActorLocation(pushActor->originalLoc);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Rebuild clashing with player location %s"), *pushActor->GetName());
-			}
-		}
-	}
-}
-
-void ARebuildManager::RebuildDoors()
-{
-	TArray<AActor*> doorActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADoor::StaticClass(), doorActors);
-
-	for (int i = 0; i < doorActors.Num(); i++)
-	{
-		ADoor* door = Cast<ADoor>(doorActors[i]);
-		if (door)
-		{
-			door->currentLoc = door->originalLoc;
-			door->nextLoc = door->originalLoc;
-			door->openState = false;
-		}
-	}
-}
-

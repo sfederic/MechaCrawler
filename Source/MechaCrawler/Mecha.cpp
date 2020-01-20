@@ -22,6 +22,8 @@
 #include "Engine/PostProcessVolume.h"
 #include "Components/StaticMeshComponent.h"
 #include "DestructibleMesh.h"
+#include "Rebuild.h"
+#include "Materials/MaterialParameterCollectionInstance.h" 
 
 AMecha::AMecha()
 {
@@ -119,6 +121,20 @@ void AMecha::BeginPlay()
 void AMecha::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	//Rebuild Pulse effect
+	if (bRebuildPulseEffect)
+	{
+		UMaterialParameterCollectionInstance* paramInstance = GetWorld()->GetParameterCollectionInstance(outlineParams);
+		paramInstance->SetScalarParameterValue(TEXT("Radius"), rebuildPulseEffectValue);
+
+		rebuildPulseEffectTimer += FApp::GetDeltaTime();
+
+		if (rebuildPulseEffectTimer < 3.0f)
+		{
+			rebuildPulseEffectValue += FApp::GetDeltaTime() * 1000.f;
+		}
+	}
 
 	instancedRebuildManager->RebuildTimers();
 
@@ -896,6 +912,8 @@ void AMecha::AddNote()
 
 void AMecha::DeleteAllNotes()
 {
+	bRebuildPulseEffect = true;
+
 	if (GetActorLocation().Equals(nextLoc))
 	{
 		//Delete all notes
@@ -963,7 +981,7 @@ void AMecha::SetCameraView()
 
 void AMecha::RebuildAllDestroyedActors()
 {
-	bFadeOutRebuild = true;
+	//bFadeOutRebuild = true;
 
 	if (instancedRebuildManager)
 	{
@@ -991,9 +1009,16 @@ void AMecha::RebuildAllDestroyedActors()
 			instancedRebuildManager->rebuildActors[i]->Destroy();
 		}
 
-		
-		instancedRebuildManager->RebuildPushables();
-		instancedRebuildManager->RebuildDoors();
+		TArray<AActor*> rebuildActors;
+		UGameplayStatics::GetAllActorsWithInterface(GetWorld(), URebuild::StaticClass(), rebuildActors);
+		for (int i = 0; i < rebuildActors.Num(); i++)
+		{
+			IRebuild* rebuilt = Cast<IRebuild>(rebuildActors[i]);
+			if (rebuilt)
+			{
+				rebuilt->Rebuild();
+			}
+		}
 
 		instancedRebuildManager->rebuildActors.Empty();
 		instancedRebuildManager->rebuildTimers.Empty();

@@ -42,8 +42,6 @@ void AGravityBox::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("%s cable particle has no end point."), *this->GetName());
 		cable->SetBeamTargetPoint(0, FVector(0.f), 0);
 	}
-
-	player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 }
 
 void AGravityBox::Tick(float DeltaTime)
