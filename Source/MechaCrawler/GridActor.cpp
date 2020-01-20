@@ -10,6 +10,8 @@ AGridActor::AGridActor()
 void AGridActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	originalLoc = GetActorLocation();
 }
 
 void AGridActor::Tick(float DeltaTime)

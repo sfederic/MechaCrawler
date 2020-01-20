@@ -38,6 +38,10 @@ public:
 	
 	UPROPERTY(VisibleAnywhere)
 	FVector currentLoc;
+
 	UPROPERTY(VisibleAnywhere)
 	FVector nextLoc;
+
+	UPROPERTY(VisibleAnywhere)
+	FVector originalLoc;
 };

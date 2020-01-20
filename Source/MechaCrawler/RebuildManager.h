@@ -26,6 +26,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	void RebuildTimers();
 	void RebuildPushables();
+	void RebuildDoors();
 
 	UPROPERTY(EditAnywhere)
 	bool debugActors;

@@ -986,7 +986,9 @@ void AMecha::RebuildAllDestroyedActors()
 			instancedRebuildManager->rebuildActors[i]->Destroy();
 		}
 
+		//Bye-bye generic programming
 		instancedRebuildManager->RebuildPushables();
+		instancedRebuildManager->RebuildDoors();
 
 		instancedRebuildManager->rebuildActors.Empty();
 		instancedRebuildManager->rebuildTimers.Empty();

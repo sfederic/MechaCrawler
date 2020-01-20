@@ -3,6 +3,7 @@
 #include "RebuildManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Mecha.h"
+#include "Door.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
 ARebuildManager::ARebuildManager()
@@ -68,6 +69,23 @@ void ARebuildManager::RebuildPushables()
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Rebuild clashing with player location %s"), *pushActor->GetName());
 			}
+		}
+	}
+}
+
+void ARebuildManager::RebuildDoors()
+{
+	TArray<AActor*> doorActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADoor::StaticClass(), doorActors);
+
+	for (int i = 0; i < doorActors.Num(); i++)
+	{
+		ADoor* door = Cast<ADoor>(doorActors[i]);
+		if (door)
+		{
+			door->currentLoc = door->originalLoc;
+			door->nextLoc = door->originalLoc;
+			door->openState = false;
 		}
 	}
 }
