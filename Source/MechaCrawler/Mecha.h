@@ -200,8 +200,4 @@ public:
 	bool canMove = true;
 	bool bFadeOutRebuild = false;
 	float fadeOutTimer = 0.f;
-
-	bool bRebuildPulseEffect = false;
-	float rebuildPulseEffectTimer = 0.f;
-	float rebuildPulseEffectValue = 0.f;
 };

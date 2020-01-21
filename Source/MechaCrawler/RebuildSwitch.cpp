@@ -5,6 +5,8 @@
 #include "Mecha.h"
 #include "RebuildManager.h"
 #include "IceComponent.h"
+#include "Materials/MaterialParameterCollectionInstance.h" 
+#include "Engine/PostProcessVolume.h"
 
 ARebuildSwitch::ARebuildSwitch()
 {
@@ -18,6 +20,8 @@ void ARebuildSwitch::BeginPlay()
 	
 	rebuildSwitchPlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	rebuildSwitchPlayer = Cast<AMecha>(rebuildSwitchPlayerPawn);
+
+	paramInstance = GetWorld()->GetParameterCollectionInstance(outlineParams);
 }
 
 void ARebuildSwitch::Tick(float DeltaTime)
@@ -28,15 +32,43 @@ void ARebuildSwitch::Tick(float DeltaTime)
 	{
 		if (rebuildSwitchPlayer->GetActorLocation().Equals(GetActorLocation()))
 		{
-			rebuildSwitchPlayer->bFadeOutRebuild = true;
+			//rebuildSwitchPlayer->bFadeOutRebuild = true;
+			bRebuildPulseEffect = true;
 
 			rebuildTimer += FApp::GetDeltaTime();
 			rebuildSwitchPlayer->canMove = false;
 
-			if (rebuildTimer > 1.0f) //half of what is being used in Mecha.cpp
+			RebuildAll();
+
+			//Rebuild Pulse effect
+			if (bRebuildPulseEffect && rebuildPulseEffectTimer == 0.f)
 			{
+				bRebuildPulseEffect = false;
+				rebuildPulseEffectTimer += FApp::GetDeltaTime();
+				postProcessMain->Settings.AddBlendable(postProcessOutline, 1.0f);
+			}
+
+			if (rebuildPulseEffectTimer < 2.0f)
+			{
+				rebuildPulseEffectValue += FApp::GetDeltaTime() * 500.f;
+				paramInstance->SetScalarParameterValue(TEXT("Radius"), rebuildPulseEffectValue);
+				rebuildPulseEffectTimer += FApp::GetDeltaTime();
+			}
+			else if (rebuildPulseEffectTimer > 2.0f)
+			{
+				rebuildPulseEffectValue = 0.f;
+				paramInstance->SetScalarParameterValue(TEXT("Radius"), rebuildPulseEffectValue);
+
+				postProcessMain->Settings.RemoveBlendable(postProcessOutline);
+				rebuildPulseEffectTimer = 0.f;
+			}
+
+			if (rebuildTimer > 2.0f) //half of what is being used in Mecha.cpp
+			{
+				rebuildSwitchPlayer->canMove = true;
+				switchActivated = true;
+
 				rebuildTimer = 0.f;
-				RebuildAll();
 			}
 		}
 	}
@@ -64,7 +96,4 @@ void ARebuildSwitch::RebuildAll()
 			iceBlock->TurnToIce();
 		}
 	}
-
-	rebuildSwitchPlayer->canMove = true;
-	switchActivated = true;
 }

@@ -27,7 +27,21 @@ public:
 
 	bool switchActivated = false;
 
-private:
 	class AMecha* rebuildSwitchPlayer;
 	class APawn* rebuildSwitchPlayerPawn;
+
+	UPROPERTY(EditAnywhere)
+	class UMaterialParameterCollection* outlineParams;
+
+	UPROPERTY(EditAnywhere)
+	class APostProcessVolume* postProcessMain;
+
+	UPROPERTY(EditAnywhere)
+	UMaterialInstance* postProcessOutline;
+
+	class UMaterialParameterCollectionInstance* paramInstance;
+
+	bool bRebuildPulseEffect = false;
+	float rebuildPulseEffectTimer = 0.f;
+	float rebuildPulseEffectValue = 0.f;
 };

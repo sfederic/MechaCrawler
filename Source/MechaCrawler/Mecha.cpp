@@ -23,7 +23,6 @@
 #include "Components/StaticMeshComponent.h"
 #include "DestructibleMesh.h"
 #include "Rebuild.h"
-#include "Materials/MaterialParameterCollectionInstance.h" 
 
 AMecha::AMecha()
 {
@@ -122,19 +121,7 @@ void AMecha::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//Rebuild Pulse effect
-	if (bRebuildPulseEffect)
-	{
-		UMaterialParameterCollectionInstance* paramInstance = GetWorld()->GetParameterCollectionInstance(outlineParams);
-		paramInstance->SetScalarParameterValue(TEXT("Radius"), rebuildPulseEffectValue);
 
-		rebuildPulseEffectTimer += FApp::GetDeltaTime();
-
-		if (rebuildPulseEffectTimer < 3.0f)
-		{
-			rebuildPulseEffectValue += FApp::GetDeltaTime() * 1000.f;
-		}
-	}
 
 	instancedRebuildManager->RebuildTimers();
 
@@ -912,8 +899,6 @@ void AMecha::AddNote()
 
 void AMecha::DeleteAllNotes()
 {
-	bRebuildPulseEffect = true;
-
 	if (GetActorLocation().Equals(nextLoc))
 	{
 		//Delete all notes
