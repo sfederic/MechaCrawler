@@ -87,3 +87,10 @@ UScanData* ADoor::Scan()
 {
 	return FindComponentByClass<UScanData>();
 }
+
+void ADoor::Rebuild()
+{
+	this->currentLoc = this->originalLoc;
+	this->nextLoc = this->originalLoc;
+	this->openState = false;
+}

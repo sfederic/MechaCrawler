@@ -6,10 +6,11 @@
 #include "GridActor.h"
 #include "Activate.h"
 #include "Scannable.h"
+#include "Rebuild.h"
 #include "Pushable.generated.h"
 
 UCLASS()
-class MECHACRAWLER_API APushable : public AGridActor, public IActivate, public IScannable
+class MECHACRAWLER_API APushable : public AGridActor, public IActivate, public IScannable, public IRebuild
 {
 	GENERATED_BODY()
 
@@ -22,6 +23,7 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void Use() override;
+	virtual void Rebuild() override;
 	virtual UScanData* Scan() override;
 
 	FHitResult moveHit;

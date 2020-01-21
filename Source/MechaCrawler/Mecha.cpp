@@ -22,6 +22,7 @@
 #include "Engine/PostProcessVolume.h"
 #include "Components/StaticMeshComponent.h"
 #include "DestructibleMesh.h"
+#include "Rebuild.h"
 
 AMecha::AMecha()
 {
@@ -103,6 +104,7 @@ void AMecha::BeginPlay()
 	
 	currentLoc = GetActorLocation();
 	nextLoc = currentLoc;
+	lastLoc = currentLoc;
 
 	currentRot = FQuat(GetActorRotation());
 	nextRot = currentRot;
@@ -118,6 +120,8 @@ void AMecha::BeginPlay()
 void AMecha::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+
 
 	instancedRebuildManager->RebuildTimers();
 
@@ -357,6 +361,7 @@ void AMecha::MoveForward(float val)
 			else
 			{
 				FVector previousLoc = nextLoc;
+				lastLoc = currentLoc;
 
 				nextLoc = loc + (forwardAxis * moveDistance);
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
@@ -428,6 +433,7 @@ void AMecha::MoveBack(float val)
 			else
 			{
 				FVector previousLoc = nextLoc;
+				lastLoc = currentLoc;
 
 				nextLoc = loc - (forwardAxis * moveDistance);
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
@@ -499,6 +505,7 @@ void AMecha::MoveLeft(float val)
 			else
 			{
 				FVector previousLoc = nextLoc;
+				lastLoc = currentLoc;
 
 				nextLoc = loc - (rightAxis * moveDistance);
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
@@ -570,6 +577,7 @@ void AMecha::MoveRight(float val)
 			else
 			{
 				FVector previousLoc = nextLoc;
+				lastLoc = currentLoc;
 
 				nextLoc = loc + (rightAxis * moveDistance);
 				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
@@ -958,7 +966,7 @@ void AMecha::SetCameraView()
 
 void AMecha::RebuildAllDestroyedActors()
 {
-	bFadeOutRebuild = true;
+	//bFadeOutRebuild = true;
 
 	if (instancedRebuildManager)
 	{
@@ -986,7 +994,16 @@ void AMecha::RebuildAllDestroyedActors()
 			instancedRebuildManager->rebuildActors[i]->Destroy();
 		}
 
-		instancedRebuildManager->RebuildPushables();
+		TArray<AActor*> rebuildActors;
+		UGameplayStatics::GetAllActorsWithInterface(GetWorld(), URebuild::StaticClass(), rebuildActors);
+		for (int i = 0; i < rebuildActors.Num(); i++)
+		{
+			IRebuild* rebuilt = Cast<IRebuild>(rebuildActors[i]);
+			if (rebuilt)
+			{
+				rebuilt->Rebuild();
+			}
+		}
 
 		instancedRebuildManager->rebuildActors.Empty();
 		instancedRebuildManager->rebuildTimers.Empty();
@@ -1096,17 +1113,17 @@ void AMecha::ProgressText()
 	}
 }
 
-void AMecha::DashForward() //TODO: Figure out if side dashes are needed.
+void AMecha::DashForward() //TODO: Dash hit can move played to center of object. Has to go
 {
-	FHitResult dashHit;
+	/*FHitResult dashHit;
 	const float dashDistance = 1000.f;
 	if (GetWorld()->LineTraceSingleByChannel(dashHit, GetActorLocation(), GetActorLocation() + forwardAxis * dashDistance, ECC_WorldStatic, moveParams))
 	{
-		nextLoc = dashHit.GetActor()->GetActorLocation() - (forwardAxis * 100.f);
+		nextLoc = dashHit.ImpactPoint - (forwardAxis * 100.f);
 		nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 		nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
 		nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 		moveSpeed = dashSpeed;
-	}
+	}*/
 }

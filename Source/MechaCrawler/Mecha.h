@@ -53,13 +53,20 @@ public:
 	void ProgressText();
 	void DashForward();
 
+	UPROPERTY(VisibleAnywhere)
 	FVector nextLoc;
+	UPROPERTY(VisibleAnywhere)
 	FVector currentLoc;
+	UPROPERTY(VisibleAnywhere)
+	FVector lastLoc;
 
 	FQuat currentRot;
 	FQuat nextRot;
 
 	FRotator cameraRot;
+
+	UPROPERTY(EditAnywhere)
+	class UMaterialParameterCollection* outlineParams;
 
 	class UCameraComponent* camera;
 	class APlayerController* controller;
