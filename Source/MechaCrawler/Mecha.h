@@ -197,6 +197,8 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	bool submerged = false;
 
+	bool bDialogueClick = false;
+
 	bool canMove = true;
 	bool bFadeOutRebuild = false;
 	float fadeOutTimer = 0.f;

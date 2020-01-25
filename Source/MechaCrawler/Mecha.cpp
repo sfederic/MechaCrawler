@@ -122,8 +122,10 @@ void AMecha::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 
-
-	instancedRebuildManager->RebuildTimers();
+	if (instancedRebuildManager)
+	{
+		instancedRebuildManager->RebuildTimers();
+	}
 
 	//MOVEMENT AXIS
 	rootAxes[0] = RootComponent->GetForwardVector();
@@ -306,7 +308,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AMecha::MoveForward(float val)
 {
-	if ((val != 0.f) && (falling == false) && (canMove))
+	if ((val != 0.f) && (falling == false) && (canMove) && (!bDialogueClick))
 	{
 		FVector loc = GetActorLocation();
 
@@ -380,7 +382,7 @@ void AMecha::MoveForward(float val)
 
 void AMecha::MoveBack(float val)
 {
-	if ((val != 0.f) && (falling == false) && (canMove))
+	if ((val != 0.f) && (falling == false) && (canMove) && (!bDialogueClick))
 	{
 		FVector loc = GetActorLocation();
 
@@ -452,7 +454,7 @@ void AMecha::MoveBack(float val)
 
 void AMecha::MoveLeft(float val)
 {
-	if ((val != 0.f) && (falling == false) && (canMove))
+	if ((val != 0.f) && (falling == false) && (canMove) && (!bDialogueClick))
 	{
 		FVector loc = GetActorLocation();
 
@@ -524,7 +526,7 @@ void AMecha::MoveLeft(float val)
 
 void AMecha::MoveRight(float val)
 {
-	if ((val != 0.f) && (falling == false) && (canMove))
+	if ((val != 0.f) && (falling == false) && (canMove) && (!bDialogueClick))
 	{
 		FVector loc = GetActorLocation();
 
@@ -615,6 +617,11 @@ void AMecha::LookPitch(float val)
 
 void AMecha::SetScan()
 {
+	if (bDialogueClick)
+	{
+		return;
+	}
+
 	//TODO: Find a better representation for actors that can be destroyed with scanner
 	if (!scanning)
 	{
@@ -677,6 +684,12 @@ void AMecha::RightMousePressed()
 	//USING
 	if (!scanning)
 	{
+		if (bDialogueClick)
+		{
+			ProgressText();
+			return;
+		}
+
 		if (GetWorld()->LineTraceSingleByChannel(useHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * useDistance, ECC_WorldStatic))
 		{
 			AActor* useActor = useHit.GetActor();
@@ -692,6 +705,8 @@ void AMecha::RightMousePressed()
 				UDialogueComponent* dialogueComponent = useActor->FindComponentByClass<UDialogueComponent>();
 				if (dialogueComponent && textBoxWidget->IsInViewport() == false)
 				{
+					bDialogueClick = true;
+
 					FString context;
 					dialogueComponent->mainTextBoxTable->GetAllRows<FTextBox>(context, textBoxRows);
 					textBoxIndex = 0;
@@ -722,6 +737,12 @@ void AMecha::RightMousePressed()
 //SHOOTING
 void AMecha::LeftMousePressed()
 {
+	if (bDialogueClick)
+	{
+		ProgressText();
+		return;
+	}
+
 	//if (val)
 	{
 		//TODO: put cam shake into weapon blueprint
@@ -1106,6 +1127,7 @@ void AMecha::ProgressText()
 		}
 		else
 		{
+			bDialogueClick = false;
 			textBoxIndex = 0;
 			textBoxRows.Empty();
 			textBoxWidget->RemoveFromViewport();
