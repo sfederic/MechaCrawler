@@ -121,6 +121,7 @@ void AMecha::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	Scan();
 
 	if (instancedRebuildManager)
 	{
@@ -680,7 +681,8 @@ void AMecha::RightMousePressed()
 					return;
 				}
 
-				UDialogueComponent* dialogueComponent = useActor->FindComponentByClass<UDialogueComponent>();
+				//TODO: Cleanup
+				/*UDialogueComponent* dialogueComponent = useActor->FindComponentByClass<UDialogueComponent>();
 				if (dialogueComponent && textBoxWidget->IsInViewport() == false)
 				{
 					bDialogueClick = true;
@@ -697,7 +699,7 @@ void AMecha::RightMousePressed()
 					}
 
 					return;
-				}
+				}*/
 
 				if (useActor->Tags.Contains(Tags::Destroy) == false) //Keep this for interactiable actors that can be destroyed and respawned
 				{
@@ -719,6 +721,34 @@ void AMecha::LeftMousePressed()
 	{
 		ProgressText();
 		return;
+	}
+
+	if (scanning)
+	{
+		/*AActor* scanActor = scanHit.GetActor();
+		UDialogueComponent* scanDialogue = scanActor->FindComponentByClass<UDialogueComponent>();
+		if (scanDialogue)
+		{
+			if (textBoxWidget->IsInViewport() == false)
+			{
+				bDialogueClick = true;
+
+				FString context;
+				scanDialogue->mainTextBoxTable->GetAllRows<FTextBox>(context, textBoxRows);
+				textBoxIndex = 0;
+				if (textBoxRows.Num() > 0)
+				{
+					textBoxWidget->name = textBoxRows[textBoxIndex]->name;
+					textBoxWidget->text = textBoxRows[textBoxIndex]->text;
+					textBoxWidget->image = textBoxRows[textBoxIndex]->image;
+					textBoxWidget->AddToViewport();
+				}
+
+				return;
+			}
+		}*/
+
+		GetDialogue(scanHit.GetActor());
 	}
 
 	//if (val)
@@ -1134,13 +1164,15 @@ void AMecha::LeftMousePressedScan(float val)
 	{
 		if (scanWidget->IsInViewport())
 		{
-			//const float scanBarSpeed = 0.5f;
+			/*const float scanBarSpeed = 0.5f;
 			scanWidget->scanBarProgress += FApp::GetDeltaTime() * val;
 
 			if (scanWidget->scanBarProgress >= 1.0f)
 			{
 				Scan();
-			}
+			}*/
+
+			Scan();
 		}
 	}
 	else
@@ -1172,6 +1204,29 @@ void AMecha::Scan()
 		{
 			scanWidget->scanEntry = FString(TEXT("No Scan data."));
 			scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
+		}
+	}
+}
+
+void AMecha::GetDialogue(AActor* dialogueActor)
+{
+	UDialogueComponent* dialogue = dialogueActor->FindComponentByClass<UDialogueComponent>();
+	if (dialogue)
+	{
+		if (textBoxWidget->IsInViewport() == false)
+		{
+			bDialogueClick = true;
+
+			FString context;
+			dialogue->mainTextBoxTable->GetAllRows<FTextBox>(context, textBoxRows);
+			textBoxIndex = 0;
+			if (textBoxRows.Num() > 0)
+			{
+				textBoxWidget->name = textBoxRows[textBoxIndex]->name;
+				textBoxWidget->text = textBoxRows[textBoxIndex]->text;
+				textBoxWidget->image = textBoxRows[textBoxIndex]->image;
+				textBoxWidget->AddToViewport();
+			}
 		}
 	}
 }

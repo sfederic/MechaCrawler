@@ -54,6 +54,7 @@ public:
 	void ProgressText();
 	void DashForward();
 	void Scan();
+	void GetDialogue(AActor* dialogueActor);
 
 	UPROPERTY(VisibleAnywhere)
 	FVector nextLoc;
