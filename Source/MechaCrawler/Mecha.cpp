@@ -211,30 +211,6 @@ void AMecha::Tick(float DeltaTime)
 		}
 	}
 
-	//SCANNING
-	if (scanning && scanWidget)
-	{
-		if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(),
-			camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_WorldDynamic))
-		{
-			AActor* actor = scanHit.GetActor();
-			if(actor)
-			{
-				UScanData* scanData = actor->FindComponentByClass<UScanData>();
-				if (scanData)
-				{
-					scanWidget->scanEntry = scanData->scanText;
-					scanWidget->scanNameEntry = scanData->scanName;
-				}
-			}
-		}
-		else
-		{
-			scanWidget->scanEntry = FString(TEXT("No Scan data."));
-			scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
-		}
-	}
-
 	UseObject(); //For 'Use' UI
 
 	//Actor/Camera Rotation & Movement
@@ -290,6 +266,8 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	//Inputs bound to mouse axis instead of Up/Down. Find out why didn't work.
 	InputComponent->BindAxis("MouseWheelUp", this, &AMecha::ZoomIn);
 	InputComponent->BindAxis("MouseWheelDown", this, &AMecha::ZoomOut);
+
+	InputComponent->BindAxis("LeftMouseScan", this, &AMecha::LeftMousePressedScan);
 	
 	InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed);
 	InputComponent->BindAction("Scan", EInputEvent::IE_Pressed, this, &AMecha::SetScan);
@@ -1148,4 +1126,52 @@ void AMecha::DashForward() //TODO: Dash hit can move played to center of object.
 
 		moveSpeed = dashSpeed;
 	}*/
+}
+
+void AMecha::LeftMousePressedScan(float val)
+{
+	if (scanning && val)
+	{
+		if (scanWidget->IsInViewport())
+		{
+			//const float scanBarSpeed = 0.5f;
+			scanWidget->scanBarProgress += FApp::GetDeltaTime() * val;
+
+			if (scanWidget->scanBarProgress >= 1.0f)
+			{
+				Scan();
+			}
+		}
+	}
+	else
+	{
+		scanWidget->scanBarProgress = 0.f;
+	}
+}
+
+void AMecha::Scan()
+{
+	//SCANNING
+	if (scanning && scanWidget)
+	{
+		if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(),
+			camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_WorldDynamic))
+		{
+			AActor* actor = scanHit.GetActor();
+			if (actor)
+			{
+				UScanData* scanData = actor->FindComponentByClass<UScanData>();
+				if (scanData)
+				{
+					scanWidget->scanEntry = scanData->scanText;
+					scanWidget->scanNameEntry = scanData->scanName;
+				}
+			}
+		}
+		else
+		{
+			scanWidget->scanEntry = FString(TEXT("No Scan data."));
+			scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
+		}
+	}
 }

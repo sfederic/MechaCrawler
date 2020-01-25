@@ -39,6 +39,7 @@ public:
 	void SetScan();
 	void RightMousePressed();
 	void LeftMousePressed();
+	void LeftMousePressedScan(float val);
 	void SetWayPoint();
 	void OpenInventory();
 	void Zoom();
@@ -52,6 +53,7 @@ public:
 	void ChangeWeapon();
 	void ProgressText();
 	void DashForward();
+	void Scan();
 
 	UPROPERTY(VisibleAnywhere)
 	FVector nextLoc;

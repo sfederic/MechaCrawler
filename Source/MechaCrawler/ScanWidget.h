@@ -16,6 +16,9 @@ class MECHACRAWLER_API UScanWidget : public UUserWidget
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float scanBarProgress = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString scanEntry;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
