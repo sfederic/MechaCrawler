@@ -13,6 +13,10 @@ void AGridActor::BeginPlay()
 	Super::BeginPlay();
 
 	originalLoc = GetActorLocation();
+	nextLoc = GetActorLocation();
+	currentLoc = nextLoc;
+	currentRot = FQuat(GetActorRotation());
+	nextRot = currentRot;
 }
 
 void AGridActor::Tick(float DeltaTime)

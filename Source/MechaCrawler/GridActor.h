@@ -40,6 +40,12 @@ public:
 	void OnPlayerOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UPROPERTY(VisibleAnywhere)
+	FQuat currentRot;
+
+	UPROPERTY(VisibleAnywhere)
+	FQuat nextRot;
+
+	UPROPERTY(VisibleAnywhere)
 	FVector currentLoc;
 
 	UPROPERTY(VisibleAnywhere)
