@@ -299,7 +299,7 @@ void AMecha::MoveForward(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
-					/*if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
+					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
 					{
 						nextLoc = loc + (forwardAxis * moveDistance);
 						nextLoc.X = FMath::RoundToFloat(nextLoc.X);
@@ -307,7 +307,7 @@ void AMecha::MoveForward(float val)
 						nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 						return;
-					}*/
+					}
 
 
 					if (!results[i].GetActor()->Tags.Contains(Tags::Destroy) && !results[i].GetActor()->Tags.Contains(Tags::Pickup))
