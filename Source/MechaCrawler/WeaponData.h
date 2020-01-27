@@ -23,6 +23,9 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditAnywhere)
+	UParticleSystem* weaponParticle;
+
+	UPROPERTY(EditAnywhere)
 	UCameraShake* camShake;
 
 	UPROPERTY(EditAnywhere)

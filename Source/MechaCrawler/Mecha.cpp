@@ -859,6 +859,11 @@ void AMecha::LeftMousePressed()
 								UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), explosionParticle, shootHit.ImpactPoint);
 							}
 						}
+
+						if (weaponData->weaponParticle)
+						{
+							UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), weaponData->weaponParticle, shootHit.ImpactPoint);
+						}
 					}
 				}
 
