@@ -305,6 +305,11 @@ void AMecha::MoveForward(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
+					if (results[i].GetActor()->Tags.Contains(Tags::CantMove))
+					{
+						return;
+					}
+
 					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
 					{
 						nextLoc = loc + (forwardAxis * moveDistance);
@@ -378,6 +383,11 @@ void AMecha::MoveBack(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
+					if (results[i].GetActor()->Tags.Contains(Tags::CantMove))
+					{
+						return;
+					}
+
 					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
 					{
 						nextLoc = loc - (forwardAxis * moveDistance);
@@ -450,6 +460,11 @@ void AMecha::MoveLeft(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
+					if (results[i].GetActor()->Tags.Contains(Tags::CantMove))
+					{
+						return;
+					}
+
 					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
 					{
 						nextLoc = loc - (rightAxis * moveDistance);
@@ -522,6 +537,11 @@ void AMecha::MoveRight(float val)
 			{
 				for (int i = 0; i < results.Num(); i++)
 				{
+					if (results[i].GetActor()->Tags.Contains(Tags::CantMove))
+					{
+						return;
+					}
+
 					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
 					{
 						nextLoc = loc + (rightAxis * moveDistance);
