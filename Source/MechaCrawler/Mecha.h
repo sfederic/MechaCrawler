@@ -41,7 +41,7 @@ public:
 	void LeftMousePressed();
 	void LeftMousePressedScan(float val);
 	void SetWayPoint();
-	void OpenInventory();
+	void StartLevel();
 	void Zoom();
 	void AddNote();
 	void DeleteAllNotes();
@@ -108,6 +108,9 @@ public:
 	//TODO: move into playerhud.h/cpp
 	//WIDGET CLASSES
 	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> startLevelWidgetClass;
+
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> textBoxWidgetClass;
 
 	UPROPERTY(EditAnywhere)
@@ -132,6 +135,9 @@ public:
 
 	UPROPERTY()
 	UActivateWidget* useWidget;
+
+	UPROPERTY()
+	UUserWidget* startLevelWidget;
 
 	UPROPERTY()
 	UInventoryWidget* inventoryWidget;
@@ -167,7 +173,7 @@ public:
 	FHitResult lookHit;
 
 	FHitResult useHit;
-	float useDistance = 175.f;
+	float useDistance = 10000.f; //TODO: Figure out whether to use Zelda/Metroid like distance switches
 
 	FHitResult shootHit;
 
@@ -205,4 +211,7 @@ public:
 	bool canMove = true;
 	bool bFadeOutRebuild = false;
 	float fadeOutTimer = 0.f;
+
+	UPROPERTY(EditAnywhere)
+	bool bStartLevelOnShip;
 };

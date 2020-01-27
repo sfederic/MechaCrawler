@@ -42,7 +42,7 @@ void AGravityTunnel::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor*
 
 		if (GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + GetActorForwardVector() * 1000.f, ECC_WorldStatic, params))
 		{
-			player->nextLoc = hit.GetActor()->GetActorLocation() + hit.ImpactNormal * 100.f;
+			player->nextLoc = hit.ImpactPoint + hit.ImpactNormal * 50.f;
 		}
 	}
 	/*else if(grid)

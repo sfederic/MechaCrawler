@@ -58,6 +58,12 @@ void AMecha::BeginPlay()
 	}
 
 	//INIT WIDGETS
+	if (bStartLevelOnShip)
+	{
+		startLevelWidget = CreateWidget<UUserWidget>(GetWorld(), startLevelWidgetClass);
+		startLevelWidget->AddToViewport();
+	}
+
 	textBoxWidget = CreateWidget<UTextBoxWidget>(GetWorld(), textBoxWidgetClass);
 	if(textBoxWidget == nullptr)
 	{
@@ -171,7 +177,7 @@ void AMecha::Tick(float DeltaTime)
 	}
 
 	//GRAVITY
-	if (currentLoc == nextLoc && currentRot == nextRot)
+	if (currentLoc == nextLoc && currentRot == nextRot && bStartLevelOnShip == false)
 	{
 		FVector loc = GetActorLocation();
 
@@ -275,7 +281,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAction("RightMouse", EInputEvent::IE_Pressed, this, &AMecha::RightMousePressed);
 	//InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed);
 	InputComponent->BindAction("Space", EInputEvent::IE_Pressed, this, &AMecha::SetWayPoint);
-	InputComponent->BindAction("Enter", EInputEvent::IE_Pressed, this, &AMecha::OpenInventory);
+	InputComponent->BindAction("Enter", EInputEvent::IE_Pressed, this, &AMecha::StartLevel);
 	//InputComponent->BindAction("Zoom", EInputEvent::IE_Pressed, this, &AMecha::Zoom);
 	InputComponent->BindAction("Note", EInputEvent::IE_Pressed, this, &AMecha::AddNote);
 	InputComponent->BindAction("Backspace", EInputEvent::IE_Pressed, this, &AMecha::DeleteAllNotes);
@@ -287,7 +293,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AMecha::MoveForward(float val)
 {
-	if ((val != 0.f) && (falling == false) && (canMove) && (!bDialogueClick))
+	if ((val != 0.f) && (falling == false) && (canMove) && (!bDialogueClick) && (!bStartLevelOnShip))
 	{
 		FVector loc = GetActorLocation();
 
@@ -361,7 +367,7 @@ void AMecha::MoveForward(float val)
 
 void AMecha::MoveBack(float val)
 {
-	if ((val != 0.f) && (falling == false) && (canMove) && (!bDialogueClick))
+	if ((val != 0.f) && (falling == false) && (canMove) && (!bDialogueClick) && (!bStartLevelOnShip))
 	{
 		FVector loc = GetActorLocation();
 
@@ -433,7 +439,7 @@ void AMecha::MoveBack(float val)
 
 void AMecha::MoveLeft(float val)
 {
-	if ((val != 0.f) && (falling == false) && (canMove) && (!bDialogueClick))
+	if ((val != 0.f) && (falling == false) && (canMove) && (!bDialogueClick) && (!bStartLevelOnShip))
 	{
 		FVector loc = GetActorLocation();
 
@@ -505,7 +511,7 @@ void AMecha::MoveLeft(float val)
 
 void AMecha::MoveRight(float val)
 {
-	if ((val != 0.f) && (falling == false) && (canMove) && (!bDialogueClick))
+	if ((val != 0.f) && (falling == false) && (canMove) && (!bDialogueClick) && (!bStartLevelOnShip))
 	{
 		FVector loc = GetActorLocation();
 
@@ -853,9 +859,19 @@ void AMecha::LeftMousePressed()
 	}
 }
 
-void AMecha::OpenInventory()
+//Also starts level from crane
+void AMecha::StartLevel()
 {
-	if (inventoryWidget && controller)
+	if (bStartLevelOnShip == true)
+	{
+		bStartLevelOnShip = false;
+		startLevelWidget->RemoveFromViewport();
+		UGameplayStatics::PlayWorldCameraShake(GetWorld(), cameraShake, GetActorLocation(), 500.f, 1.f); 
+		camera->FieldOfView = maxFOV;
+	}
+
+	//TODO: Function was previously open inventory. Decide if need to keep
+	/*if (inventoryWidget && controller)
 	{
 		if (inventoryWidget->IsInViewport() == false)
 		{
@@ -871,7 +887,7 @@ void AMecha::OpenInventory()
 			controller->bShowMouseCursor = false;
 			inventoryWidget->RemoveFromViewport();
 		}
-	}
+	}*/
 }
 
 //TODO: Set in binocular UI for later. Don't need for now.
