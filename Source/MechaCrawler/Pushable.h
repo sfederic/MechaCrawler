@@ -25,11 +25,17 @@ public:
 	virtual void Use() override;
 	virtual void Rebuild() override;
 	virtual UScanData* Scan() override;
+	void SetPlayerMove();
+
+	class AMecha* player;
 
 	FHitResult moveHit;
 	FCollisionQueryParams moveParams;
 
-	FVector originalLoc; //For respawning pushables. 13 secret Herbs and Transforms
+	FTimerHandle playerMoveTimer;
+
+	UPROPERTY(EditAnywhere)
+	FVector gravityVector;
 
 	UPROPERTY(EditAnywhere)
 	float moveSpeed;
@@ -40,6 +46,8 @@ public:
 	float moveDistance;
 
 	bool falling;
+
+	bool bMoving = false;
 
 private:
 	float maxFallDistance = 10000.f;

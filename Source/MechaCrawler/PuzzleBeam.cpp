@@ -50,3 +50,8 @@ void APuzzleBeam::Tick(float DeltaTime)
 		}
 	}
 }
+
+void APuzzleBeam::Rebuild()
+{
+	SetActorRotation(originalRot);
+}

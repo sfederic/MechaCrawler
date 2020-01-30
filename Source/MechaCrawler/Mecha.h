@@ -208,7 +208,9 @@ public:
 
 	bool bDialogueClick = false;
 
+	UPROPERTY(VisibleAnywhere)
 	bool canMove = true;
+
 	bool bFadeOutRebuild = false;
 	float fadeOutTimer = 0.f;
 

@@ -17,6 +17,7 @@ void AGridActor::BeginPlay()
 	currentLoc = nextLoc;
 	currentRot = FQuat(GetActorRotation());
 	nextRot = currentRot;
+	originalRot = FQuat(GetActorRotation());
 }
 
 void AGridActor::Tick(float DeltaTime)

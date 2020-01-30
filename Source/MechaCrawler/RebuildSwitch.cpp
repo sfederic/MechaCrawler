@@ -7,6 +7,7 @@
 #include "IceComponent.h"
 #include "Materials/MaterialParameterCollectionInstance.h" 
 #include "Engine/PostProcessVolume.h"
+#include "Components/BoxComponent.h"
 
 ARebuildSwitch::ARebuildSwitch()
 {
@@ -18,8 +19,12 @@ void ARebuildSwitch::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	UBoxComponent* box = FindComponentByClass<UBoxComponent>();
+	box->OnComponentBeginOverlap.AddDynamic(this, &ARebuildSwitch::OnPlayerOverlapBegin);
+
 	rebuildSwitchPlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	rebuildSwitchPlayer = Cast<AMecha>(rebuildSwitchPlayerPawn);
+	check(rebuildSwitchPlayer);
 
 	paramInstance = GetWorld()->GetParameterCollectionInstance(outlineParams);
 }
@@ -28,47 +33,59 @@ void ARebuildSwitch::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if(rebuildSwitchPlayer && switchActivated == false)
+	if (rebuildSwitchPlayer && switchActivated == false)
 	{
 		if (rebuildSwitchPlayer->GetActorLocation().Equals(GetActorLocation()))
 		{
-			//rebuildSwitchPlayer->bFadeOutRebuild = true;
-			bRebuildPulseEffect = true;
-
 			rebuildTimer += FApp::GetDeltaTime();
-			rebuildSwitchPlayer->canMove = false;
 
-			RebuildAll();
-
-			//Rebuild Pulse effect
-			if (bRebuildPulseEffect && rebuildPulseEffectTimer == 0.f)
+			if (rebuildTimer > 0.5f)
 			{
-				bRebuildPulseEffect = false;
-				rebuildPulseEffectTimer += FApp::GetDeltaTime();
-				postProcessMain->Settings.AddBlendable(postProcessOutline, 1.0f);
-			}
+				//rebuildSwitchPlayer->bFadeOutRebuild = true;
+				bRebuildPulseEffect = true;
 
-			if (rebuildPulseEffectTimer < 2.0f)
-			{
-				rebuildPulseEffectValue += FApp::GetDeltaTime() * 500.f;
-				paramInstance->SetScalarParameterValue(TEXT("Radius"), rebuildPulseEffectValue);
-				rebuildPulseEffectTimer += FApp::GetDeltaTime();
-			}
-			else if (rebuildPulseEffectTimer > 2.0f)
-			{
-				rebuildPulseEffectValue = 0.f;
-				paramInstance->SetScalarParameterValue(TEXT("Radius"), rebuildPulseEffectValue);
+				rebuildSwitchPlayer->canMove = false;
 
-				postProcessMain->Settings.RemoveBlendable(postProcessOutline);
-				rebuildPulseEffectTimer = 0.f;
-			}
+				RebuildAll();
 
-			if (rebuildTimer > 2.0f) //half of what is being used in Mecha.cpp
-			{
-				rebuildSwitchPlayer->canMove = true;
-				switchActivated = true;
+				//Rebuild Pulse effect
+				if (bRebuildPulseEffect && rebuildPulseEffectTimer == 0.f)
+				{
+					bRebuildPulseEffect = false;
+					rebuildPulseEffectTimer += FApp::GetDeltaTime();
 
-				rebuildTimer = 0.f;
+					if (postProcessMain)
+					{
+						postProcessMain->Settings.AddBlendable(postProcessOutline, 1.0f);
+					}
+				}
+
+				if (rebuildPulseEffectTimer < 2.5f)
+				{
+					rebuildPulseEffectValue += FApp::GetDeltaTime() * 500.f;
+					paramInstance->SetScalarParameterValue(TEXT("Radius"), rebuildPulseEffectValue);
+					rebuildPulseEffectTimer += FApp::GetDeltaTime();
+				} 
+				else if (rebuildPulseEffectTimer > 2.5f)
+				{
+					rebuildPulseEffectValue = 0.f;
+					paramInstance->SetScalarParameterValue(TEXT("Radius"), rebuildPulseEffectValue);
+
+					if (postProcessMain)
+					{
+						postProcessMain->Settings.RemoveBlendable(postProcessOutline);
+					}
+
+					rebuildPulseEffectTimer = 0.f;
+				}
+
+				if (rebuildTimer > 2.5f && rebuildPulseEffectTimer == 0.f) //this is awful using the two timers together
+				{
+					rebuildSwitchPlayer->canMove = true;
+					switchActivated = true;
+
+					rebuildTimer = 0.f;
+				}
 			}
 		}
 	}
@@ -95,5 +112,13 @@ void ARebuildSwitch::RebuildAll()
 		{
 			iceBlock->TurnToIce();
 		}
+	}
+}
+
+void ARebuildSwitch::OnPlayerOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (switchActivated == false)
+	{
+		switchActivated = true;
 	}
 }

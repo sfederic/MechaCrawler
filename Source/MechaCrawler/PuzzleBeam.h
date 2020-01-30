@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GridActor.h"
+#include "Rebuild.h"
 #include "PuzzleBeam.generated.h"
 
 UCLASS()
-class MECHACRAWLER_API APuzzleBeam : public AGridActor
+class MECHACRAWLER_API APuzzleBeam : public AGridActor, public IRebuild
 {
 	GENERATED_BODY()
 	
@@ -19,6 +20,7 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
+	virtual void Rebuild() override;
 
 	FHitResult beamHit;
 	FCollisionQueryParams beamParams;

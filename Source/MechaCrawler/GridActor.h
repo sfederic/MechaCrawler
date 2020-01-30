@@ -53,4 +53,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	FVector originalLoc;
+
+	UPROPERTY(VisibleAnywhere)
+	FQuat originalRot;
 };

@@ -6,6 +6,7 @@
 #include "Activate.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/MeshComponent.h"
+#include "DestructibleComponent.h"
 
 ABlockSwitch::ABlockSwitch()
 {
@@ -34,6 +35,7 @@ void ABlockSwitch::Tick(float DeltaTime)
 		if (pushableActors[i]->GetActorLocation().Equals(this->GetActorLocation()))
 		{
 			mesh->SetMaterial(0, activatedMat);
+			ActivateConnection();
 			return;
 		}
 	}
@@ -51,7 +53,16 @@ void ABlockSwitch::ActivateConnection()
 {
 	if (connectedActor)
 	{
-		IActivate* connect = Cast<IActivate>(connectedActor);
-		connect->Use();
+		//IActivate* connect = Cast<IActivate>(connectedActor);
+		//connect->Use();
+
+		if (connectedActor->IsA<ADestructibleActor>())
+		{
+			UDestructibleComponent* dc = connectedActor->FindComponentByClass<UDestructibleComponent>();
+			if (dc)
+			{
+				dc->ApplyDamage(10000.f, connectedActor->GetActorLocation(), connectedActor->GetActorForwardVector(), 1000.f);
+			}
+		}
 	}
 }

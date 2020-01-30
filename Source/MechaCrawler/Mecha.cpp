@@ -229,6 +229,7 @@ void AMecha::Tick(float DeltaTime)
 	currentLoc = FMath::VInterpConstantTo(currentLoc, nextLoc, DeltaTime, moveSpeed);
 	SetActorLocation(currentLoc);
 
+
 	//Rebuild Postprocess effect (fade out)
 	if (bFadeOutRebuild)
 	{
@@ -1184,19 +1185,19 @@ void AMecha::ProgressText()
 	}
 }
 
-void AMecha::DashForward() //TODO: Dash hit can move played to center of object. Has to go
+void AMecha::DashForward()
 {
-	/*FHitResult dashHit;
+	FHitResult dashHit;
 	const float dashDistance = 1000.f;
 	if (GetWorld()->LineTraceSingleByChannel(dashHit, GetActorLocation(), GetActorLocation() + forwardAxis * dashDistance, ECC_WorldStatic, moveParams))
 	{
-		nextLoc = dashHit.ImpactPoint - (forwardAxis * 100.f);
+		nextLoc = dashHit.ImpactPoint - (forwardAxis * 50.f);
 		nextLoc.X = FMath::RoundToFloat(nextLoc.X);
 		nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
 		nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 		moveSpeed = dashSpeed;
-	}*/
+	}
 }
 
 void AMecha::LeftMousePressedScan(float val)
