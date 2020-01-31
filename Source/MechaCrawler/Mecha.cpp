@@ -631,7 +631,10 @@ void AMecha::SetScan()
 	//TODO: Find a better representation for actors that can be destroyed with scanner
 	if (!scanning)
 	{
-		postProcessMain->Settings.AddBlendable(scanPostProcess, 1.0f);
+		if (postProcessMain)
+		{
+			postProcessMain->Settings.AddBlendable(scanPostProcess, 1.0f);
+		}
 
 		TArray<AActor*> destroyableScanActors;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADestructibleActor::StaticClass(), destroyableScanActors);
@@ -1159,7 +1162,10 @@ void AMecha::ChangeWeapon()
 	{
 		weapon->SetVisibility(true);
 		UWeaponData* weaponData = weapon->GetChildActor()->FindComponentByClass<UWeaponData>();
-		attackDistance = weaponData->range;
+		if (weaponData)
+		{
+			attackDistance = weaponData->range;
+		}
 	}
 }
 
