@@ -646,7 +646,10 @@ void AMecha::SetScan()
 	} 
 	else if (scanning)
 	{
-		postProcessMain->Settings.RemoveBlendable(scanPostProcess);
+		if (postProcessMain)
+		{
+			postProcessMain->Settings.RemoveBlendable(scanPostProcess);
+		}
 
 		TArray<AActor*> destroyableScanActors;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADestructibleActor::StaticClass(), destroyableScanActors);
@@ -801,6 +804,10 @@ void AMecha::LeftMousePressed()
 					enemyDc->ApplyDamage(destructibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
 					shotEnemy->SetLifeSpan(3.0);
 					shotEnemy->Tags.Add(Tags::Destroy);
+				}
+				else
+				{
+					shotEnemy->Destroy();
 				}
 
 				return;
@@ -1235,7 +1242,7 @@ void AMecha::Scan()
 	if (scanning && scanWidget)
 	{
 		if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(),
-			camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_WorldDynamic))
+			camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_GameTraceChannel1)) //TransparentScan
 		{
 			AActor* actor = scanHit.GetActor();
 			if (actor)
