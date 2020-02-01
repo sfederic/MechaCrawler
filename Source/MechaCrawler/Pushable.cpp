@@ -72,10 +72,12 @@ void APushable::Use()
 		if (player)
 		{
 			FVector playerForward = player->forwardAxis;
-			if (playerForward.Equals(FVector::UpVector))
+
+			//This was something about the player pushing upwards on ground
+			/*if (playerForward.Equals(FVector::UpVector))
 			{
 				return;
-			}
+			}*/
 
 			if (!GetWorld()->LineTraceSingleByChannel(moveHit, GetActorLocation(), GetActorLocation() + playerForward * moveDistance,
 				ECC_WorldStatic, moveParams))
@@ -87,7 +89,7 @@ void APushable::Use()
 
 				bMoving = true;
 
-				if (!GetWorld()->LineTraceSingleByChannel(moveHit, nextLoc, nextLoc - GetActorUpVector() * maxFallDistance, ECC_WorldStatic, moveParams))
+				if (!GetWorld()->LineTraceSingleByChannel(moveHit, nextLoc, nextLoc + gravityVector * maxFallDistance, ECC_WorldStatic, moveParams))
 				{
 					nextLoc = prevLoc;
 					return;

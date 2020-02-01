@@ -20,24 +20,20 @@ void AActivateSwitch::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	//TODO: Remove. For debug to show connected actor.
-	if (connectedActor)
+	for (int i = 0; i < connectedActors.Num(); i++)
 	{
-		DrawDebugLine(GetWorld(), GetActorLocation(), connectedActor->GetActorLocation(), FColor::Blue);
+		DrawDebugLine(GetWorld(), GetActorLocation(), connectedActors[i]->GetActorLocation(), FColor::Blue);
 	}
 }
 
 void AActivateSwitch::Use()
 {
-	if (connectedActor)
+	for (int i = 0; i < connectedActors.Num(); i++)
 	{
-		IActivate* use = Cast<IActivate>(connectedActor);
+		IActivate* use = Cast<IActivate>(connectedActors[i]);
 		if (use)
 		{
 			use->Use();
 		}
  	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No actor connected to %s"), *GetNameSafe(this));
-	}
 }

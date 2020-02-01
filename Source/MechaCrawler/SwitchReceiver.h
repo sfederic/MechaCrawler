@@ -4,24 +4,22 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Activate.h"
-#include "ActivateSwitch.generated.h"
+#include "SwitchReceiver.generated.h"
 
 UCLASS()
-class MECHACRAWLER_API AActivateSwitch : public AActor, public IActivate
+class MECHACRAWLER_API ASwitchReceiver : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
-	AActivateSwitch();
+	ASwitchReceiver();
 
 protected:
 	virtual void BeginPlay() override;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-	virtual void Use() override;
 
-	UPROPERTY(EditAnywhere)
-	TArray<AActor*> connectedActors;
+	UPROPERTY()
+	TArray<class ABlockSwitch*> switchActors;
 };

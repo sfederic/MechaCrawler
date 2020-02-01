@@ -5,15 +5,17 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Activate.h"
-#include "ActivateSwitch.generated.h"
+#include "ReverseGravitySwitch.generated.h"
+
+//For reversing Pushable actors
 
 UCLASS()
-class MECHACRAWLER_API AActivateSwitch : public AActor, public IActivate
+class MECHACRAWLER_API AReverseGravitySwitch : public AActor, public IActivate
 {
 	GENERATED_BODY()
 	
 public:	
-	AActivateSwitch();
+	AReverseGravitySwitch();
 
 protected:
 	virtual void BeginPlay() override;
@@ -22,6 +24,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void Use() override;
 
-	UPROPERTY(EditAnywhere)
-	TArray<AActor*> connectedActors;
+	UPROPERTY()
+	TArray<class APushable*> pushActors;
 };
