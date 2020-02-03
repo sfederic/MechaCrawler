@@ -127,7 +127,7 @@ void AMecha::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	Scan();
+	//Scan();
 
 	if (instancedRebuildManager)
 	{
@@ -278,9 +278,9 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	InputComponent->BindAxis("LeftMouseScan", this, &AMecha::LeftMousePressedScan);
 	
-	InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed);
+	InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed).bExecuteWhenPaused = true;
 	InputComponent->BindAction("Scan", EInputEvent::IE_Pressed, this, &AMecha::SetScan);
-	InputComponent->BindAction("RightMouse", EInputEvent::IE_Pressed, this, &AMecha::RightMousePressed);
+	InputComponent->BindAction("RightMouse", EInputEvent::IE_Pressed, this, &AMecha::RightMousePressed).bExecuteWhenPaused = true;
 	//InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed);
 	InputComponent->BindAction("Space", EInputEvent::IE_Pressed, this, &AMecha::SetWayPoint);
 	InputComponent->BindAction("Enter", EInputEvent::IE_Pressed, this, &AMecha::StartLevel);
@@ -618,13 +618,19 @@ void AMecha::MoveUp(float val)
 
 void AMecha::LookYaw(float val)
 {
-	cameraRot.Yaw += cameraSpeed * val;
+	if (scanWidget->scanBarProgress == 0.f)
+	{
+		cameraRot.Yaw += cameraSpeed * val;
+	}
 }
 
 void AMecha::LookPitch(float val)
 {
-	cameraRot.Pitch -= cameraSpeed * val;
-	cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch, -70.f, 70.f);
+	if (scanWidget->scanBarProgress == 0.f)
+	{
+		cameraRot.Pitch -= cameraSpeed * val;
+		cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch, -70.f, 70.f);
+	}
 }
 
 void AMecha::SetScan()
@@ -700,7 +706,16 @@ void AMecha::SetWayPoint()
 void AMecha::RightMousePressed()
 {
 	//USING
-	if (!scanning)
+	if (scanning && bDialogueClick == false)
+	{
+		if (scanHit.GetActor())
+		{
+			GetDialogue(scanHit.GetActor());
+			return;
+		}
+	}
+
+	//if (!scanning)
 	{
 		if (bDialogueClick)
 		{
@@ -748,6 +763,12 @@ void AMecha::RightMousePressed()
 						useable->Use();
 					}
 				}
+
+				if (useActor->Tags.Contains(Tags::Pickup))
+				{
+					//TODO: Add to some invecntory and a particle effect
+					useActor->Destroy();
+				}
 			}
 		}
 	}
@@ -787,7 +808,14 @@ void AMecha::LeftMousePressed()
 			}
 		}*/
 
-		GetDialogue(scanHit.GetActor());
+		if (UGameplayStatics::IsGamePaused(GetWorld()) && scanWidget->IsInViewport())
+		{
+			scanWidget->scanBarProgress = 0.f;
+			scanWidget->scanNameEntry = TEXT("Scanning...");
+			scanWidget->scanEntry = TEXT("No Entry");
+
+			UGameplayStatics::SetGamePaused(GetWorld(), false);
+		}
 	}
 
 	//if (val)
@@ -1199,7 +1227,7 @@ void AMecha::UseObject()
 			{
 				return;
 			}
-
+			
 			if (lookHit.GetActor()->Tags.Contains(Tags::Useable))
 			{
 				if (useWidget->IsInViewport() == false)
@@ -1278,6 +1306,8 @@ void AMecha::ProgressText()
 			textBoxIndex = 0;
 			textBoxRows.Empty();
 			textBoxWidget->RemoveFromViewport();
+
+			UGameplayStatics::SetGamePaused(GetWorld(), false);
 		}
 	}
 }
@@ -1303,15 +1333,13 @@ void AMecha::LeftMousePressedScan(float val)
 	{
 		if (scanWidget->IsInViewport())
 		{
-			/*const float scanBarSpeed = 0.5f;
+			const float scanBarSpeed = 2.0f;
 			scanWidget->scanBarProgress += FApp::GetDeltaTime() * val;
 
 			if (scanWidget->scanBarProgress >= 1.0f)
 			{
 				Scan();
-			}*/
-
-			Scan();
+			}
 		}
 	}
 	else
@@ -1336,6 +1364,24 @@ void AMecha::Scan()
 				{
 					scanWidget->scanEntry = scanData->scanText;
 					scanWidget->scanNameEntry = scanData->scanName;
+
+					UGameplayStatics::SetGamePaused(GetWorld(), true);
+				}
+			}
+		}
+		else if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(),
+				camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_WorldStatic)) 
+		{
+			AActor* actor = scanHit.GetActor();
+			if (actor)
+			{
+				UScanData* scanData = actor->FindComponentByClass<UScanData>();
+				if (scanData)
+				{
+					scanWidget->scanEntry = scanData->scanText;
+					scanWidget->scanNameEntry = scanData->scanName;
+
+					UGameplayStatics::SetGamePaused(GetWorld(), true);
 				}
 			}
 		}
@@ -1343,6 +1389,8 @@ void AMecha::Scan()
 		{
 			scanWidget->scanEntry = FString(TEXT("No Scan data."));
 			scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
+
+			UGameplayStatics::SetGamePaused(GetWorld(), true);
 		}
 	}
 }
@@ -1352,6 +1400,8 @@ void AMecha::GetDialogue(AActor* dialogueActor)
 	UDialogueComponent* dialogue = dialogueActor->FindComponentByClass<UDialogueComponent>();
 	if (dialogue)
 	{
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+
 		if (textBoxWidget->IsInViewport() == false)
 		{
 			bDialogueClick = true;

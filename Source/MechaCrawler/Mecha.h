@@ -40,6 +40,7 @@ public:
 	void RightMousePressed();
 	void LeftMousePressed();
 	void LeftMousePressedScan(float val);
+	void RightMousePressedScan(float val);
 	void SetWayPoint();
 	void StartLevel();
 	void Zoom();
