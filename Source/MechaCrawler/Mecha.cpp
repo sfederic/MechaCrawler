@@ -810,12 +810,11 @@ void AMecha::LeftMousePressed()
 						{
 							FTransform transform = {};
 							transform.SetLocation(shootHit.GetActor()->GetActorLocation());
-							transform.SetScale3D(FVector(1.0f));
-							transform.SetRotation(FQuat::Identity);
+							transform.SetScale3D(shootHit.GetActor()->GetActorScale3D());
+							transform.SetRotation(FQuat(shootHit.GetActor()->GetActorRotation()));
 
 							if (iceBlockClass)
 							{
-
 								TArray<AActor*> existingIceBlocks;
 								UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld(), ADestructibleActor::StaticClass(), Tags::Ice, existingIceBlocks);
 								for (int i = 0; i < existingIceBlocks.Num(); i++)
@@ -832,6 +831,7 @@ void AMecha::LeftMousePressed()
 								shootHit.GetActor()->SetActorEnableCollision(false);
 
 								ADestructibleActor* iceBlock = GetWorld()->SpawnActor<ADestructibleActor>(iceBlockClass, transform);
+								//iceBlock->SetActorScale3D(shootHit.GetActor()->GetActorScale3D);
 
 								iceBlock->Tags.Add(Tags::DontRebuild);
 								return;
