@@ -26,6 +26,7 @@ public:
 	UFUNCTION()
 	void OnPlayerOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	UPROPERTY(VisibleAnywhere)
 	float rebuildTimer = 0.f;
 
 	bool switchActivated = false;
@@ -45,6 +46,10 @@ public:
 	class UMaterialParameterCollectionInstance* paramInstance;
 
 	bool bRebuildPulseEffect = false;
+
+	UPROPERTY(VisibleAnywhere)
 	float rebuildPulseEffectTimer = 0.f;
+
+	UPROPERTY(VisibleAnywhere)
 	float rebuildPulseEffectValue = 0.f;
 };

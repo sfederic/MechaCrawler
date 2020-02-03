@@ -33,9 +33,9 @@ void ARebuildSwitch::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (rebuildSwitchPlayer && switchActivated == false)
+	if (rebuildSwitchPlayer && switchActivated == true)
 	{
-		if (rebuildSwitchPlayer->GetActorLocation().Equals(GetActorLocation()))
+		//if (rebuildSwitchPlayer->GetActorLocation().Equals(GetActorLocation()))
 		{
 			rebuildTimer += FApp::GetDeltaTime();
 
@@ -85,14 +85,14 @@ void ARebuildSwitch::Tick(float DeltaTime)
 					switchActivated = true;
 
 					rebuildTimer = 0.f;
+
+					if (switchActivated == true)
+					{
+						switchActivated = false;
+					}
 				}
 			}
 		}
-	}
-
-	if (switchActivated == true && rebuildSwitchPlayer->GetActorLocation().Equals(GetActorLocation()) == false)
-	{
-		switchActivated = false;
 	}
 }
 
@@ -117,8 +117,11 @@ void ARebuildSwitch::RebuildAll()
 
 void ARebuildSwitch::OnPlayerOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (switchActivated == false)
+	if (OtherActor->IsA<AMecha>())
 	{
-		switchActivated = true;
+		if (switchActivated == false)
+		{
+			switchActivated = true;
+		}
 	}
 }

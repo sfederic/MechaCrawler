@@ -25,8 +25,6 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	void RebuildTimers();
-	void RebuildPushables();
-	void RebuildDoors();
 
 	UPROPERTY(EditAnywhere)
 	bool debugActors;
@@ -34,7 +32,10 @@ public:
 	class AMecha* player;
 
 	UPROPERTY()
-	TArray<ADestructibleActor*> rebuildActors;
+	TArray<ADestructibleActor*> rebuildActors; //ADestructibleActors
+
+	UPROPERTY()
+	TArray<AActor*> normalRebuildActors; //AActors
 
 	UPROPERTY()
 	TArray<float> rebuildTimers;

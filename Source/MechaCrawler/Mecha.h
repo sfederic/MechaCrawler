@@ -125,6 +125,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ANoteNode> noteWidgetClass;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ADestructibleActor> iceBlockClass;
+
 	UPROPERTY()
 	UTextBoxWidget* textBoxWidget;
 	int textBoxIndex = 0;

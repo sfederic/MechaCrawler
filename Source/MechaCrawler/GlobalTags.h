@@ -9,8 +9,11 @@ namespace Tags
 	static const FName Pushable = "Pushable"; 
 	static const FName Scannable = "Scannable"; 
 	static const FName Pickup = "Pickup";
-	static const FName MoveThrough = "MoveThrough"; //Means player can walk through transparent actor
+	static const FName MoveThrough = "MoveThrough"; //Means player can walk through actor
 	static const FName Enemy = "Enemy";
 	static const FName ScanMarked = "ScanMarked";
 	static const FName CantMove = "CantMove"; //For when player can't rotate onto object
+	static const FName Water = "Water";
+	static const FName Ice = "Ice";
+	static const FName DontRebuild = "DontRebuild"; //Flaging actors that don't need to be rebuilt (ice block spawns etc.)
 }

@@ -16,7 +16,7 @@ AWaterVolume::AWaterVolume()
 void AWaterVolume::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	waterBounds = FindComponentByClass<UBoxComponent>();
 	if (waterBounds)
 	{
@@ -32,19 +32,10 @@ void AWaterVolume::Tick(float DeltaTime)
 
 void AWaterVolume::OnActorBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	AMecha* player = Cast<AMecha>(OtherActor);
-	if (player)
-	{
-		player->submerged = true;
-		player->falling = false;
-	}
+
 }
 
 void AWaterVolume::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	AMecha* player = Cast<AMecha>(OtherActor);
-	if (player)
-	{
-		player->submerged = false;
-	}
+
 }

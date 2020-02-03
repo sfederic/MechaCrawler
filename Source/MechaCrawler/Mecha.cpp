@@ -166,10 +166,11 @@ void AMecha::Tick(float DeltaTime)
 	forwardAxis = rootAxes[forwardAxisIndex];
 	rightAxis = rootAxes[rightAxisIndex];
 
-	if (submerged)
+	//TODO: Don't know if need water to change move speed
+	/*if (submerged)
 	{
 		moveSpeed = initialMoveSpeed;
-	}
+	}*/
 
 	if (!GetWorld()->LineTraceSingleByChannel(moveHit, GetActorLocation(), GetActorLocation() - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
 	{
@@ -196,7 +197,7 @@ void AMecha::Tick(float DeltaTime)
 		}*/
 
 		//For normal gravity
-		if (submerged == false)
+		//if (submerged == false)
 		{
 			if (!GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
 			{
@@ -206,9 +207,9 @@ void AMecha::Tick(float DeltaTime)
 				moveSpeed += FApp::GetDeltaTime() + 100.0f;
 
 				nextLoc = loc - (RootComponent->GetUpVector() * moveDistance);
-				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+				//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 			}
 			else
 			{
@@ -311,12 +312,13 @@ void AMecha::MoveForward(float val)
 						return;
 					}
 
+					//TODO: Maybe get rid of MoveThrough
 					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
 					{
 						nextLoc = loc + (forwardAxis * moveDistance);
-						nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-						nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-						nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+						//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+						//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+						//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 						return;
 					}
@@ -349,7 +351,11 @@ void AMecha::MoveForward(float val)
 					nextRot *= FQuat(FVector::ForwardVector, FMath::DegreesToRadians(90.f));
 				}
 
-				nextRot.Normalize();
+				//nextRot.Normalize();
+
+				//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 			}
 			else
 			{
@@ -357,9 +363,9 @@ void AMecha::MoveForward(float val)
 				lastLoc = currentLoc;
 
 				nextLoc = loc + (forwardAxis * moveDistance);
-				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+				//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 				if (!GetWorld()->LineTraceSingleByChannel(moveHit, nextLoc, nextLoc - GetActorUpVector() * maxFallDistance, ECC_WorldStatic, moveParams))
 				{
@@ -392,9 +398,9 @@ void AMecha::MoveBack(float val)
 					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
 					{
 						nextLoc = loc - (forwardAxis * moveDistance);
-						nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-						nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-						nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+						//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+						//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+						//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 						return;
 					}
@@ -426,7 +432,7 @@ void AMecha::MoveBack(float val)
 					nextRot *= FQuat(FVector::ForwardVector, FMath::DegreesToRadians(-90.f));
 				}
 
-				nextRot.Normalize();
+				//nextRot.Normalize();
 			}
 			else
 			{
@@ -434,9 +440,9 @@ void AMecha::MoveBack(float val)
 				lastLoc = currentLoc;
 
 				nextLoc = loc - (forwardAxis * moveDistance);
-				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+				//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 				if (!GetWorld()->LineTraceSingleByChannel(moveHit, nextLoc, nextLoc - GetActorUpVector() * maxFallDistance, ECC_WorldStatic, moveParams))
 				{
@@ -469,9 +475,9 @@ void AMecha::MoveLeft(float val)
 					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
 					{
 						nextLoc = loc - (rightAxis * moveDistance);
-						nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-						nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-						nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+						//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+						//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+						//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 						return;
 					}
@@ -503,7 +509,7 @@ void AMecha::MoveLeft(float val)
 					nextRot *= FQuat(FVector::ForwardVector, FMath::DegreesToRadians(90.f));
 				}
 
-				nextRot.Normalize();
+				//nextRot.Normalize();
 			}
 			else
 			{
@@ -511,9 +517,9 @@ void AMecha::MoveLeft(float val)
 				lastLoc = currentLoc;
 
 				nextLoc = loc - (rightAxis * moveDistance);
-				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+				//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 				if (!GetWorld()->LineTraceSingleByChannel(moveHit, nextLoc, nextLoc - GetActorUpVector() * maxFallDistance, ECC_WorldStatic, moveParams))
 				{
@@ -546,9 +552,9 @@ void AMecha::MoveRight(float val)
 					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
 					{
 						nextLoc = loc + (rightAxis * moveDistance);
-						nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-						nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-						nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+						//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+						//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+						//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 						return;
 					}
@@ -580,7 +586,7 @@ void AMecha::MoveRight(float val)
 					nextRot *= FQuat(FVector::ForwardVector, FMath::DegreesToRadians(-90.f));
 				}
 
-				nextRot.Normalize();
+				//nextRot.Normalize();
 			}
 			else
 			{
@@ -588,9 +594,9 @@ void AMecha::MoveRight(float val)
 				lastLoc = currentLoc;
 
 				nextLoc = loc + (rightAxis * moveDistance);
-				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+				//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 				if (!GetWorld()->LineTraceSingleByChannel(moveHit, nextLoc, nextLoc - GetActorUpVector() * maxFallDistance, ECC_WorldStatic, moveParams))
 				{
@@ -789,6 +795,53 @@ void AMecha::LeftMousePressed()
 		//TODO: put cam shake into weapon blueprint
 		//UGameplayStatics::PlayWorldCameraShake(GetWorld(), cameraShake, FVector(0.f), 500.f, 1.f); 
 
+		UChildActorComponent* iceWeapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
+		if (iceWeapon)
+		{
+			UWeaponData* weaponData = iceWeapon->GetChildActor()->FindComponentByClass<UWeaponData>();
+			if (weaponData)
+			{
+				if (weaponData->ice)
+				{
+					if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
+						GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_GameTraceChannel1))
+					{
+						if (shootHit.GetActor()->Tags.Contains(Tags::Water))
+						{
+							FTransform transform = {};
+							transform.SetLocation(shootHit.GetActor()->GetActorLocation());
+							transform.SetScale3D(FVector(1.0f));
+							transform.SetRotation(FQuat::Identity);
+
+							if (iceBlockClass)
+							{
+
+								TArray<AActor*> existingIceBlocks;
+								UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld(), ADestructibleActor::StaticClass(), Tags::Ice, existingIceBlocks);
+								for (int i = 0; i < existingIceBlocks.Num(); i++)
+								{
+									if (existingIceBlocks[i]->GetActorLocation().Equals(transform.GetLocation()))
+									{
+										UE_LOG(LogTemp, Warning, TEXT("Create ice block conflicting with existing location"));
+										return;
+									}
+								}
+
+								instancedRebuildManager->normalRebuildActors.Add(shootHit.GetActor());
+								shootHit.GetActor()->SetActorHiddenInGame(true);
+								shootHit.GetActor()->SetActorEnableCollision(false);
+
+								ADestructibleActor* iceBlock = GetWorld()->SpawnActor<ADestructibleActor>(iceBlockClass, transform);
+
+								iceBlock->Tags.Add(Tags::DontRebuild);
+								return;
+							}
+						}
+					}
+				}
+			}
+		}
+
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
 			GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_WorldStatic)) 
 		{
@@ -884,8 +937,16 @@ void AMecha::LeftMousePressed()
 				{
 					if (rebuildActor && rebuildActor->IsA<ADestructibleActor>())
 					{
-						instancedRebuildManager->rebuildActors.Add(rebuildActor);
+						if (rebuildActor->Tags.Contains(Tags::DontRebuild) == false)
+						{
+							instancedRebuildManager->rebuildActors.Add(rebuildActor);
+						}
+						else
+						{
+							rebuildActor->SetLifeSpan(2.0f);
+						}
 					}
+
 					instancedRebuildManager->rebuildTimers.Add(0.f);
 				}
 
@@ -1049,6 +1110,13 @@ void AMecha::RebuildAllDestroyedActors()
 {
 	//bFadeOutRebuild = true;
 
+	TArray<AActor*> dontRebuildActors;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), Tags::DontRebuild, dontRebuildActors);
+	for (int i = 0; i < dontRebuildActors.Num(); i++)
+	{
+		dontRebuildActors[i]->Destroy();
+	}
+
 	if (instancedRebuildManager)
 	{
 		UWorld* world = GetWorld();
@@ -1057,7 +1125,16 @@ void AMecha::RebuildAllDestroyedActors()
 		{
 			if (instancedRebuildManager->rebuildActors[i]->GetActorLocation().Equals(GetActorLocation()))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("REBUILD is clashing with player position"));
+				UE_LOG(LogTemp, Warning, TEXT("DESTRUCTIBLE REBUILD is clashing with player position"));
+				return;
+			}
+		}
+
+		for (int i = 0; i < instancedRebuildManager->normalRebuildActors.Num(); i++)
+		{
+			if (instancedRebuildManager->normalRebuildActors[i]->GetActorLocation().Equals(GetActorLocation()))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("NORMAL REBUILD is clashing with player position"));
 				return;
 			}
 		}
@@ -1075,6 +1152,12 @@ void AMecha::RebuildAllDestroyedActors()
 			instancedRebuildManager->rebuildActors[i]->Destroy();
 		}
 
+		for (int i = 0; i < instancedRebuildManager->normalRebuildActors.Num(); i++)
+		{
+			instancedRebuildManager->normalRebuildActors[i]->SetActorEnableCollision(true);
+			instancedRebuildManager->normalRebuildActors[i]->SetActorHiddenInGame(false);
+		}
+
 		TArray<AActor*> rebuildActors;
 		UGameplayStatics::GetAllActorsWithInterface(GetWorld(), URebuild::StaticClass(), rebuildActors);
 		for (int i = 0; i < rebuildActors.Num(); i++)
@@ -1087,6 +1170,7 @@ void AMecha::RebuildAllDestroyedActors()
 		}
 
 		instancedRebuildManager->rebuildActors.Empty();
+		//instancedRebuildManager->normalRebuildActors.Empty();
 		instancedRebuildManager->rebuildTimers.Empty();
 	}
 	else
@@ -1205,9 +1289,9 @@ void AMecha::DashForward()
 	if (GetWorld()->LineTraceSingleByChannel(dashHit, GetActorLocation(), GetActorLocation() + forwardAxis * dashDistance, ECC_WorldStatic, moveParams))
 	{
 		nextLoc = dashHit.ImpactPoint - (forwardAxis * 50.f);
-		nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-		nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-		nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+		//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+		//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+		//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 		moveSpeed = dashSpeed;
 	}
