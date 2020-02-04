@@ -23,6 +23,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "DestructibleMesh.h"
 #include "Rebuild.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 AMecha::AMecha()
 {
@@ -968,6 +969,12 @@ void AMecha::LeftMousePressed()
 						if (rebuildActor->Tags.Contains(Tags::DontRebuild) == false)
 						{
 							instancedRebuildManager->rebuildActors.Add(rebuildActor);
+
+							instancedRebuildManager->rebuildActorFadeMaterials.Add(rebuildActor->FindComponentByClass<UDestructibleComponent>()->GetMaterial(0));
+							//UMaterialInstanceDynamic* mat = Cast<UMaterialInstanceDynamic>(rebuildActor->FindComponentByClass<UDestructibleComponent>()->GetMaterial(0));
+							//UMaterialInstanceDynamic* matInst = UMaterialInstanceDynamic::Create(mat, rebuildActor);
+							//rebuildActor->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, mat);
+							//instancedRebuildManager->rebuildActorFadeMaterials.Add(mat);
 						}
 						else
 						{
@@ -1149,6 +1156,7 @@ void AMecha::RebuildAllDestroyedActors()
 	{
 		UWorld* world = GetWorld();
 
+
 		for (int i = 0; i < instancedRebuildManager->rebuildActors.Num(); i++)
 		{
 			if (instancedRebuildManager->rebuildActors[i]->GetActorLocation().Equals(GetActorLocation()))
@@ -1172,10 +1180,19 @@ void AMecha::RebuildAllDestroyedActors()
 			ADestructibleActor* da = world->SpawnActor<ADestructibleActor>(ADestructibleActor::StaticClass(),
 				instancedRebuildManager->rebuildActors[i]->GetActorTransform());
 			da->FindComponentByClass<UDestructibleComponent>()->SetDestructibleMesh(instancedRebuildManager->rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->GetDestructibleMesh());
-			UMaterialInterface* rebuildMat = instancedRebuildManager->rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->GetMaterial(0);
+			//UMaterialInterface* rebuildMat = instancedRebuildManager->rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->GetMaterial(0);
 			
-			da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, rebuildMat);
-			da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(1, rebuildMat);
+			da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, instancedRebuildManager->rebuildActorFadeMaterials[i]);
+			da->FindComponentByClass<UDestructibleComponent>()->SetScalarParameterValueOnMaterials("FadeValue", 1.f);
+
+
+			/*UMaterialInterface* mat = instancedRebuildManager->rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->GetMaterial(0);
+			UMaterialInstanceDynamic* matInst = UMaterialInstanceDynamic::Create(mat, da);
+			da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, matInst);
+			matInst->SetScalarParameterValue("FadeValue", 1.0f);*/
+
+			//da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, rebuildMat);
+			//da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(1, rebuildMat);
 
 			instancedRebuildManager->rebuildActors[i]->Destroy();
 		}
@@ -1199,6 +1216,7 @@ void AMecha::RebuildAllDestroyedActors()
 
 		instancedRebuildManager->rebuildActors.Empty();
 		//instancedRebuildManager->normalRebuildActors.Empty();
+		instancedRebuildManager->rebuildActorFadeMaterials.Empty();
 		instancedRebuildManager->rebuildTimers.Empty();
 	}
 	else

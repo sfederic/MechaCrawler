@@ -4,6 +4,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Mecha.h"
 #include "Door.h"
+#include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
 ARebuildManager::ARebuildManager()
@@ -34,10 +35,24 @@ void ARebuildManager::Tick(float DeltaTime)
 
 void ARebuildManager::RebuildTimers()
 {
-	//REBUILD ACTOR TIMERS: Basically a cheap way to get around UE4's timers
+	//REBUILD ACTOR TIMERS: Basically a cheap  (lazy) way to get around UE4's timers
+
+	for (int i = 0; i < rebuildActorFadeMaterials.Num(); i++)
+	{
+		for (int i = 0; i < rebuildTimers.Num(); i++)
+		{
+
+		}
+	}
+
 	for (int i = 0; i < rebuildActors.Num(); i++)
 	{
-		if (rebuildTimers[i] > 5.0f)
+		if (rebuildTimers[i] > 0.f && rebuildTimers[i] < 1.0f)
+		{
+			rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->SetScalarParameterValueOnMaterials("FadeValue", 1.f - rebuildTimers[i]);
+		}
+
+		if (rebuildTimers[i] > 1.0f)
 		{
 			rebuildActors[i]->SetActorHiddenInGame(true);
 			rebuildActors[i]->SetActorEnableCollision(false);

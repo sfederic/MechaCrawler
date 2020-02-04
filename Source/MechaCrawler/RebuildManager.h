@@ -35,6 +35,9 @@ public:
 	TArray<ADestructibleActor*> rebuildActors; //ADestructibleActors
 
 	UPROPERTY()
+	TArray<UMaterialInterface*> rebuildActorFadeMaterials;
+
+	UPROPERTY()
 	TArray<AActor*> normalRebuildActors; //AActors
 
 	UPROPERTY()
@@ -45,4 +48,5 @@ public:
 
 	UPROPERTY()
 	TArray<AActor*> pushableActors;
+
 };

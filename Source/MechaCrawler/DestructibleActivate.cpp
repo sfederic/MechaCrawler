@@ -11,5 +11,21 @@ void ADestructibleActivate::BeginPlay()
 
 void ADestructibleActivate::Use()
 { 
-	dc->ApplyDamage(10000.f, this->GetActorLocation(), GetActorForwardVector(), 1000.f);
+	if (CheckAllSwitches())
+	{
+		dc->ApplyDamage(10000.f, this->GetActorLocation(), GetActorForwardVector(), 1000.f);
+	}
+}
+
+bool CheckAllSwitches()
+{
+	for (int i = 0; i < switches.Num(); i++)
+	{
+		if (switches[i]->bDestroyed == false)
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
