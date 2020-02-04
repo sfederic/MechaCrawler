@@ -18,5 +18,6 @@ class MECHACRAWLER_API ADestructibleSwitch : public ADestructibleActor, public I
 public:
 	virtual void Rebuild() override;
 
+	UPROPERTY(VisibleAnywhere)
 	bool bDestroyed = false;
 };

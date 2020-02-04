@@ -24,6 +24,7 @@
 #include "DestructibleMesh.h"
 #include "Rebuild.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "DestructibleSwitch.h"
 
 AMecha::AMecha()
 {
@@ -983,6 +984,16 @@ void AMecha::LeftMousePressed()
 					}
 
 					instancedRebuildManager->rebuildTimers.Add(0.f);
+
+					//FOR DESTRUCTIBLE SWITCHES
+					if (dc->GetOwner()->IsA<ADestructibleSwitch>())
+					{
+						ADestructibleSwitch* destSwitch = Cast<ADestructibleSwitch>(dc->GetOwner());
+						if (destSwitch)
+						{
+							destSwitch->bDestroyed = true;
+						}
+					}
 				}
 
 				dc->GetOwner()->Tags.Add(Tags::Destroy);

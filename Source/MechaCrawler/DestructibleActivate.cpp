@@ -3,21 +3,31 @@
 #include "DestructibleActivate.h"
 #include "DestructibleComponent.h"
 
+ADestructibleActivate::ADestructibleActivate()
+{
+	this->PrimaryActorTick.bCanEverTick = true;
+}
+
 void ADestructibleActivate::BeginPlay()
 {
+	Super::BeginPlay();
+
 	dc = FindComponentByClass<UDestructibleComponent>();
 	check(dc);
 }
 
-void ADestructibleActivate::Use()
-{ 
+void ADestructibleActivate::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
 	if (CheckAllSwitches())
 	{
 		dc->ApplyDamage(10000.f, this->GetActorLocation(), GetActorForwardVector(), 1000.f);
 	}
 }
 
-bool CheckAllSwitches()
+
+bool ADestructibleActivate::CheckAllSwitches()
 {
 	for (int i = 0; i < switches.Num(); i++)
 	{
