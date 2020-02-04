@@ -9,6 +9,7 @@
 #include "DestructibleComponent.h"
 #include "IceBlock.h"
 #include "Pushable.h"
+#include "DestructibleActivate.h"
 #include "RebuildManager.generated.h"
 
 UCLASS()
@@ -35,13 +36,22 @@ public:
 	TArray<ADestructibleActor*> rebuildActors; //ADestructibleActors
 
 	UPROPERTY()
-	TArray<UMaterialInterface*> rebuildActorFadeMaterials;
+	TArray<UMaterialInterface*> rebuildActorFadeMaterials; //GetMaterial for ADestructbles
+
+	UPROPERTY()
+	TArray<UMaterialInterface*> rebuildActorActivateFadeMaterials; //GetMaterial for ADestructibleActivate
 
 	UPROPERTY()
 	TArray<AActor*> normalRebuildActors; //AActors
 
 	UPROPERTY()
+	TArray<ADestructibleActivate*> rebuildActorsActivate; //ADestructibleActivate
+
+	UPROPERTY()
 	TArray<float> rebuildTimers;
+
+	UPROPERTY()
+	TArray<float> rebuildActivateTimers;
 
 	UPROPERTY()
 	TArray<AActor*> movingGridActors;

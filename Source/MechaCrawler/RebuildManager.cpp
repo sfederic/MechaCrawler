@@ -55,4 +55,23 @@ void ARebuildManager::RebuildTimers()
 			rebuildTimers[i] += FApp::GetDeltaTime();
 		}
 	}
+
+	for (int i = 0; i < rebuildActorsActivate.Num(); i++)
+	{
+		if (rebuildActivateTimers[i] > 0.f && rebuildActivateTimers[i] < 1.0f)
+		{
+			rebuildActorsActivate[i]->FindComponentByClass<UDestructibleComponent>()->SetScalarParameterValueOnMaterials("FadeValue", 1.f - rebuildActivateTimers[i]);
+		}
+
+		if (rebuildActivateTimers[i] > 1.0f)
+		{
+			rebuildActorsActivate[i]->SetActorHiddenInGame(true);
+			rebuildActorsActivate[i]->SetActorEnableCollision(false);
+			rebuildActorsActivate[i]->SetActorTickEnabled(false);
+		}
+		else
+		{
+			rebuildActivateTimers[i] += FApp::GetDeltaTime();
+		}
+	}
 }

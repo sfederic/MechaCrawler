@@ -25,6 +25,7 @@
 #include "Rebuild.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "DestructibleSwitch.h"
+#include "DestructibleActivate.h"
 
 AMecha::AMecha()
 {
@@ -131,6 +132,7 @@ void AMecha::Tick(float DeltaTime)
 
 	//Scan();
 
+	//TODO: Remove this and call it through RebuildManager's Tick
 	if (instancedRebuildManager)
 	{
 		instancedRebuildManager->RebuildTimers();
@@ -278,7 +280,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAxis("MouseWheelUp", this, &AMecha::ZoomIn);
 	InputComponent->BindAxis("MouseWheelDown", this, &AMecha::ZoomOut);
 
-	InputComponent->BindAxis("LeftMouseScan", this, &AMecha::LeftMousePressedScan);
+	//InputComponent->BindAxis("LeftMouseScan", this, &AMecha::LeftMousePressedScan);
 	
 	InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed).bExecuteWhenPaused = true;
 	InputComponent->BindAction("Scan", EInputEvent::IE_Pressed, this, &AMecha::SetScan);
@@ -620,19 +622,13 @@ void AMecha::MoveUp(float val)
 
 void AMecha::LookYaw(float val)
 {
-	if (scanWidget->scanBarProgress == 0.f)
-	{
-		cameraRot.Yaw += cameraSpeed * val;
-	}
+	cameraRot.Yaw += cameraSpeed * val;
 }
 
 void AMecha::LookPitch(float val)
 {
-	if (scanWidget->scanBarProgress == 0.f)
-	{
-		cameraRot.Pitch -= cameraSpeed * val;
-		cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch, -70.f, 70.f);
-	}
+	cameraRot.Pitch -= cameraSpeed * val;
+	cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch, -70.f, 70.f);
 }
 
 void AMecha::SetScan()
@@ -812,11 +808,18 @@ void AMecha::LeftMousePressed()
 
 		if (UGameplayStatics::IsGamePaused(GetWorld()) && scanWidget->IsInViewport())
 		{
-			scanWidget->scanBarProgress = 0.f;
 			scanWidget->scanNameEntry = TEXT("Scanning...");
 			scanWidget->scanEntry = TEXT("No Entry");
 
 			UGameplayStatics::SetGamePaused(GetWorld(), false);
+
+			return;
+		}
+		
+
+		if (scanWidget->IsInViewport())
+		{
+			Scan();
 		}
 	}
 
@@ -922,6 +925,7 @@ void AMecha::LeftMousePressed()
 				return; //Works as a fallthrough for the rebuild mechanic.
 			}
 
+
 			//Old tag method
 			/*if (shootHit.GetActor()->Tags.Contains(Tags::Destroy))
 			{
@@ -932,6 +936,16 @@ void AMecha::LeftMousePressed()
 			}*/
 
 			UDestructibleComponent* dc = Cast<UDestructibleComponent>(shootHit.GetComponent());
+
+			//For destructible activators
+			if (dc)
+			{
+				if (dc->GetOwner()->IsA<ADestructibleActivate>())
+				{
+					return;
+				}
+			}
+
 			ADestructibleActor* rebuildActor = nullptr;
 			if (dc)
 			{
@@ -972,10 +986,6 @@ void AMecha::LeftMousePressed()
 							instancedRebuildManager->rebuildActors.Add(rebuildActor);
 
 							instancedRebuildManager->rebuildActorFadeMaterials.Add(rebuildActor->FindComponentByClass<UDestructibleComponent>()->GetMaterial(0));
-							//UMaterialInstanceDynamic* mat = Cast<UMaterialInstanceDynamic>(rebuildActor->FindComponentByClass<UDestructibleComponent>()->GetMaterial(0));
-							//UMaterialInstanceDynamic* matInst = UMaterialInstanceDynamic::Create(mat, rebuildActor);
-							//rebuildActor->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, mat);
-							//instancedRebuildManager->rebuildActorFadeMaterials.Add(mat);
 						}
 						else
 						{
@@ -1188,24 +1198,42 @@ void AMecha::RebuildAllDestroyedActors()
 
 		for (int i = 0; i < instancedRebuildManager->rebuildActors.Num(); i++)
 		{
-			ADestructibleActor* da = world->SpawnActor<ADestructibleActor>(ADestructibleActor::StaticClass(),
-				instancedRebuildManager->rebuildActors[i]->GetActorTransform());
-			da->FindComponentByClass<UDestructibleComponent>()->SetDestructibleMesh(instancedRebuildManager->rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->GetDestructibleMesh());
-			//UMaterialInterface* rebuildMat = instancedRebuildManager->rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->GetMaterial(0);
-			
-			da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, instancedRebuildManager->rebuildActorFadeMaterials[i]);
-			da->FindComponentByClass<UDestructibleComponent>()->SetScalarParameterValueOnMaterials("FadeValue", 1.f);
-
-
-			/*UMaterialInterface* mat = instancedRebuildManager->rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->GetMaterial(0);
-			UMaterialInstanceDynamic* matInst = UMaterialInstanceDynamic::Create(mat, da);
-			da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, matInst);
-			matInst->SetScalarParameterValue("FadeValue", 1.0f);*/
-
-			//da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, rebuildMat);
-			//da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(1, rebuildMat);
+			//conditional statement order is important here. Other classes that inherit from ADestructible actor will fall through on that IsA<>()
+			if (instancedRebuildManager->rebuildActors[i]->IsA<ADestructibleSwitch>())
+			{
+				ADestructibleSwitch* da = world->SpawnActor<ADestructibleSwitch>(ADestructibleSwitch::StaticClass(),
+					instancedRebuildManager->rebuildActors[i]->GetActorTransform());
+				da->FindComponentByClass<UDestructibleComponent>()->SetDestructibleMesh(instancedRebuildManager->rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->GetDestructibleMesh());
+				da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, instancedRebuildManager->rebuildActorFadeMaterials[i]);
+				da->FindComponentByClass<UDestructibleComponent>()->SetScalarParameterValueOnMaterials("FadeValue", 1.f);
+			}
+			else if (instancedRebuildManager->rebuildActors[i]->IsA<ADestructibleActor>())
+			{
+				ADestructibleActor* da = world->SpawnActor<ADestructibleActor>(ADestructibleActor::StaticClass(),
+					instancedRebuildManager->rebuildActors[i]->GetActorTransform());
+				da->FindComponentByClass<UDestructibleComponent>()->SetDestructibleMesh(instancedRebuildManager->rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->GetDestructibleMesh());
+				da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, instancedRebuildManager->rebuildActorFadeMaterials[i]);
+				da->FindComponentByClass<UDestructibleComponent>()->SetScalarParameterValueOnMaterials("FadeValue", 1.f);
+			}
 
 			instancedRebuildManager->rebuildActors[i]->Destroy();
+		}
+
+		for (int i = 0; i < instancedRebuildManager->rebuildActorsActivate.Num(); i++)
+		{
+			if (instancedRebuildManager->rebuildActorsActivate[i]->IsA<ADestructibleActivate>())
+			{
+				ADestructibleActivate* da = world->SpawnActor<ADestructibleActivate>(ADestructibleActivate::StaticClass(),
+					instancedRebuildManager->rebuildActorsActivate[i]->GetActorTransform());
+				//da->switches = instancedRebuildManager->rebuildActorsActivate[i]->switches; //Copy over EditAnywhere switches
+				//da->rebuildManager = instancedRebuildManager->rebuildActorsActivate[i]->rebuildManager;
+				//da->dc = instancedRebuildManager->rebuildActorsActivate[i]findcom
+				da->FindComponentByClass<UDestructibleComponent>()->SetDestructibleMesh(instancedRebuildManager->rebuildActorsActivate[i]->FindComponentByClass<UDestructibleComponent>()->GetDestructibleMesh());
+				da->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, instancedRebuildManager->rebuildActorActivateFadeMaterials[i]);
+				da->FindComponentByClass<UDestructibleComponent>()->SetScalarParameterValueOnMaterials("FadeValue", 1.f);
+
+				instancedRebuildManager->rebuildActorsActivate[i]->Destroy();
+			}
 		}
 
 		for (int i = 0; i < instancedRebuildManager->normalRebuildActors.Num(); i++)
@@ -1227,8 +1255,10 @@ void AMecha::RebuildAllDestroyedActors()
 
 		instancedRebuildManager->rebuildActors.Empty();
 		//instancedRebuildManager->normalRebuildActors.Empty();
+		instancedRebuildManager->rebuildActorsActivate.Empty();
 		instancedRebuildManager->rebuildActorFadeMaterials.Empty();
 		instancedRebuildManager->rebuildTimers.Empty();
+		instancedRebuildManager->rebuildActivateTimers.Empty();
 	}
 	else
 	{
@@ -1358,22 +1388,25 @@ void AMecha::DashForward()
 
 void AMecha::LeftMousePressedScan(float val)
 {
+	if (val)
+	{
+		if (UGameplayStatics::IsGamePaused(GetWorld()) && scanWidget->IsInViewport())
+		{
+			scanWidget->scanNameEntry = TEXT("Scanning...");
+			scanWidget->scanEntry = TEXT("No Entry");
+
+			UGameplayStatics::SetGamePaused(GetWorld(), false);
+
+			return;
+		}
+	}
+
 	if (scanning && val)
 	{
 		if (scanWidget->IsInViewport())
 		{
-			const float scanBarSpeed = 2.0f;
-			scanWidget->scanBarProgress += FApp::GetDeltaTime() * val;
-
-			if (scanWidget->scanBarProgress >= 1.0f)
-			{
-				Scan();
-			}
+			Scan();
 		}
-	}
-	else
-	{
-		scanWidget->scanBarProgress = 0.f;
 	}
 }
 
@@ -1419,7 +1452,7 @@ void AMecha::Scan()
 			scanWidget->scanEntry = FString(TEXT("No Scan data."));
 			scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
 
-			UGameplayStatics::SetGamePaused(GetWorld(), true);
+			//UGameplayStatics::SetGamePaused(GetWorld(), true);
 		}
 	}
 }

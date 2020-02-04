@@ -5,13 +5,15 @@
 #include "CoreMinimal.h"
 #include "DestructibleActor.h"
 #include "DestructibleSwitch.h"
+#include "Rebuild.h"
 #include "DestructibleActivate.generated.h"
 
 /**
  * Actor that works off of multiple DestructibleSwitches as supports (eg. roof, floor, net)
+ * Looks like we can only have one per level too, unless you generate a tag that matches an original tag of the instance
  */
 UCLASS()
-class MECHACRAWLER_API ADestructibleActivate : public ADestructibleActor
+class MECHACRAWLER_API ADestructibleActivate : public ADestructibleActor, public IRebuild
 {
 	GENERATED_BODY()
 	
@@ -23,10 +25,12 @@ protected:
 
 public:
 	virtual void Tick(float DeltaTime) override;
+	virtual void Rebuild() override;
 	bool CheckAllSwitches();
 
 	UPROPERTY(EditAnywhere)
 	TArray<ADestructibleSwitch*> switches;
 
-	UDestructibleComponent* dc;
+	UPROPERTY(EditAnywhere)
+	class ARebuildManager* rebuildManager;
 };

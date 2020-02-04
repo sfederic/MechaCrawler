@@ -2,6 +2,10 @@
 
 #include "DestructibleActivate.h"
 #include "DestructibleComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "GlobalTags.h"
+#include "RebuildManager.h"
+#include "Mecha.h"
 
 ADestructibleActivate::ADestructibleActivate()
 {
@@ -12,8 +16,6 @@ void ADestructibleActivate::BeginPlay()
 {
 	Super::BeginPlay();
 
-	dc = FindComponentByClass<UDestructibleComponent>();
-	check(dc);
 }
 
 void ADestructibleActivate::Tick(float DeltaTime)
@@ -22,8 +24,41 @@ void ADestructibleActivate::Tick(float DeltaTime)
 
 	if (CheckAllSwitches())
 	{
-		dc->ApplyDamage(10000.f, this->GetActorLocation(), GetActorForwardVector(), 1000.f);
+		if (Tags.Contains(Tags::Destroy) == false)
+		{
+			FindComponentByClass<UDestructibleComponent>()->ApplyDamage(1000.f, this->GetActorLocation(), GetActorForwardVector(), 1000.f);
+
+			Tags.Add(Tags::Destroy);
+
+			if (rebuildManager)
+			{
+				rebuildManager->rebuildActorsActivate.Add(this);
+				rebuildManager->rebuildActorActivateFadeMaterials.Add(FindComponentByClass<UDestructibleComponent>()->GetMaterial(0));
+				rebuildManager->rebuildActivateTimers.Add(0.f);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Rebuild maanager not set for %s\n"), *GetNameSafe(this));
+			}
+		}
 	}
+}
+
+void ADestructibleActivate::Rebuild()
+{
+	switches.Empty();
+
+	TArray<AActor*> actors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADestructibleSwitch::StaticClass(), actors);
+
+	for (int i = 0; i < actors.Num(); i++)
+	{
+		switches.Add(Cast<ADestructibleSwitch>(actors[i]));
+	}
+
+	APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	AMecha* player = Cast<AMecha>(playerPawn);
+	this->rebuildManager = player->instancedRebuildManager;	
 }
 
 
