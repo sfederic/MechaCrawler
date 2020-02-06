@@ -26,6 +26,8 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "DestructibleSwitch.h"
 #include "DestructibleActivate.h"
+#include "RebuildTransparent.h"
+#include "Components/BoxComponent.h"
 
 AMecha::AMecha()
 {
@@ -721,6 +723,27 @@ void AMecha::RightMousePressed()
 			return;
 		}
 
+		//For Rebuild Transparents
+		FHitResult rebuildTransparentHit;
+		if (GetWorld()->LineTraceSingleByChannel(rebuildTransparentHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * useDistance, ECC_GameTraceChannel1))
+		{
+			if (rebuildTransparentHit.GetActor()->IsA<ARebuildTransparent>())
+			{
+				ARebuildTransparent* rebuildTransparent = Cast<ARebuildTransparent>(rebuildTransparentHit.GetActor());
+				if (rebuildTransparent->bRebuilt == false)
+				{
+					UMeshComponent* rebuildTransparentMesh = rebuildTransparent->FindComponentByClass<UMeshComponent>();
+					rebuildTransparentMesh->SetMaterial(0, rebuildTransparent->rebuildMaterial);
+					rebuildTransparentMesh->SetCollisionResponseToAllChannels(ECR_Block);
+					rebuildTransparent->bRebuilt = true;
+					rebuildTransparent->AddOverlap();
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),
+						rebuildTransparent->FindComponentByClass<UParticleSystemComponent>()->Template,
+						rebuildTransparent->GetActorLocation(), FRotator(), true);
+				}
+			}
+		}
+
 		if (GetWorld()->LineTraceSingleByChannel(useHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * useDistance, ECC_WorldStatic))
 		{
 			AActor* useActor = useHit.GetActor();
@@ -816,7 +839,6 @@ void AMecha::LeftMousePressed()
 			return;
 		}
 		
-
 		if (scanWidget->IsInViewport())
 		{
 			Scan();

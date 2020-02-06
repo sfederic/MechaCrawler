@@ -36,6 +36,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	
+	//To push player to previous location if inside actor
 	UFUNCTION()
 	void OnPlayerOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
