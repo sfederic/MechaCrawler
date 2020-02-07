@@ -132,7 +132,8 @@ void AMecha::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//Scan();
+	Scan();
+	ScrollText();
 
 	//TODO: Remove this and call it through RebuildManager's Tick
 	if (instancedRebuildManager)
@@ -719,7 +720,11 @@ void AMecha::RightMousePressed()
 	{
 		if (bDialogueClick)
 		{
-			ProgressText();
+			if (textBoxWidget->bScrollFinished)
+			{
+				ProgressText();
+			}
+
 			return;
 		}
 
@@ -738,7 +743,7 @@ void AMecha::RightMousePressed()
 					rebuildTransparent->bRebuilt = true;
 					rebuildTransparent->AddOverlap();
 					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),
-						rebuildTransparent->FindComponentByClass<UParticleSystemComponent>()->Template,
+						rebuildTransparent->particleSpawnTemplate,
 						rebuildTransparent->GetActorLocation(), FRotator(), true);
 				}
 			}
@@ -800,8 +805,11 @@ void AMecha::LeftMousePressed()
 {
 	if (bDialogueClick)
 	{
-		ProgressText();
-		return;
+		if (textBoxWidget->bScrollFinished)
+		{
+			ProgressText();
+			return;
+		}
 	}
 
 	if (scanning)
@@ -1373,22 +1381,48 @@ void AMecha::ProgressText()
 {
 	if (textBoxWidget->IsInViewport())
 	{
-		if (textBoxIndex < (textBoxRows.Num() - 1))
+		if (textBoxWidget->textBoxIndex < (textBoxWidget->textBoxRows.Num() - 1))
 		{
-			textBoxIndex++;
-			
-			textBoxWidget->name = textBoxRows[textBoxIndex]->name;
-			textBoxWidget->text = textBoxRows[textBoxIndex]->text;
-			textBoxWidget->image = textBoxRows[textBoxIndex]->image;
+			textBoxWidget->textBoxIndex++;
+			textBoxWidget->bScrollFinished = false;
+
+			textBoxWidget->name = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name;
+			textBoxWidget->scrollIndex = 0;
+			textBoxWidget->text.Empty();
+			textBoxWidget->text.AppendChar(textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text[textBoxWidget->scrollIndex]);
+			textBoxWidget->image = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->image;
 		}
 		else
 		{
 			bDialogueClick = false;
-			textBoxIndex = 0;
-			textBoxRows.Empty();
+			textBoxWidget->textBoxIndex = 0;
+			textBoxWidget->textBoxRows.Empty();
 			textBoxWidget->RemoveFromViewport();
 
 			UGameplayStatics::SetGamePaused(GetWorld(), false);
+		}
+	}
+}
+
+void AMecha::ScrollText()
+{
+	if (textBoxWidget->IsInViewport())
+	{
+		if (textBoxWidget->scrollIndex < (textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text.Len() - 1))
+		{
+			textBoxWidget->scrollTimer += FApp::GetDeltaTime() * textBoxWidget->scrollSpeed;
+			if (textBoxWidget->scrollTimer > 0.1f)
+			{
+				textBoxWidget->scrollTimer = 0.f;
+				textBoxWidget->scrollIndex++;
+				textBoxWidget->text.AppendChar(textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text[textBoxWidget->scrollIndex]);
+			}
+		}
+		else
+		{
+			textBoxWidget->bScrollFinished = true;
+			//textBoxWidget->scrollIndex = 0;
+			textBoxWidget->scrollTimer = 0.f;
 		}
 	}
 }
@@ -1417,7 +1451,7 @@ void AMecha::LeftMousePressedScan(float val)
 			scanWidget->scanNameEntry = TEXT("Scanning...");
 			scanWidget->scanEntry = TEXT("No Entry");
 
-			UGameplayStatics::SetGamePaused(GetWorld(), false);
+			//UGameplayStatics::SetGamePaused(GetWorld(), false);
 
 			return;
 		}
@@ -1449,7 +1483,12 @@ void AMecha::Scan()
 					scanWidget->scanEntry = scanData->scanText;
 					scanWidget->scanNameEntry = scanData->scanName;
 
-					UGameplayStatics::SetGamePaused(GetWorld(), true);
+					//UGameplayStatics::SetGamePaused(GetWorld(), true);
+				}
+				else
+				{
+					scanWidget->scanEntry = FString(TEXT("No Scan data."));
+					scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
 				}
 			}
 		}
@@ -1465,7 +1504,12 @@ void AMecha::Scan()
 					scanWidget->scanEntry = scanData->scanText;
 					scanWidget->scanNameEntry = scanData->scanName;
 
-					UGameplayStatics::SetGamePaused(GetWorld(), true);
+					//UGameplayStatics::SetGamePaused(GetWorld(), true);
+				}
+				else
+				{
+					scanWidget->scanEntry = FString(TEXT("No Scan data."));
+					scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
 				}
 			}
 		}
@@ -1484,20 +1528,22 @@ void AMecha::GetDialogue(AActor* dialogueActor)
 	UDialogueComponent* dialogue = dialogueActor->FindComponentByClass<UDialogueComponent>();
 	if (dialogue)
 	{
-		UGameplayStatics::SetGamePaused(GetWorld(), true);
+		//UGameplayStatics::SetGamePaused(GetWorld(), true);
 
 		if (textBoxWidget->IsInViewport() == false)
 		{
 			bDialogueClick = true;
 
 			FString context;
-			dialogue->mainTextBoxTable->GetAllRows<FTextBox>(context, textBoxRows);
-			textBoxIndex = 0;
-			if (textBoxRows.Num() > 0)
+			dialogue->mainTextBoxTable->GetAllRows<FTextBox>(context, textBoxWidget->textBoxRows);
+			textBoxWidget->textBoxIndex = 0;
+			if (textBoxWidget->textBoxRows.Num() > 0)
 			{
-				textBoxWidget->name = textBoxRows[textBoxIndex]->name;
-				textBoxWidget->text = textBoxRows[textBoxIndex]->text;
-				textBoxWidget->image = textBoxRows[textBoxIndex]->image;
+				textBoxWidget->name = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name;
+				textBoxWidget->scrollIndex = 0;
+				textBoxWidget->text.Empty();
+				textBoxWidget->text.AppendChar(textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text[textBoxWidget->scrollIndex]); //Just get the first char, scroll it in ProgressText()
+				textBoxWidget->image = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->image;
 				textBoxWidget->AddToViewport();
 			}
 		}

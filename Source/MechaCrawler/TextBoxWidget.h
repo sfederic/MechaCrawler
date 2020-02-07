@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "TextBox.h"
 #include "TextBoxWidget.generated.h"
 
 /**
@@ -23,4 +24,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UTexture2D* image;
+
+	TArray<FTextBox*> textBoxRows;
+
+	int textBoxIndex = 0;
+	int scrollIndex = 0;
+	float scrollTimer = 0.f;
+	float scrollSpeed = 5.0f;
+	bool bScrollFinished = false;
 };

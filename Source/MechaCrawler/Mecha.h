@@ -55,7 +55,11 @@ public:
 	void ProgressText();
 	void DashForward();
 	void Scan();
+
+	UFUNCTION(BlueprintCallable)
 	void GetDialogue(AActor* dialogueActor);
+
+	void ScrollText();
 
 	UPROPERTY(VisibleAnywhere)
 	FVector nextLoc;
@@ -131,8 +135,6 @@ public:
 
 	UPROPERTY()
 	UTextBoxWidget* textBoxWidget;
-	int textBoxIndex = 0;
-	TArray<FTextBox*> textBoxRows;
 
 	UPROPERTY()
 	UScanWidget* scanWidget;

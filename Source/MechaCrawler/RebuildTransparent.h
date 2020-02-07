@@ -29,6 +29,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* rebuildMaterial;
 
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* particleSpawnTemplate;
+
 	UMaterialInterface* originalMaterial;
 
 	UPROPERTY(VisibleAnywhere)
