@@ -719,11 +719,17 @@ void AMecha::RightMousePressed()
 
 	//if (!scanning)
 	{
+		//Just a debug thing for moving through dialogue faster
 		if (bDialogueClick)
 		{
-			if (textBoxWidget->bScrollFinished)
+			bDialogueClick = false;
+			textBoxWidget->textBoxIndex = 0;
+			textBoxWidget->textBoxRows.Empty();
+			textBoxWidget->RemoveFromViewport();
+
+			//if (textBoxWidget->bScrollFinished)
 			{
-				ProgressText();
+				//ProgressText();
 			}
 
 			return;
@@ -1547,17 +1553,22 @@ void AMecha::GetDialogue(AActor* dialogueActor)
 		{
 			bDialogueClick = true;
 
-			FString context;
-			dialogue->mainTextBoxTable->GetAllRows<FTextBox>(context, textBoxWidget->textBoxRows);
-			textBoxWidget->textBoxIndex = 0;
-			if (textBoxWidget->textBoxRows.Num() > 0)
+			if (dialogue->mainTextBoxTable)
 			{
-				textBoxWidget->name = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name;
-				textBoxWidget->scrollIndex = 0;
-				textBoxWidget->text.Empty();
-				textBoxWidget->text.AppendChar(textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text[textBoxWidget->scrollIndex]); //Just get the first char, scroll it in ProgressText()
-				textBoxWidget->image = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->image;
-				textBoxWidget->AddToViewport();
+				FString context;
+				dialogue->mainTextBoxTable->GetAllRows<FTextBox>(context, textBoxWidget->textBoxRows);
+
+				textBoxWidget->textBoxIndex = 0;
+
+				if (textBoxWidget->textBoxRows.Num() > 0)
+				{
+					textBoxWidget->name = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name;
+					textBoxWidget->scrollIndex = 0;
+					textBoxWidget->text.Empty();
+					textBoxWidget->text.AppendChar(textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text[textBoxWidget->scrollIndex]); //Just get the first char, scroll it in ProgressText()
+					textBoxWidget->image = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->image;
+					textBoxWidget->AddToViewport();
+				}
 			}
 		}
 	}
