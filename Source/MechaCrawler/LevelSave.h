@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
 #include "ReadBox.h"
+#include "Pickup.h"
+#include "PickupStruct.h"
 #include "LevelSave.generated.h"
 
 /**
@@ -19,4 +21,7 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TArray<FReadBox> readDialogueBoxes;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TArray<FPickupStruct> pickups;
 };

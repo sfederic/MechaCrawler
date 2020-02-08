@@ -24,4 +24,9 @@ public:
 	void OnPlayerOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	class UBoxComponent* box;
+
+	UPROPERTY(VisibleAnywhere)
+	FString saveSlotLevelName;
+
+	int saveSlotIndex = 0;
 };

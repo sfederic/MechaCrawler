@@ -1,13 +1,12 @@
 #pragma once
 
 #include "Containers/UnrealString.h" 
-#include "ReadBox.generated.h"
+#include "PickupStruct.generated.h"
 
-//For the dialogue boxes
-//Keep in mind that Uproperty() is needed.
+//For any pickups/collectibles in save data
 
 USTRUCT(BlueprintType)
-struct FReadBox
+struct FPickupStruct
 {
 public:
     GENERATED_BODY()
@@ -16,5 +15,5 @@ public:
     FString actorName;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    bool readDialogue;
+    bool bPickedup;
 };

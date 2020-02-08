@@ -6,7 +6,7 @@
 
 //Dialogue UI for codec calls. Keep in mind that Uproperty() is needed 
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FTextBox : public FTableRowBase
 {
 	GENERATED_BODY()

@@ -28,6 +28,7 @@
 #include "DestructibleActivate.h"
 #include "RebuildTransparent.h"
 #include "Components/BoxComponent.h"
+#include "Pickup.h"
 
 AMecha::AMecha()
 {
@@ -793,7 +794,19 @@ void AMecha::RightMousePressed()
 				if (useActor->Tags.Contains(Tags::Pickup))
 				{
 					//TODO: Add to some invecntory and a particle effect
-					useActor->Destroy();
+					//useActor->Destroy();
+					useActor->SetActorHiddenInGame(true);
+					useActor->SetActorEnableCollision(false);
+					//useActor->SetActorTickEnabled(false);
+
+					if (useActor->IsA<APickup>())
+					{
+						APickup* pickup = Cast<APickup>(useActor);
+						if (pickup)
+						{
+							pickup->isInInventory = true;
+						}
+					}
 				}
 			}
 		}

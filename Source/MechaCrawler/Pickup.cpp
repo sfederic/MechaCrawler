@@ -12,6 +12,11 @@ APickup::APickup()
 void APickup::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (isInInventory)
+	{
+		Destroy();
+	}
 }
 
 void APickup::Tick(float DeltaTime)
@@ -26,7 +31,7 @@ void APickup::AddToInventory()
 	{
 		player->inventoryWidget->entries.Add(name);
 		this->isInInventory = true;
-		Destroy();
+		//Destroy();
 	}
 }
 
