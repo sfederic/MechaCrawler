@@ -17,5 +17,8 @@ class MECHACRAWLER_API UInventoryWidget : public UUserWidget
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FString> entries;
+	int mineralsHeld;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString minerals;
 };

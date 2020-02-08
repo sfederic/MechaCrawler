@@ -25,5 +25,8 @@ public:
 	FString scanText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString scanName;
+	FString scanName;	
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* codecImage;
 };

@@ -29,7 +29,9 @@ void APickup::AddToInventory()
 	AMecha* player = Cast<AMecha>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 	if (player)
 	{
-		player->inventoryWidget->entries.Add(name);
+		player->inventoryWidget->mineralsHeld++;
+		player->inventoryWidget->minerals = TEXT("Minerals: ");
+		player->inventoryWidget->minerals.AppendInt(player->inventoryWidget->mineralsHeld);
 		this->isInInventory = true;
 		//Destroy();
 	}

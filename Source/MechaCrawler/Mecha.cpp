@@ -657,6 +657,9 @@ void AMecha::SetScan()
 		{
 			//destroyableScanActors[i]->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, destroyableWireframeMaterial);
 		}
+
+		//Hide Weapon
+		weapons[currentWeaponIndex]->GetOwner()->SetActorHiddenInGame(true);
 	} 
 	else if (scanning)
 	{
@@ -672,6 +675,9 @@ void AMecha::SetScan()
 		{
 			//destroyableScanActors[i]->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, destroyableBaseMaterial);
 		}
+
+		//Hide Weapon
+		weapons[currentWeaponIndex]->GetOwner()->SetActorHiddenInGame(false);
 	}
 
 	if (scanWidget && useWidget && (inventoryWidget->IsInViewport() == false))
@@ -1064,16 +1070,16 @@ void AMecha::LeftMousePressed()
 //Also starts level from crane
 void AMecha::StartLevel()
 {
-	if (bStartLevelOnShip == true)
+	/*if (bStartLevelOnShip == true)
 	{
 		bStartLevelOnShip = false;
 		startLevelWidget->RemoveFromViewport();
 		UGameplayStatics::PlayWorldCameraShake(GetWorld(), cameraShake, GetActorLocation(), 500.f, 1.f); 
 		camera->FieldOfView = maxFOV;
-	}
+	}*/
 
 	//TODO: Function was previously open inventory. Decide if need to keep
-	/*if (inventoryWidget && controller)
+	if (inventoryWidget && controller)
 	{
 		if (inventoryWidget->IsInViewport() == false)
 		{
@@ -1089,7 +1095,7 @@ void AMecha::StartLevel()
 			controller->bShowMouseCursor = false;
 			inventoryWidget->RemoveFromViewport();
 		}
-	}*/
+	}
 }
 
 //TODO: Set in binocular UI for later. Don't need for now.
@@ -1490,8 +1496,7 @@ void AMecha::Scan()
 	//SCANNING
 	if (scanning && scanWidget)
 	{
-		if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(),
-			camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_GameTraceChannel1)) //TransparentScan
+		if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(), camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_GameTraceChannel1)) //TransparentScan
 		{
 			AActor* actor = scanHit.GetActor();
 			if (actor)
@@ -1501,6 +1506,7 @@ void AMecha::Scan()
 				{
 					scanWidget->scanEntry = scanData->scanText;
 					scanWidget->scanNameEntry = scanData->scanName;
+					scanWidget->codecImagePreview = scanData->codecImage;
 
 					//UGameplayStatics::SetGamePaused(GetWorld(), true);
 				}
@@ -1508,11 +1514,11 @@ void AMecha::Scan()
 				{
 					scanWidget->scanEntry = FString(TEXT("No Scan data."));
 					scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
+					scanWidget->codecImagePreview = nullptr;
 				}
 			}
 		}
-		else if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(),
-				camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_WorldStatic)) 
+		else if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(), camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_WorldStatic)) 
 		{
 			AActor* actor = scanHit.GetActor();
 			if (actor)
@@ -1522,6 +1528,7 @@ void AMecha::Scan()
 				{
 					scanWidget->scanEntry = scanData->scanText;
 					scanWidget->scanNameEntry = scanData->scanName;
+					scanWidget->codecImagePreview = scanData->codecImage;
 
 					//UGameplayStatics::SetGamePaused(GetWorld(), true);
 				}
@@ -1529,6 +1536,7 @@ void AMecha::Scan()
 				{
 					scanWidget->scanEntry = FString(TEXT("No Scan data."));
 					scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
+					scanWidget->codecImagePreview = nullptr;
 				}
 			}
 		}
@@ -1536,6 +1544,7 @@ void AMecha::Scan()
 		{
 			scanWidget->scanEntry = FString(TEXT("No Scan data."));
 			scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
+			scanWidget->codecImagePreview = nullptr;
 
 			//UGameplayStatics::SetGamePaused(GetWorld(), true);
 		}
