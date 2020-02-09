@@ -4,6 +4,7 @@
 #include "Components/BoxComponent.h"
 #include "Activate.h"
 #include "DestructibleComponent.h"
+#include "Mecha.h"
 
 AUseVolume::AUseVolume()
 {
@@ -38,12 +39,16 @@ void AUseVolume::ActivateConnections()
 		{
 			connectedActors[i]->FindComponentByClass<UDestructibleComponent>()->ApplyDamage(100000.f, connectedActors[i]->GetActorLocation(), -FVector::UpVector, 10000.f);
 			connectedActors[i]->SetLifeSpan(2.0f); //Instead of putting onto rebuilable stack
-
 		}
 	}
+
+	this->Destroy();
 }
 
 void AUseVolume::OnActorOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	ActivateConnections();
+	if (OtherActor->IsA<AMecha>())
+	{
+		ActivateConnections();
+	}
 }

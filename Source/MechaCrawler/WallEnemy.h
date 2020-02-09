@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "GridActor.h"
 #include "RebuildManager.h"
+#include "Enemy.h"
 #include "WallEnemy.generated.h"
 
 UCLASS()
-class MECHACRAWLER_API AWallEnemy : public AGridActor
+class MECHACRAWLER_API AWallEnemy : public AEnemy
 {
 	GENERATED_BODY()
 	
@@ -20,6 +21,7 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
+	virtual void DropLoot() override;
 
 	FCollisionQueryParams moveParams;
 

@@ -20,24 +20,8 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-
-	FCollisionQueryParams params;
-	FHitResult hit;
-
-	class UWidgetComponent* healthBarComponent;
+	virtual void DropLoot();
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> healthBarClass;
-
-	UEnemyHealthBarWidget* healthBar;
-
-	UPROPERTY(EditAnywhere)
-	float moveSpeed;
-
-	UPROPERTY(EditAnywhere)
-	float moveTimer;	
-
-	float killTimer;
-
-	bool kill = false;
+	TSubclassOf<AActor> loot;
 };

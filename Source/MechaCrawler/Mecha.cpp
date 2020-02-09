@@ -948,7 +948,21 @@ void AMecha::LeftMousePressed()
 				}
 				else
 				{
-					shotEnemy->Destroy();
+					if (shotEnemy->Tags.Contains(Tags::Destroy) == false)
+					{
+						AEnemy* enemyCast = Cast<AEnemy>(shotEnemy);
+						if (enemyCast)
+						{
+							enemyCast->DropLoot();
+						}
+
+						//shotEnemy->Destroy();
+						shotEnemy->FindComponentByClass<UMeshComponent>()->SetSimulatePhysics(true);
+						shotEnemy->FindComponentByClass<UMeshComponent>()->AddImpulse(shotEnemy->GetActorForwardVector() * 10000.f);
+						shotEnemy->SetActorTickEnabled(false);
+						shotEnemy->FindComponentByClass<UBoxComponent>()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+						shotEnemy->Tags.Add(Tags::Destroy);
+					}
 				}
 
 				return;
@@ -1506,7 +1520,6 @@ void AMecha::Scan()
 				{
 					scanWidget->scanEntry = scanData->scanText;
 					scanWidget->scanNameEntry = scanData->scanName;
-					scanWidget->codecImagePreview = scanData->codecImage;
 
 					//UGameplayStatics::SetGamePaused(GetWorld(), true);
 				}
@@ -1514,7 +1527,6 @@ void AMecha::Scan()
 				{
 					scanWidget->scanEntry = FString(TEXT("No Scan data."));
 					scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
-					scanWidget->codecImagePreview = nullptr;
 				}
 			}
 		}
@@ -1528,7 +1540,6 @@ void AMecha::Scan()
 				{
 					scanWidget->scanEntry = scanData->scanText;
 					scanWidget->scanNameEntry = scanData->scanName;
-					scanWidget->codecImagePreview = scanData->codecImage;
 
 					//UGameplayStatics::SetGamePaused(GetWorld(), true);
 				}
@@ -1536,7 +1547,6 @@ void AMecha::Scan()
 				{
 					scanWidget->scanEntry = FString(TEXT("No Scan data."));
 					scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
-					scanWidget->codecImagePreview = nullptr;
 				}
 			}
 		}
@@ -1544,7 +1554,6 @@ void AMecha::Scan()
 		{
 			scanWidget->scanEntry = FString(TEXT("No Scan data."));
 			scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
-			scanWidget->codecImagePreview = nullptr;
 
 			//UGameplayStatics::SetGamePaused(GetWorld(), true);
 		}

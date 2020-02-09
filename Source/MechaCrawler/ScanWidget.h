@@ -15,8 +15,6 @@ class MECHACRAWLER_API UScanWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UTexture2D* codecImagePreview;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString scanEntry;

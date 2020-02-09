@@ -25,6 +25,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void Use() override;
+	void MovePlayer();
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UFadeToBlackWidget> fadeWidgetClass;

@@ -5,6 +5,8 @@
 #include "GlobalTags.h"
 #include "Kismet/GameplayStatics.h"
 #include "Mecha.h"
+#include "Engine/World.h"
+#include "Runtime/Engine/Public/TimerManager.h"
 
 ABlackoutText::ABlackoutText()
 {
@@ -30,13 +32,19 @@ void ABlackoutText::Use()
 	fadeWidget->text = fadeOutText;
 	fadeWidget->AddToViewport();
 
-	//Just for when player finds mecha first time
+	//Just for when player finds mecha first time edge case
 	if (this->Tags.Contains(Tags::MechaFirstTime))
 	{
-		APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-		AMecha* player = Cast<AMecha>(playerPawn);
-		player->nextLoc = (this->GetActorLocation());
-		player->nextRot = (FQuat(this->GetActorRotation()));
-		this->Destroy();
+		FTimerHandle timerHandle;
+		GetWorldTimerManager().SetTimer(timerHandle, this, &ABlackoutText::MovePlayer, 1.5f, false);
 	}
+}
+
+void ABlackoutText::MovePlayer()
+{
+	APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	AMecha* player = Cast<AMecha>(playerPawn);
+	player->nextLoc = (this->GetActorLocation());
+	player->nextRot = (FQuat(this->GetActorRotation()));
+	this->Destroy();
 }

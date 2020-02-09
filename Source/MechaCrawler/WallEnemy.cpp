@@ -3,6 +3,7 @@
 #include "WallEnemy.h"
 #include "Engine/World.h"
 #include "Misc/App.h"
+#include "GlobalTags.h"
 #include "Components/BoxComponent.h"
 
 AWallEnemy::AWallEnemy()
@@ -93,4 +94,10 @@ void AWallEnemy::Tick(float DeltaTime)
 endMovement:
 
 	SetActorLocation(FMath::VInterpConstantTo(currentLoc, nextLoc, DeltaTime, moveSpeed));
+}
+
+void AWallEnemy::DropLoot()
+{
+	Tags.Add(Tags::Pickup);
+	Tags.Add(Tags::Useable);
 }
