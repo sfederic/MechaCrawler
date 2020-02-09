@@ -16,4 +16,5 @@ namespace Tags
 	static const FName Water = "Water";
 	static const FName Ice = "Ice";
 	static const FName DontRebuild = "DontRebuild"; //Flaging actors that don't need to be rebuilt (ice block spawns etc.)
+	static const FName MechaFirstTime = "MechaFirstTime"; //When mecha first found.
 }

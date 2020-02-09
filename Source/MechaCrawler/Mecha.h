@@ -179,7 +179,7 @@ public:
 	FHitResult lookHit;
 
 	FHitResult useHit;
-	float useDistance = 10000.f; //TODO: Figure out whether to use Zelda/Metroid like distance switches
+	float useDistance = 125.f; //TODO: Figure out whether to use Zelda/Metroid like distance switches
 
 	FHitResult shootHit;
 
