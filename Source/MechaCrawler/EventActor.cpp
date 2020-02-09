@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "EventActor.h"
+#include "Components/BoxComponent.h"
 
 AEventActor::AEventActor()
 {
@@ -13,8 +13,14 @@ void AEventActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	box->OnComponentBeginOverlap.AddDynamic(this, &AEventActor::Activate);
-
+	if (bIsActivated)
+	{
+		FindComponentByClass<UBoxComponent>()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}
+	else if (!bIsActivated)
+	{
+		FindComponentByClass<UBoxComponent>()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 
 void AEventActor::Tick(float DeltaTime)
@@ -26,5 +32,6 @@ void AEventActor::Tick(float DeltaTime)
 void AEventActor::Activate()
 {
 	bIsActivated = true;
+	FindComponentByClass<UBoxComponent>()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
