@@ -19,6 +19,14 @@ void ARebuildSwitch::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	TArray<AActor*> postProcessVolumes;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APostProcessVolume::StaticClass(), postProcessVolumes);
+	for (int i = 0; i < postProcessVolumes.Num(); i++)
+	{
+		postProcessMain = Cast<APostProcessVolume>(postProcessVolumes[i]);
+		break;
+	}
+
 	UBoxComponent* box = FindComponentByClass<UBoxComponent>();
 	box->OnComponentBeginOverlap.AddDynamic(this, &ARebuildSwitch::OnPlayerOverlapBegin);
 

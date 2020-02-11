@@ -45,6 +45,9 @@ void AMecha::BeginPlay()
 
 	initialMoveSpeed = moveSpeed;
 
+	//Spawn Rebuild Manager
+	instancedRebuildManager = GetWorld()->SpawnActor<ARebuildManager>();
+
 	//SETUP WEAPONS
 	weapons = GetComponentsByClass(UChildActorComponent::StaticClass());
 	for (int i = 0; i < weapons.Num(); i++)
