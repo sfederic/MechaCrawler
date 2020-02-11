@@ -13,6 +13,8 @@ void AShip::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	//Init Widgets
+	levelEntryWidget = CreateWidget<UEnterLevelWidget>(GetWorld(), levelEntryWidgetClass);
 }
 
 void AShip::Tick(float DeltaTime)
@@ -22,12 +24,9 @@ void AShip::Tick(float DeltaTime)
 	velocity = FMath::Clamp(velocity, velocityMin, velocityMax);
 	reverseVelocity = FMath::Clamp(reverseVelocity, reverseVelocityMin, reverseVelocityMax);
 
-	if (!bReversing)
+	if (levelEntryWidget->IsInViewport() == false)
 	{
 		SetActorLocation(GetActorLocation() + (GetActorForwardVector() * velocity));
-	}
-	else
-	{
 		SetActorLocation(GetActorLocation() + (GetActorForwardVector() * reverseVelocity));
 	}
 }
@@ -44,46 +43,58 @@ void AShip::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AShip::RotateRight(float val)
 {
-	if (val)
+	if (levelEntryWidget->IsInViewport() == false)
 	{
-		FRotator rot = GetActorRotation();
-		rot.Yaw += rotateSpeed;
-		SetActorRotation(rot);
+		if (val)
+		{
+			FRotator rot = GetActorRotation();
+			rot.Yaw += rotateSpeed;
+			SetActorRotation(rot);
+		}
 	}
 }
 
 void AShip::RotateLeft(float val)
 {
-	if (val)
+	if (levelEntryWidget->IsInViewport() == false)
 	{
-		FRotator rot = GetActorRotation();
-		rot.Yaw -= rotateSpeed;
-		SetActorRotation(rot);
+		if (val)
+		{
+			FRotator rot = GetActorRotation();
+			rot.Yaw -= rotateSpeed;
+			SetActorRotation(rot);
+		}
 	}
 }
 
 void AShip::Accelerate(float val)
 {
-	if (val)
+	if (levelEntryWidget->IsInViewport() == false)
 	{
-		velocity += moveSpeed * val;
-	}
-	else 
-	{
-		velocity -= moveSpeed;
+		if (val && bReversing == false)
+		{
+			velocity += moveSpeed * val;
+		}
+		else
+		{
+			velocity -= moveSpeed;
+		}
 	}
 }
 
 void AShip::Reverse(float val)
 {
-	if (val)
+	if (levelEntryWidget->IsInViewport() == false)
 	{
-		bReversing = true;
-		reverseVelocity -= reverseSpeed * val;
-	}
-	else
-	{
-		bReversing = false;
-		reverseVelocity += reverseSpeed;
+		if (val)
+		{
+			bReversing = true;
+			reverseVelocity -= reverseSpeed * val;
+		}
+		else
+		{
+			bReversing = false;
+			reverseVelocity += reverseSpeed;
+		}
 	}
 }

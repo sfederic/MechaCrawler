@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "EnterLevelWidget.h"
 #include "Ship.generated.h"
 
 //Pawn used to travel world map
@@ -28,14 +29,22 @@ public:
 	void Accelerate(float val);
 	void Reverse(float val);
 
-private:
+public:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> levelEntryWidgetClass;
+
+	UEnterLevelWidget* levelEntryWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString levelToEnterName; //This is here because I can't figure out how to get an actors string from a widget to its class without GetPlayerPawn()
+
 	float velocityMin = 0.f;
 	float velocityMax = 13.5f;
 
-	float reverseVelocityMin = -13.5f;
+	float reverseVelocityMin = -7.5f;
 	float reverseVelocityMax = 0.0f;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	float velocity;
 
 	UPROPERTY(VisibleAnywhere)
