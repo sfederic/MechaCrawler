@@ -49,4 +49,6 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	float rotateSpeed;
+
+	bool bReversing;
 };

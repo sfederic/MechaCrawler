@@ -22,7 +22,14 @@ void AShip::Tick(float DeltaTime)
 	velocity = FMath::Clamp(velocity, velocityMin, velocityMax);
 	reverseVelocity = FMath::Clamp(reverseVelocity, reverseVelocityMin, reverseVelocityMax);
 
-	SetActorLocation(GetActorLocation() + (GetActorForwardVector() * velocity));
+	if (!bReversing)
+	{
+		SetActorLocation(GetActorLocation() + (GetActorForwardVector() * velocity));
+	}
+	else
+	{
+		SetActorLocation(GetActorLocation() + (GetActorForwardVector() * reverseVelocity));
+	}
 }
 
 void AShip::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -71,10 +78,12 @@ void AShip::Reverse(float val)
 {
 	if (val)
 	{
+		bReversing = true;
 		reverseVelocity -= reverseSpeed * val;
 	}
 	else
 	{
+		bReversing = false;
 		reverseVelocity += reverseSpeed;
 	}
 }
