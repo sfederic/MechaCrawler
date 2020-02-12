@@ -7,6 +7,8 @@
 #include "LevelSave.h"
 #include "DialogueBox.h"
 #include "Components/BoxComponent.h"
+#include "Pickup.h"
+#include "GlobalTags.h"
 
 ASavePoint::ASavePoint()
 {
@@ -20,8 +22,6 @@ void ASavePoint::BeginPlay()
 	
 	box = FindComponentByClass<UBoxComponent>();
 	box->OnComponentBeginOverlap.AddDynamic(this, &ASavePoint::OnPlayerOverlapBegin);
-
-	saveSlotLevelName = UGameplayStatics::GetCurrentLevelName(GetWorld());
 }
 
 void ASavePoint::Tick(float DeltaTime)
@@ -34,33 +34,56 @@ void ASavePoint::OnPlayerOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 	AMecha* player = Cast<AMecha>(OtherActor);
 	if (player)
 	{
-		ULevelSave* save = Cast<ULevelSave>(UGameplayStatics::CreateSaveGameObject(ULevelSave::StaticClass()));
+		FMapSaveData mapSaveData = {};
+		int levelSaveDataIndex = 0;
+		FString levelName = UGameplayStatics::GetCurrentLevelName(GetWorld());
+
+		ULevelSave* save = Cast<ULevelSave>(UGameplayStatics::LoadGameFromSlot(SaveSlots::Slot1, SaveSlots::slotIndex));
+		if (save == nullptr)
+		{
+			save = Cast<ULevelSave>(UGameplayStatics::CreateSaveGameObject(ULevelSave::StaticClass()));
+			save->levelData.Add(FMapSaveData(levelName));
+		}
+
+		//Delete previouslevel
+		for (int i = 0; i < save->levelData.Num(); i++)
+		{
+			if (save->levelData[i].levelName == levelName)
+			{
+				save->levelData.RemoveAt(i);
+			}
+		}
 
 		TArray<AActor*> dialogueBoxes;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADialogueBox::StaticClass(), dialogueBoxes);
+
 		for (int i = 0; i < dialogueBoxes.Num(); i++)
 		{
 			ADialogueBox* dialogueBox = Cast<ADialogueBox>(dialogueBoxes[i]);
 			FReadBox readBox;
 			readBox.actorName = dialogueBox->GetName();
 			readBox.readDialogue = dialogueBox->bHasBeenRead;
-			save->readDialogueBoxes.Add(readBox);
+			mapSaveData.readDialogueBoxes.Add(readBox);
 		}
 
 		TArray<AActor*> pickups;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APickup::StaticClass(), pickups);
+
 		for (int i = 0; i < pickups.Num(); i++)
 		{
 			APickup* pickup = Cast<APickup>(pickups[i]);
 			FPickupStruct pickupData;
 			pickupData.actorName = *pickup->GetName();
 			pickupData.bPickedup = pickup->isInInventory;
-			save->pickups.Add(pickupData);
+			mapSaveData.pickups.Add(pickupData);
 		}
 
-		UGameplayStatics::SaveGameToSlot(save, saveSlotLevelName, saveSlotIndex);
+		save->levelData.Add(mapSaveData);
 
-		UE_LOG(LogTemp, Warning, TEXT("Game Saved to %s at index %d\n"), *saveSlotLevelName, saveSlotIndex);
+
+		UGameplayStatics::SaveGameToSlot(save, SaveSlots::Slot1, SaveSlots::slotIndex);
+
+		UE_LOG(LogTemp, Warning, TEXT("Game Saved to %s at index %d\n"), *SaveSlots::Slot1, SaveSlots::slotIndex);
 	}
 }
 

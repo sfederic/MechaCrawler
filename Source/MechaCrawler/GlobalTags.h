@@ -18,3 +18,14 @@ namespace Tags
 	static const FName DontRebuild = "DontRebuild"; //Flaging actors that don't need to be rebuilt (ice block spawns etc.)
 	static const FName MechaFirstTime = "MechaFirstTime"; //When mecha first found.
 }
+
+namespace LevelNames
+{
+	static const FString OpeningLevel = TEXT("OpeningLevel");
+}
+
+namespace SaveSlots
+{
+	static const FString Slot1 = TEXT("Slot1");
+	static const int slotIndex = 0;
+}

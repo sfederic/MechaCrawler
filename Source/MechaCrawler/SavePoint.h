@@ -26,7 +26,7 @@ public:
 	class UBoxComponent* box;
 
 	UPROPERTY(VisibleAnywhere)
-	FString saveSlotLevelName;
+	FString saveSlot;
 
 	int saveSlotIndex = 0;
 };

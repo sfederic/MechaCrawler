@@ -23,7 +23,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(VisibleAnywhere)
-	FString loadSlotLevelName;
+	FString loadSlot;
 
 	int loadSlotIndex = 0;
 };

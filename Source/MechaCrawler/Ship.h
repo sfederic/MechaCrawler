@@ -38,11 +38,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString levelToEnterName; //This is here because I can't figure out how to get an actors string from a widget to its class without GetPlayerPawn()
 
-	float velocityMin = 0.f;
-	float velocityMax = 13.5f;
+	UPROPERTY(EditAnywhere)
+	float velocityMin;
 
-	float reverseVelocityMin = -7.5f;
-	float reverseVelocityMax = 0.0f;
+	UPROPERTY(EditAnywhere)
+	float velocityMax;
+
+	UPROPERTY(EditAnywhere)
+	float reverseVelocityMin;
+
+	UPROPERTY(EditAnywhere)
+	float reverseVelocityMax;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	float velocity;
@@ -59,5 +65,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	float rotateSpeed;
 
+	UPROPERTY(VisibleAnywhere)
 	bool bReversing;
+
+	UPROPERTY(VisibleAnywhere)
+	bool bMovingForward;
 };

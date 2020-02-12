@@ -4,9 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
-#include "ReadBox.h"
-#include "Pickup.h"
-#include "PickupStruct.h"
+#include "MapSaveData.h"
 #include "LevelSave.generated.h"
 
 /**
@@ -19,9 +17,5 @@ class MECHACRAWLER_API ULevelSave : public USaveGame
 
 public:
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TArray<FReadBox> readDialogueBoxes;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TArray<FPickupStruct> pickups;
+    TArray<FMapSaveData> levelData; //TMap too much hassle with USTRUCT() for keys
 };

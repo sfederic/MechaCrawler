@@ -43,7 +43,7 @@ void ALevelChange::OnPlayerOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 			FReadBox readBox = {};
 			readBox.actorName = dialogueBox->GetName();
 			readBox.readDialogue = dialogueBox->bHasBeenRead;
-			save->readDialogueBoxes.Add(readBox);
+			save->levelData[i].readDialogueBoxes.Add(readBox);
 		}
 
 		FString slotName = TEXT("Slot1");

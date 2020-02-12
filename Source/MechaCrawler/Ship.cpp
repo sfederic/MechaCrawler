@@ -15,6 +15,7 @@ void AShip::BeginPlay()
 	
 	//Init Widgets
 	levelEntryWidget = CreateWidget<UEnterLevelWidget>(GetWorld(), levelEntryWidgetClass);
+	check(levelEntryWidget);
 }
 
 void AShip::Tick(float DeltaTime)
@@ -73,10 +74,12 @@ void AShip::Accelerate(float val)
 	{
 		if (val && bReversing == false)
 		{
+			bMovingForward = true;
 			velocity += moveSpeed * val;
 		}
 		else
 		{
+			bMovingForward = false;
 			velocity -= moveSpeed;
 		}
 	}
@@ -86,7 +89,7 @@ void AShip::Reverse(float val)
 {
 	if (levelEntryWidget->IsInViewport() == false)
 	{
-		if (val)
+		if (val && bMovingForward == false)
 		{
 			bReversing = true;
 			reverseVelocity -= reverseSpeed * val;
