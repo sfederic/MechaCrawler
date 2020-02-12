@@ -78,6 +78,8 @@ void ASavePoint::OnPlayerOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 			mapSaveData.pickups.Add(pickupData);
 		}
 
+		mapSaveData.levelName = levelName;
+
 		save->levelData.Add(mapSaveData);
 
 

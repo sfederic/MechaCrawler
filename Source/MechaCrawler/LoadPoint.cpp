@@ -29,7 +29,7 @@ void ALoadPoint::BeginPlay()
 		//load = Cast<ULevelSave>(UGameplayStatics::CreateSaveGameObject(ULevelSave::StaticClass()));
 		//load->levelData.Add(FMapSaveData(levelName));
 
-		UE_LOG(LogTemp, Warning, TEXT("Load file not found.")); //What about the index?
+		UE_LOG(LogTemp, Warning, TEXT("Load file was null and not found.")); //What about the index?
 		return;
 	}
 

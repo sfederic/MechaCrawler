@@ -15,13 +15,20 @@ void APickup::BeginPlay()
 
 	if (isInInventory)
 	{
-		Destroy();
+		SetActorHiddenInGame(true);
+		SetActorTickEnabled(false);
 	}
 }
 
 void APickup::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (isInInventory)
+	{
+		SetActorHiddenInGame(true);
+		SetActorTickEnabled(false);
+	}
 }
 
 void APickup::AddToInventory()

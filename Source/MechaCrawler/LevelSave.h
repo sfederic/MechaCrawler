@@ -17,5 +17,6 @@ class MECHACRAWLER_API ULevelSave : public USaveGame
 
 public:
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TArray<FMapSaveData> levelData; //TMap too much hassle with USTRUCT() for keys
 };
