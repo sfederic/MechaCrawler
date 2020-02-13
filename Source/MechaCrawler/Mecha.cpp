@@ -820,6 +820,7 @@ void AMecha::RightMousePressed()
 						if (pickup)
 						{
 							pickup->isInInventory = true;
+							this->pickups.Add(pickup->pickupType);
 						}
 					}
 				}
@@ -1371,6 +1372,10 @@ void AMecha::UseObject()
 					{
 						useWidget->useText = "Right Mouse: Pickup";
 					}
+					else if (lookHit.GetActor()->Tags.Contains(Tags::Talk))
+					{
+						useWidget->useText = "Right Mouse: Talk";
+					}
 
 					useWidget->AddToViewport();
 				}
@@ -1577,7 +1582,14 @@ void AMecha::GetDialogue(AActor* dialogueActor)
 			if (dialogue->mainTextBoxTable)
 			{
 				FString context;
-				dialogue->mainTextBoxTable->GetAllRows<FTextBox>(context, textBoxWidget->textBoxRows);
+				if (dialogue->bFirstTextBoxRead == false)
+				{
+					dialogue->mainTextBoxTable->GetAllRows<FTextBox>(context, textBoxWidget->textBoxRows);
+				}
+				else if (dialogue->bFirstTextBoxRead == true)
+				{
+					dialogue->secondTextBoxTable->GetAllRows<FTextBox>(context, textBoxWidget->textBoxRows);
+				}
 
 				textBoxWidget->textBoxIndex = 0;
 
@@ -1589,6 +1601,11 @@ void AMecha::GetDialogue(AActor* dialogueActor)
 					textBoxWidget->text.AppendChar(textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text[textBoxWidget->scrollIndex]); //Just get the first char, scroll it in ProgressText()
 					textBoxWidget->image = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->image;
 					textBoxWidget->AddToViewport();
+				}
+
+				if (dialogue->secondTextBoxTable)
+				{
+					dialogue->bFirstTextBoxRead = true;
 				}
 			}
 		}

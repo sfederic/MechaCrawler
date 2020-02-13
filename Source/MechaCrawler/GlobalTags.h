@@ -8,6 +8,7 @@ namespace Tags
 	static const FName Useable = "Useable"; //Object will activate Use widget (Interface still called regardless)
 	static const FName Pushable = "Pushable"; 
 	static const FName Scannable = "Scannable"; 
+	static const FName Talk = "Talk"; //For NPCs
 	static const FName Pickup = "Pickup";
 	static const FName MoveThrough = "MoveThrough"; //Means player can walk through actor
 	static const FName Enemy = "Enemy";

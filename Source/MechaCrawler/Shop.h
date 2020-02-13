@@ -5,21 +5,20 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Activate.h"
-#include "Pickup.generated.h"
+#include "Blueprint/UserWidget.h"
+#include "Shop.generated.h"
 
-UENUM()
-enum class EPickupType : uint8 //This might get big
-{
-	Mineral UMETA(DisplayName = "Mineral")
-};
+/**
+* basically a trade shop that pops up a UI on Use()
+*/
 
 UCLASS()
-class MECHACRAWLER_API APickup : public AActor, public IActivate
+class MECHACRAWLER_API AShop : public AActor, public IActivate
 {
 	GENERATED_BODY()
 	
 public:	
-	APickup();
+	AShop();
 
 protected:
 	virtual void BeginPlay() override;
@@ -27,14 +26,10 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void Use() override;
-	void AddToInventory();
 
 	UPROPERTY(EditAnywhere)
-	EPickupType pickupType;
+	TSubclassOf<UUserWidget> shopWidgetClass;
 
-	UPROPERTY(EditAnywhere)
-	FString name;
-
-	UPROPERTY(VisibleAnywhere)
-	bool isInInventory;
+	UPROPERTY()
+	UUserWidget* shopWidget;
 };

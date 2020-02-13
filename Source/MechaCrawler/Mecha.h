@@ -12,6 +12,7 @@
 #include "TextBox.h"
 #include "NoteNode.h"
 #include "RebuildManager.h"
+#include "Pickup.h"
 #include "Mecha.generated.h"
 
 UCLASS()
@@ -72,6 +73,12 @@ public:
 	FQuat nextRot;
 
 	FRotator cameraRot;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<EPickupType> pickups;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float cash;
 
 	UPROPERTY(EditAnywhere)
 	class UMaterialParameterCollection* outlineParams;

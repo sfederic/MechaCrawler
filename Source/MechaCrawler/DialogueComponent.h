@@ -23,4 +23,10 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	UDataTable* mainTextBoxTable;
+
+	UPROPERTY(EditAnywhere)
+	UDataTable* secondTextBoxTable;
+
+	UPROPERTY(EditAnywhere)
+	bool bFirstTextBoxRead;
 };
