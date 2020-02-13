@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "EnterLevelWidget.h"
+#include "TextBoxWidget.h"
 #include "Ship.generated.h"
 
 //Pawn used to travel world map
@@ -26,14 +27,36 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void RotateRight(float val);
 	void RotateLeft(float val);
+	void RotateUp(float val);
+	void RotateDown(float val);
 	void Accelerate(float val);
 	void Reverse(float val);
 
+	UFUNCTION(BlueprintCallable)
+	void GetDialogue(AActor* dialogueActor);
+
+	void ProgressText();
+	void ScrollText();
+	void LeftMousePressed();
+
 public:
+	FHitResult shootHit;
+	FCollisionQueryParams shootParams;
+	class UCameraComponent* camera;
+	class APlayerController* controller;
+
+	//Widgets
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> levelEntryWidgetClass;
 
+	UPROPERTY()
 	UEnterLevelWidget* levelEntryWidget;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> textBoxWidgetClass;
+
+	UPROPERTY()
+	UTextBoxWidget* textBoxWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString levelToEnterName; //This is here because I can't figure out how to get an actors string from a widget to its class without GetPlayerPawn()
@@ -57,17 +80,21 @@ public:
 	float reverseVelocity;
 
 	UPROPERTY(EditAnywhere)
-	float moveSpeed;	
+	float shipMoveSpeed;	
 
 	UPROPERTY(EditAnywhere)
 	float reverseSpeed;
 	
 	UPROPERTY(EditAnywhere)
-	float rotateSpeed;
+	float shipRotateSpeed;
+
+	float shootDistance = 5000.f;
 
 	UPROPERTY(VisibleAnywhere)
 	bool bReversing;
 
 	UPROPERTY(VisibleAnywhere)
 	bool bMovingForward;
+
+	bool bDialogueClick;
 };

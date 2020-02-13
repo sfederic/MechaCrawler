@@ -3,6 +3,7 @@
 #include "DialogueBox.h"
 #include "Components/BoxComponent.h"
 #include "Mecha.h"
+#include "Ship.h"
 #include "DrawDebugHelpers.h"
 
 ADialogueBox::ADialogueBox()
@@ -39,9 +40,36 @@ void ADialogueBox::OnPlayerOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 	if (bHasBeenRead == false)
 	{
 		AMecha* player = Cast<AMecha>(OtherActor);
+		AShip* ship = Cast<AShip>(OtherActor); //So lazy
+
 		if (player)
 		{
 			player->GetDialogue(this);
+			bHasBeenRead = true;
+
+			//Handle dialogue boxes that daisey chain
+			for (int i = 0; i < dialogueBoxesToActivate.Num(); i++)
+			{
+				dialogueBoxesToActivate[i]->Activate();
+			}
+
+			//Handle decorative actors
+			for (int i = 0; i < actorsToActivate.Num(); i++)
+			{
+				actorsToActivate[i]->SetActorHiddenInGame(false);
+			}
+
+			//Handle in-level events to spawn
+			for (int i = 0; i < eventActors.Num(); i++)
+			{
+				eventActors[i]->Activate();
+			}
+		}
+		else if (ship)
+		{
+			ship->GetDialogue(this);
+			ship->velocity = 0.f;
+			ship->reverseVelocity = 0.f;
 			bHasBeenRead = true;
 
 			//Handle dialogue boxes that daisey chain
