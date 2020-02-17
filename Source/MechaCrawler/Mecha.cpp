@@ -67,6 +67,9 @@ void AMecha::BeginPlay()
 	}
 
 	//INIT WIDGETS
+	shootingWidget = CreateWidget<UUserWidget>(GetWorld(), shootingWidgetClass);
+	shootingWidget->AddToViewport();
+
 	if (bStartLevelOnShip)
 	{
 		startLevelWidget = CreateWidget<UUserWidget>(GetWorld(), startLevelWidgetClass);
@@ -138,7 +141,7 @@ void AMecha::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	Scan();
+	//Scan();
 	ScrollText();
 
 	//TODO: Remove this and call it through RebuildManager's Tick
@@ -653,7 +656,6 @@ void AMecha::SetScan()
 		return;
 	}
 
-	//TODO: Find a better representation for actors that can be destroyed with scanner
 	if (!scanning)
 	{
 		if (postProcessMain)
@@ -689,6 +691,9 @@ void AMecha::SetScan()
 
 		//Hide Weapon
 		weapons[currentWeaponIndex]->GetOwner()->SetActorHiddenInGame(false);
+
+		//reset zoom in and out
+		camera->FieldOfView = maxFOV;
 	}
 
 	if (scanWidget && useWidget && (inventoryWidget->IsInViewport() == false))
@@ -893,6 +898,8 @@ void AMecha::LeftMousePressed()
 		{
 			Scan();
 		}
+
+		return;
 	}
 
 	//if (val)
@@ -1217,7 +1224,7 @@ void AMecha::DeleteAllNotes()
 
 void AMecha::ZoomIn(float val)
 {
-	if (camera)
+	if (camera && scanning)
 	{
 		camera->FieldOfView += 5.0f * val; //TODO: Figure out how feels with different mice (TODO: Google plural of mouses)
 		camera->FieldOfView = FMath::Clamp(camera->FieldOfView, 5.0f, maxFOV);
@@ -1226,7 +1233,7 @@ void AMecha::ZoomIn(float val)
 
 void AMecha::ZoomOut(float val)
 {
-	if (camera)
+	if (camera && scanning)
 	{
 		camera->FieldOfView -= 5.0f * val;
 		camera->FieldOfView = FMath::Clamp(camera->FieldOfView, 5.0f, maxFOV);
@@ -1613,7 +1620,7 @@ void AMecha::Scan()
 					scanWidget->scanEntry = scanData->scanText;
 					scanWidget->scanNameEntry = scanData->scanName;
 
-					//UGameplayStatics::SetGamePaused(GetWorld(), true);
+					UGameplayStatics::SetGamePaused(GetWorld(), true);
 				}
 				else
 				{
@@ -1633,7 +1640,7 @@ void AMecha::Scan()
 					scanWidget->scanEntry = scanData->scanText;
 					scanWidget->scanNameEntry = scanData->scanName;
 
-					//UGameplayStatics::SetGamePaused(GetWorld(), true);
+					UGameplayStatics::SetGamePaused(GetWorld(), true);
 				}
 				else
 				{
@@ -1647,7 +1654,7 @@ void AMecha::Scan()
 			scanWidget->scanEntry = FString(TEXT("No Scan data."));
 			scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
 
-			//UGameplayStatics::SetGamePaused(GetWorld(), true);
+			UGameplayStatics::SetGamePaused(GetWorld(), true);
 		}
 	}
 }

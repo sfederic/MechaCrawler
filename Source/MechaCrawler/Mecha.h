@@ -123,6 +123,13 @@ public:
 
 	//TODO: move into playerhud.h/cpp
 	//WIDGET CLASSES
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> shootingWidgetClass;
+
+	UPROPERTY()
+	UUserWidget* shootingWidget;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> startLevelWidgetClass;
 
