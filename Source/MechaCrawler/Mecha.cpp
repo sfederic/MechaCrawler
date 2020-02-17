@@ -79,6 +79,8 @@ void AMecha::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("Dialogue Widget not set in Mecha.cpp"));
 	}
 
+	choiceWidget = CreateWidget<UDialogueChoiceWidget>(GetWorld(), choiceWidgetClass);
+
 	useWidget = CreateWidget<UActivateWidget>(GetWorld(), useWidgetClass);
 	if (useWidget)
 	{
@@ -629,18 +631,24 @@ void AMecha::MoveUp(float val)
 
 void AMecha::LookYaw(float val)
 {
-	cameraRot.Yaw += cameraSpeed * val;
+	if (canMove)
+	{
+		cameraRot.Yaw += cameraSpeed * val;
+	}
 }
 
 void AMecha::LookPitch(float val)
 {
-	cameraRot.Pitch -= cameraSpeed * val;
-	cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch, -70.f, 70.f);
+	if (canMove)
+	{
+		cameraRot.Pitch -= cameraSpeed * val;
+		cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch, -70.f, 70.f);
+	}
 }
 
 void AMecha::SetScan()
 {
-	if (bDialogueClick)
+	if (bDialogueClick || canMove == false)
 	{
 		return;
 	}
@@ -701,7 +709,7 @@ void AMecha::SetScan()
 
 void AMecha::SetWayPoint()
 {
-	if (wayPoint)
+	if (wayPoint && canMove)
 	{
 		FHitResult wayPointHit;
 		if (GetWorld()->LineTraceSingleByChannel(wayPointHit, camera->GetComponentLocation(),
@@ -716,6 +724,11 @@ void AMecha::SetWayPoint()
 
 void AMecha::RightMousePressed()
 {
+	if (canMove == false)
+	{
+		return;
+	}
+
 	//USING
 	if (scanning && bDialogueClick == false)
 	{
@@ -1426,27 +1439,98 @@ void AMecha::ChangeWeapon()
 
 void AMecha::ProgressText()
 {
-	if (textBoxWidget->IsInViewport())
+	if (bDialogueClick && textBoxWidget->bScrollFinished)
 	{
-		if (textBoxWidget->textBoxIndex < (textBoxWidget->textBoxRows.Num() - 1))
+		if (textBoxWidget->IsInViewport())
 		{
+		Start: //Lazy way of looping through the table rows fror choie dialogue
+
 			textBoxWidget->textBoxIndex++;
-			textBoxWidget->bScrollFinished = false;
 
-			textBoxWidget->name = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name;
-			textBoxWidget->scrollIndex = 0;
-			textBoxWidget->text.Empty();
-			textBoxWidget->text.AppendChar(textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text[textBoxWidget->scrollIndex]);
-			textBoxWidget->image = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->image;
-		}
-		else
-		{
-			bDialogueClick = false;
-			textBoxWidget->textBoxIndex = 0;
-			textBoxWidget->textBoxRows.Empty();
-			textBoxWidget->RemoveFromViewport();
+			if (textBoxWidget->textBoxIndex <= (textBoxWidget->textBoxRows.Num() - 1))
+			{
+				//if ()
+				{
+					if (textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->isChoice)
+					{	
+						if (choiceWidget->IsInViewport() == false)
+						{
+							choiceWidget->choice1 = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->choice1;
+							choiceWidget->choice2 = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->choice2;
 
-			UGameplayStatics::SetGamePaused(GetWorld(), false);
+							choiceWidget->choice1Taken = false;
+							choiceWidget->choice2Taken = false;
+
+							choiceWidget->AddToViewport();
+						}
+					}
+
+					if (choiceWidget->choice1Taken)
+					{
+						//Choice 1
+						if (choiceWidget->choice1Taken == textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->choice1Chosen)
+						{
+							textBoxWidget->bScrollFinished = false;
+
+							textBoxWidget->name = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name;
+							textBoxWidget->scrollIndex = 0;
+							textBoxWidget->text.Empty();
+							textBoxWidget->text.AppendChar(textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text[textBoxWidget->scrollIndex]);
+							textBoxWidget->image = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->image;
+						}
+						else if (choiceWidget->choice1Taken != textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->choice1Chosen)
+						{
+							goto Start;
+						}
+					}
+					else if (choiceWidget->choice2Taken)
+					{
+						//Choice 2
+						if (choiceWidget->choice2Taken == textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->choice2Chosen)
+						{
+							textBoxWidget->bScrollFinished = false;
+
+							textBoxWidget->name = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name;
+							textBoxWidget->scrollIndex = 0;
+							textBoxWidget->text.Empty();
+							textBoxWidget->text.AppendChar(textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text[textBoxWidget->scrollIndex]);
+							textBoxWidget->image = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->image;
+						}
+						else if (choiceWidget->choice2Taken != textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->choice2Chosen)
+						{
+							goto Start;
+						}
+					}
+
+					if (!choiceWidget->choice1Taken && !choiceWidget->choice2Taken)
+					{
+						textBoxWidget->bScrollFinished = false;
+
+						textBoxWidget->name = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name;
+						textBoxWidget->scrollIndex = 0;
+						textBoxWidget->text.Empty();
+						textBoxWidget->text.AppendChar(textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text[textBoxWidget->scrollIndex]);
+						textBoxWidget->image = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->image;
+					}
+				}
+			}
+			else
+			{
+				bDialogueClick = false;
+				textBoxWidget->textBoxIndex = 0;
+				textBoxWidget->textBoxRows.Empty();
+				textBoxWidget->RemoveFromViewport();
+
+				if (scanning && !scanWidget->IsInViewport())
+				{
+					scanWidget->AddToViewport();
+				}
+
+				choiceWidget->choice1Taken = false;
+				choiceWidget->choice2Taken = false;
+
+				//UGameplayStatics::SetGamePaused(GetWorld(), false);
+			}
 		}
 	}
 }
@@ -1601,6 +1685,22 @@ void AMecha::GetDialogue(AActor* dialogueActor)
 					textBoxWidget->text.AppendChar(textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text[textBoxWidget->scrollIndex]); //Just get the first char, scroll it in ProgressText()
 					textBoxWidget->image = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->image;
 					textBoxWidget->AddToViewport();
+
+					if (textBoxWidget->textBoxRows[0]->isChoice)
+					{
+						choiceWidget->choice1 = textBoxWidget->textBoxRows[0]->choice1;
+						choiceWidget->choice2 = textBoxWidget->textBoxRows[0]->choice2;
+
+						choiceWidget->choice1Taken = false;
+						choiceWidget->choice2Taken = false;
+
+						choiceWidget->AddToViewport();
+
+						if (scanning && scanWidget->IsInViewport())
+						{
+							scanWidget->RemoveFromViewport();
+						}
+					}
 				}
 
 				if (dialogue->secondTextBoxTable)

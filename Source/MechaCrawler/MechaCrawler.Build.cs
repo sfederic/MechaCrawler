@@ -8,7 +8,7 @@ public class MechaCrawler : ModuleRules
 	{        
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ApexDestruction", "UMG", "ProceduralMeshComponent" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ApexDestruction", "UMG", "ProceduralMeshComponent", "LevelSequence" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

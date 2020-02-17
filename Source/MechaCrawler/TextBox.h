@@ -19,4 +19,19 @@ struct FTextBox : public FTableRowBase
 
 	UPROPERTY(EditAnywhere)
 	UTexture2D* image;
+
+	UPROPERTY(EditAnywhere)
+	bool isChoice = false;
+
+	UPROPERTY(EditAnywhere)
+	FString choice1;
+
+	UPROPERTY(EditAnywhere)
+	bool choice1Chosen = false;
+
+	UPROPERTY(EditAnywhere)
+	FString choice2;
+
+	UPROPERTY(EditAnywhere)
+	bool choice2Chosen = false;
 };

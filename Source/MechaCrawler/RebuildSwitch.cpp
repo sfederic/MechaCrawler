@@ -13,6 +13,8 @@ ARebuildSwitch::ARebuildSwitch()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	rebuildTimer = 0.0f;
+	pulseSpeed = 300.f;
+	pulseTimerMax = 3.0f;
 }
 
 void ARebuildSwitch::BeginPlay()
@@ -47,7 +49,7 @@ void ARebuildSwitch::Tick(float DeltaTime)
 		{
 			rebuildTimer += FApp::GetDeltaTime();
 
-			if (rebuildTimer > 0.5f)
+			if (rebuildTimer > 0.5f) //Magic number here because don't want rebuild to trigger when just walking through bounds, needs a while to warm up
 			{
 				//rebuildSwitchPlayer->bFadeOutRebuild = true;
 				bRebuildPulseEffect = true;
@@ -68,13 +70,13 @@ void ARebuildSwitch::Tick(float DeltaTime)
 					}
 				}
 
-				if (rebuildPulseEffectTimer < 2.5f)
+				if (rebuildPulseEffectTimer < pulseTimerMax)
 				{
-					rebuildPulseEffectValue += FApp::GetDeltaTime() * 500.f;
+					rebuildPulseEffectValue += FApp::GetDeltaTime() * pulseSpeed;
 					paramInstance->SetScalarParameterValue(TEXT("Radius"), rebuildPulseEffectValue);
 					rebuildPulseEffectTimer += FApp::GetDeltaTime();
 				} 
-				else if (rebuildPulseEffectTimer > 2.5f)
+				else if (rebuildPulseEffectTimer > pulseTimerMax)
 				{
 					rebuildPulseEffectValue = 0.f;
 					paramInstance->SetScalarParameterValue(TEXT("Radius"), rebuildPulseEffectValue);
@@ -87,7 +89,7 @@ void ARebuildSwitch::Tick(float DeltaTime)
 					rebuildPulseEffectTimer = 0.f;
 				}
 
-				if (rebuildTimer > 2.5f && rebuildPulseEffectTimer == 0.f) //this is awful using the two timers together
+				if (rebuildTimer > pulseTimerMax && rebuildPulseEffectTimer == 0.f) //this is awful using the two timers together
 				{
 					rebuildSwitchPlayer->canMove = true;
 					switchActivated = true;

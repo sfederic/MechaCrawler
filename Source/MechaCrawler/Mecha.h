@@ -12,6 +12,7 @@
 #include "TextBox.h"
 #include "NoteNode.h"
 #include "RebuildManager.h"
+#include "DialogueChoiceWidget.h"
 #include "Pickup.h"
 #include "Mecha.generated.h"
 
@@ -53,7 +54,10 @@ public:
 	void RebuildAllDestroyedActors();
 	void UseObject();
 	void ChangeWeapon();
+
+	UFUNCTION(BlueprintCallable)
 	void ProgressText();
+
 	void DashForward();
 	void Scan();
 
@@ -138,6 +142,12 @@ public:
 	TSubclassOf<ANoteNode> noteWidgetClass;
 
 	UPROPERTY(EditAnywhere)
+	TSubclassOf<UDialogueChoiceWidget> choiceWidgetClass;
+
+	UPROPERTY()
+	UDialogueChoiceWidget* choiceWidget;
+
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<ADestructibleActor> iceBlockClass;
 
 	UPROPERTY()
@@ -219,9 +229,10 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	bool submerged = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bDialogueClick = false;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool canMove = true;
 
 	bool bFadeOutRebuild = false;

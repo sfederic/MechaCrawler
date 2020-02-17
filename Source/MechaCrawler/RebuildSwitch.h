@@ -47,6 +47,12 @@ public:
 
 	bool bRebuildPulseEffect = false;
 
+	UPROPERTY(EditAnywhere)
+	float pulseSpeed;	
+	
+	UPROPERTY(EditAnywhere)
+	float pulseTimerMax;
+
 	UPROPERTY(VisibleAnywhere)
 	float rebuildPulseEffectTimer = 0.f;
 

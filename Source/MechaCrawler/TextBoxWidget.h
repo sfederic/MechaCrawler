@@ -29,7 +29,9 @@ public:
 
 	int textBoxIndex = 0;
 	int scrollIndex = 0;
+
 	float scrollTimer = 0.f;
-	float scrollSpeed = 5.0f;
+	float scrollSpeed = 6.5f;
+
 	bool bScrollFinished = false;
 };
