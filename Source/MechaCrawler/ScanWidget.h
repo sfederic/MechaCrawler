@@ -21,4 +21,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString scanNameEntry;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString dialogueName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* dialogueImage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* defaultDialogueImage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bHasDialouge = false;
 };

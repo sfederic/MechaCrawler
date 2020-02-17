@@ -12,7 +12,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Particles/ParticleSystem.h"
 #include "GlobalTags.h"
-#include "TimerManager.h" //What was this things problem before?
+#include "TimerManager.h"
 #include "IceComponent.h"
 #include "Enemy.h"
 #include "Weapon.h"
@@ -95,6 +95,7 @@ void AMecha::BeginPlay()
 	}
 
 	scanWidget = CreateWidget<UScanWidget>(GetWorld(), scanWidgetClass);
+	scanWidget->dialogueImage = scanWidget->defaultDialogueImage; //If you don't set the image before hand before calling it nullptr, it will blank out
 	if (scanWidget == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Scan widget not set in Mecha.cpp"));
@@ -142,6 +143,78 @@ void AMecha::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	//Scan();
+	//TODO: Just testing to get scan name as runtime and not pause. Decide on one or the other
+	if (scanning && scanWidget)
+	{
+		if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(), camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_GameTraceChannel1)) //TransparentScan
+		{
+			AActor* actor = scanHit.GetActor();
+			if (actor)
+			{
+				UScanData* scanData = actor->FindComponentByClass<UScanData>();
+				if (scanData)
+				{
+					scanWidget->scanNameEntry = scanData->scanName;
+					scanWidget->scanEntry = scanData->scanText;
+					if (actor->FindComponentByClass<UDialogueComponent>())
+					{
+						scanWidget->bHasDialouge = true;
+						scanWidget->dialogueName = scanData->dialogueName;
+						scanWidget->dialogueImage = scanData->dialogueImage;
+					}
+					else
+					{
+						scanWidget->bHasDialouge = false;
+						scanWidget->dialogueImage = scanWidget->defaultDialogueImage;
+					}
+				}
+				else
+				{
+					scanWidget->bHasDialouge = true;
+					scanWidget->dialogueName = TEXT("");
+					scanWidget->dialogueImage = scanWidget->defaultDialogueImage;
+				}
+			}
+		}
+		else if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(), camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_WorldStatic))
+		{
+			AActor* actor = scanHit.GetActor();
+			if (actor)
+			{
+				UScanData* scanData = actor->FindComponentByClass<UScanData>();
+				if (scanData)
+				{
+					scanWidget->scanNameEntry = scanData->scanName;
+					scanWidget->scanEntry = scanData->scanText;
+					if (actor->FindComponentByClass<UDialogueComponent>())
+					{
+						scanWidget->bHasDialouge = true;
+						scanWidget->dialogueName = scanData->dialogueName;
+						scanWidget->dialogueImage = scanData->dialogueImage;
+					}
+					else
+					{
+						scanWidget->bHasDialouge = false;
+						scanWidget->dialogueImage = scanWidget->defaultDialogueImage;
+					}
+				}
+				else
+				{
+					scanWidget->bHasDialouge = false;
+					scanWidget->dialogueName = TEXT("");
+					scanWidget->dialogueImage = scanWidget->defaultDialogueImage;
+				}
+			}
+		}
+		else
+		{
+			scanWidget->bHasDialouge = false;
+			scanWidget->dialogueName = TEXT("");
+			scanWidget->dialogueImage = scanWidget->defaultDialogueImage;
+		}
+	}
+
+
 	ScrollText();
 
 	//TODO: Remove this and call it through RebuildManager's Tick
@@ -182,58 +255,30 @@ void AMecha::Tick(float DeltaTime)
 	forwardAxis = rootAxes[forwardAxisIndex];
 	rightAxis = rootAxes[rightAxisIndex];
 
-	//TODO: Don't know if need water to change move speed
-	/*if (submerged)
-	{
-		moveSpeed = initialMoveSpeed;
-	}*/
 
+	//GRAVITY
 	if (!GetWorld()->LineTraceSingleByChannel(moveHit, GetActorLocation(), GetActorLocation() - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
 	{
 		falling = true;
 	}
 
-	//GRAVITY
 	if (currentLoc == nextLoc && currentRot == nextRot && bStartLevelOnShip == false)
 	{
 		FVector loc = GetActorLocation();
-
-		//For Water and obstacles that the player can pass through (Tagged as MoveThrough)
-		/*if (GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
+		
+		if (!GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
 		{
-			if (moveHit.GetActor()->Tags.Contains(Tags::MoveThrough))
-			{
-				submerged = true;
-
-				nextLoc = loc - (RootComponent->GetUpVector() * moveDistance);
-				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
-			}
-		}*/
-
-		//For normal gravity
-		//if (submerged == false)
+			falling = true;
+			moveSpeed += FApp::GetDeltaTime() + 100.0f;
+			nextLoc = loc - (RootComponent->GetUpVector() * moveDistance);
+		}
+		else
 		{
-			if (!GetWorld()->LineTraceSingleByChannel(moveHit, loc, loc - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
-			{
-				falling = true;
-
-				//TODO: Acellerating fallspeed mucks with linetrace collision. Might add back in. Might take out. Feels good though.
-				moveSpeed += FApp::GetDeltaTime() + 100.0f;
-
-				nextLoc = loc - (RootComponent->GetUpVector() * moveDistance);
-				//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
-			}
-			else
-			{
-				moveSpeed = previousMoveSpeed;
-				falling = false;
-			}
+			moveSpeed = previousMoveSpeed;
+			falling = false;
 		}
 	}
+
 
 	UseObject(); //For 'Use' UI
 
@@ -284,28 +329,25 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAxis("Back", this, &AMecha::MoveBack);
 	InputComponent->BindAxis("Left", this, &AMecha::MoveLeft);
 	InputComponent->BindAxis("Right", this, &AMecha::MoveRight);
-	//InputComponent->BindAxis("Up", this, &AMecha::MoveUp);
 	InputComponent->BindAxis("Mouse X", this, &AMecha::LookYaw);
 	InputComponent->BindAxis("Mouse Y", this, &AMecha::LookPitch);
 	
-	//Inputs bound to mouse axis instead of Up/Down. Find out why didn't work.
 	InputComponent->BindAxis("MouseWheelUp", this, &AMecha::ZoomIn);
 	InputComponent->BindAxis("MouseWheelDown", this, &AMecha::ZoomOut);
 
-	//InputComponent->BindAxis("LeftMouseScan", this, &AMecha::LeftMousePressedScan);
-	
+	//This was for making a metroid prime like scan system of pausing the game.
+	//InputComponent->BindAxis("ProgressText", this, &AMecha::ProgressText).bExecuteWhenPaused = true;
+	//InputComponent->BindAxis("ScrollText", this, &AMecha::ScrollText).bExecuteWhenPaused = true;
+
 	InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed).bExecuteWhenPaused = true;
 	InputComponent->BindAction("Scan", EInputEvent::IE_Pressed, this, &AMecha::SetScan);
 	InputComponent->BindAction("RightMouse", EInputEvent::IE_Pressed, this, &AMecha::RightMousePressed).bExecuteWhenPaused = true;
-	//InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AMecha::LeftMousePressed);
 	InputComponent->BindAction("Space", EInputEvent::IE_Pressed, this, &AMecha::SetWayPoint);
 	InputComponent->BindAction("Enter", EInputEvent::IE_Pressed, this, &AMecha::StartLevel);
-	//InputComponent->BindAction("Zoom", EInputEvent::IE_Pressed, this, &AMecha::Zoom);
 	InputComponent->BindAction("Note", EInputEvent::IE_Pressed, this, &AMecha::AddNote);
 	InputComponent->BindAction("Backspace", EInputEvent::IE_Pressed, this, &AMecha::DeleteAllNotes);
 	InputComponent->BindAction("View", EInputEvent::IE_Pressed, this, &AMecha::SetCameraView);
 	InputComponent->BindAction("SwitchWeapon", EInputEvent::IE_Pressed, this, &AMecha::ChangeWeapon);
-	InputComponent->BindAction("ProgressText", EInputEvent::IE_Pressed, this, &AMecha::ProgressText);
 	InputComponent->BindAction("DashForward", EInputEvent::IE_Pressed, this, &AMecha::DashForward);
 }
 
@@ -673,6 +715,8 @@ void AMecha::SetScan()
 
 		//Hide Weapon
 		weapons[currentWeaponIndex]->GetOwner()->SetActorHiddenInGame(true);
+
+		scanWidget->dialogueImage = scanWidget->defaultDialogueImage;
 	} 
 	else if (scanning)
 	{
@@ -1450,6 +1494,7 @@ void AMecha::ProgressText()
 	{
 		if (textBoxWidget->IsInViewport())
 		{
+
 		Start: //Lazy way of looping through the table rows fror choie dialogue
 
 			textBoxWidget->textBoxIndex++;
@@ -1459,7 +1504,7 @@ void AMecha::ProgressText()
 				//if ()
 				{
 					if (textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->isChoice)
-					{	
+					{
 						if (choiceWidget->IsInViewport() == false)
 						{
 							choiceWidget->choice1 = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->choice1;
@@ -1535,8 +1580,6 @@ void AMecha::ProgressText()
 
 				choiceWidget->choice1Taken = false;
 				choiceWidget->choice2Taken = false;
-
-				//UGameplayStatics::SetGamePaused(GetWorld(), false);
 			}
 		}
 	}
@@ -1619,13 +1662,18 @@ void AMecha::Scan()
 				{
 					scanWidget->scanEntry = scanData->scanText;
 					scanWidget->scanNameEntry = scanData->scanName;
-
-					UGameplayStatics::SetGamePaused(GetWorld(), true);
+					if (actor->FindComponentByClass<UDialogueComponent>())
+					{
+						scanWidget->bHasDialouge = true;
+						scanWidget->dialogueName = scanData->dialogueName;
+					}
 				}
 				else
 				{
 					scanWidget->scanEntry = FString(TEXT("No Scan data."));
 					scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
+					scanWidget->bHasDialouge = false;
+					scanWidget->dialogueName = TEXT("");
 				}
 			}
 		}
@@ -1639,13 +1687,18 @@ void AMecha::Scan()
 				{
 					scanWidget->scanEntry = scanData->scanText;
 					scanWidget->scanNameEntry = scanData->scanName;
-
-					UGameplayStatics::SetGamePaused(GetWorld(), true);
+					if (actor->FindComponentByClass<UDialogueComponent>())
+					{
+						scanWidget->bHasDialouge = true;
+						scanWidget->dialogueName = scanData->dialogueName;
+					}
 				}
 				else
 				{
 					scanWidget->scanEntry = FString(TEXT("No Scan data."));
 					scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
+					scanWidget->bHasDialouge = false;
+					scanWidget->dialogueName = TEXT("");
 				}
 			}
 		}
@@ -1653,8 +1706,8 @@ void AMecha::Scan()
 		{
 			scanWidget->scanEntry = FString(TEXT("No Scan data."));
 			scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
-
-			UGameplayStatics::SetGamePaused(GetWorld(), true);
+			scanWidget->bHasDialouge = false;
+			scanWidget->dialogueName = TEXT("");
 		}
 	}
 }
@@ -1664,8 +1717,6 @@ void AMecha::GetDialogue(AActor* dialogueActor)
 	UDialogueComponent* dialogue = dialogueActor->FindComponentByClass<UDialogueComponent>();
 	if (dialogue)
 	{
-		//UGameplayStatics::SetGamePaused(GetWorld(), true);
-
 		if (textBoxWidget->IsInViewport() == false)
 		{
 			bDialogueClick = true;
