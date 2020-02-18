@@ -26,7 +26,10 @@ public:
 	UParticleSystem* weaponParticle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCameraShake* camShake;
+	TSubclassOf<UCameraShake> camShake;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float cooldown;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float damage;

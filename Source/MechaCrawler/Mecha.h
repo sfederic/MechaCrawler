@@ -90,8 +90,11 @@ public:
 	class UCameraComponent* camera;
 	class APlayerController* controller;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Camera Shakes")
 	TSubclassOf<class UCameraShake> cameraShake;
+
+	UPROPERTY(EditAnywhere, Category = "Camera Shakes")
+	TSubclassOf<class UCameraShake> beamShootCameraShake;
 
 	UPROPERTY()
 	TArray<UActorComponent*> weapons;
@@ -110,9 +113,15 @@ public:
 	UMaterialInterface* destroyableBaseMaterial;
 
 	//PARTICLES
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Particles")
 	UParticleSystem* explosionParticle;
+
 	UParticleSystemComponent* wayPoint;
+
+	UPROPERTY(EditAnywhere, Category = "Particles")
+	UParticleSystem* beamShootParticleTemplate;
+
+	UParticleSystemComponent* beamShootParticle;
 
 	//REBUILDS
 	UPROPERTY(EditAnywhere)
@@ -195,6 +204,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float destructibleDamageStrength;
+
+	UPROPERTY(VisibleAnywhere)
+	float shootCooldownTimer = 0.f;
 
 	int forwardAxisIndex;
 	int rightAxisIndex;

@@ -142,6 +142,9 @@ void AMecha::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	shootCooldownTimer += FApp::GetDeltaTime();
+
+
 	//Scan();
 	//TODO: Just testing to get scan name as runtime and not pause. Decide on one or the other
 	if (scanning && scanWidget)
@@ -951,7 +954,7 @@ void AMecha::LeftMousePressed()
 		//TODO: put cam shake into weapon blueprint
 		//UGameplayStatics::PlayWorldCameraShake(GetWorld(), cameraShake, FVector(0.f), 500.f, 1.f); 
 
-		UChildActorComponent* iceWeapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
+		/*UChildActorComponent* iceWeapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
 		if (iceWeapon)
 		{
 			UWeaponData* weaponData = iceWeapon->GetChildActor()->FindComponentByClass<UWeaponData>();
@@ -996,7 +999,7 @@ void AMecha::LeftMousePressed()
 					}
 				}
 			}
-		}
+		}*/
 
 		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
 			GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_WorldStatic)) 
@@ -1004,39 +1007,60 @@ void AMecha::LeftMousePressed()
 			UE_LOG(LogTemp, Warning, TEXT("Shot Actor: %s\n"), *shootHit.GetActor()->GetName());
 
 			AActor* shotEnemy = shootHit.GetActor();
-			
-			if (shotEnemy->Tags.Contains(Tags::Enemy) && shotEnemy->Tags.Contains(Tags::Destroy) == false)
-			{
-				UDestructibleComponent* enemyDc = shotEnemy->FindComponentByClass<UDestructibleComponent>();
-				if (enemyDc)
-				{
-					enemyDc->ApplyDamage(destructibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
-					shotEnemy->SetLifeSpan(3.0);
-					shotEnemy->Tags.Add(Tags::Destroy);
-				}
-				else
-				{
-					if (shotEnemy->Tags.Contains(Tags::Destroy) == false)
-					{
-						AEnemy* enemyCast = Cast<AEnemy>(shotEnemy);
-						if (enemyCast)
-						{
-							enemyCast->DropLoot();
-						}
 
-						//shotEnemy->Destroy();
-						shotEnemy->FindComponentByClass<UMeshComponent>()->SetSimulatePhysics(true);
-						shotEnemy->FindComponentByClass<UMeshComponent>()->AddImpulse(shotEnemy->GetActorForwardVector() * 10000.f);
-						shotEnemy->SetActorTickEnabled(false);
-						shotEnemy->FindComponentByClass<UBoxComponent>()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+			UChildActorComponent* weapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
+			UWeaponData* weaponData;
+
+
+			weaponData = weapon->GetChildActor()->FindComponentByClass<UWeaponData>();
+
+			//TODO: Decide on weapon cooldown shooting
+			//if (shootCooldownTimer > weaponData->cooldown)
+			{
+				shootCooldownTimer = 0.f;
+
+				//Beam particle 
+				USceneComponent* weaponLoc = Cast<USceneComponent>(weapons[currentWeaponIndex]); //This actually worked. Where did it get the component info from? Casting is fucking magic
+				beamShootParticle = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), beamShootParticleTemplate, weaponLoc->GetComponentLocation());
+				beamShootParticle->SetBeamSourcePoint(0, weapons[currentWeaponIndex]->GetOwner()->GetActorLocation(), 0);
+				beamShootParticle->SetBeamTargetPoint(0, shootHit.ImpactPoint, 0);
+
+				UGameplayStatics::PlayWorldCameraShake(GetWorld(), weaponData->camShake, GetActorLocation(), 500.f, 1.f);
+
+
+				if (shotEnemy->Tags.Contains(Tags::Enemy) && shotEnemy->Tags.Contains(Tags::Destroy) == false)
+				{
+					UDestructibleComponent* enemyDc = shotEnemy->FindComponentByClass<UDestructibleComponent>();
+					if (enemyDc)
+					{
+						enemyDc->ApplyDamage(destructibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
+						shotEnemy->SetLifeSpan(3.0);
 						shotEnemy->Tags.Add(Tags::Destroy);
 					}
-				}
+					else
+					{
+						if (shotEnemy->Tags.Contains(Tags::Destroy) == false)
+						{
+							AEnemy* enemyCast = Cast<AEnemy>(shotEnemy);
+							if (enemyCast)
+							{
+								enemyCast->DropLoot();
+							}
 
-				return;
+							//shotEnemy->Destroy();
+							shotEnemy->FindComponentByClass<UMeshComponent>()->SetSimulatePhysics(true);
+							shotEnemy->FindComponentByClass<UMeshComponent>()->AddImpulse(shotEnemy->GetActorForwardVector() * 10000.f);
+							shotEnemy->SetActorTickEnabled(false);
+							shotEnemy->FindComponentByClass<UBoxComponent>()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+							shotEnemy->Tags.Add(Tags::Destroy);
+						}
+					}
+
+					return;
+				}
 			}
 
-			//MESH SLICING
+			//MESH SLICING (why did I add this to the game...)
 			UProceduralMeshComponent* cutMesh = shootHit.GetActor()->FindComponentByClass<UProceduralMeshComponent>();
 			if (cutMesh)
 			{
