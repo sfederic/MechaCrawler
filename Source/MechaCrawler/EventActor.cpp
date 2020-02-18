@@ -47,13 +47,16 @@ void AEventActor::OnPlayerOverlap(UPrimitiveComponent* OverlappedComp, AActor* O
 	if (OtherActor->IsA<AMecha>())
 	{
 		UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
-		UGameplayStatics::SetGamePaused(GetWorld(), true);
+		APlayerController* controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		OtherActor->DisableInput(controller);
 
 		if (shot)
 		{
 			ULevelSequencePlayer* sequence = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), shot, FMovieSceneSequencePlaybackSettings(), sequenceActor);
 			sequence->Play();
 			sequence->OnStop.AddDynamic(this, &AEventActor::OnCinematicStop);
+
+			bIsActivated = false;
 		}
 	}
 }
@@ -61,5 +64,11 @@ void AEventActor::OnPlayerOverlap(UPrimitiveComponent* OverlappedComp, AActor* O
 void AEventActor::OnCinematicStop()
 {
 	UGameplayStatics::SetGamePaused(GetWorld(), false);
+	APlayerController* controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	playerPawn->EnableInput(controller);
+
+	AMecha* player = Cast<AMecha>(playerPawn);
+	player->shootingWidget->AddToViewport(); //Need to add back in reticle HUD after RemoveAllWidgets()
 }
 
