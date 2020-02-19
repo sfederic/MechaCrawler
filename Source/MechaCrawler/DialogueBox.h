@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "EventActor.h"
+#include "CinematicEventActor.h"
 #include "DialogueBox.generated.h"
 
 //Player walks inside collision component, gets dialogue.Inhertis from AActor to save the cast in GetDialogue()
@@ -41,7 +41,7 @@ public:
 	TArray<AActor*> actorsToActivate;
 
 	UPROPERTY(EditAnywhere)
-	TArray<AEventActor*> eventActors;
+	TArray<ACinematicEventActor*> eventActors;
 
 	class UBoxComponent* box;
 };

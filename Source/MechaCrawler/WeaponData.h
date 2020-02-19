@@ -29,6 +29,9 @@ public:
 	TSubclassOf<UCameraShake> camShake;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterialInterface* decal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float cooldown;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

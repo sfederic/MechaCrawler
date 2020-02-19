@@ -29,7 +29,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString dialogueName; //Name of the character you can call in scanwidget
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UTexture2D* dialogueImage; //Image of the character you can call in scanwidget
 };

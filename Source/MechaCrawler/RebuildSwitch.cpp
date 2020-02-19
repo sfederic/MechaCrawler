@@ -34,7 +34,6 @@ void ARebuildSwitch::BeginPlay()
 
 	rebuildSwitchPlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	rebuildSwitchPlayer = Cast<AMecha>(rebuildSwitchPlayerPawn);
-	check(rebuildSwitchPlayer);
 
 	paramInstance = GetWorld()->GetParameterCollectionInstance(outlineParams);
 }

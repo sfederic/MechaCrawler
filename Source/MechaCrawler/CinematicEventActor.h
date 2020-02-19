@@ -5,17 +5,17 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "LevelSequenceActor.h"
-#include "EventActor.generated.h"
+#include "CinematicEventActor.generated.h"
 
 //Pretty much all done with blueprint
 
 UCLASS()
-class MECHACRAWLER_API AEventActor : public AActor
+class MECHACRAWLER_API ACinematicEventActor : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
-	AEventActor();
+	ACinematicEventActor();
 
 protected:
 	virtual void BeginPlay() override;

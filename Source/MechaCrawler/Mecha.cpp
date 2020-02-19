@@ -27,6 +27,7 @@
 #include "DestructibleSwitch.h"
 #include "DestructibleActivate.h"
 #include "RebuildTransparent.h"
+#include "DialogueBox.h"
 #include "Components/BoxComponent.h"
 #include "Pickup.h"
 
@@ -95,7 +96,6 @@ void AMecha::BeginPlay()
 	}
 
 	scanWidget = CreateWidget<UScanWidget>(GetWorld(), scanWidgetClass);
-	scanWidget->dialogueImage = scanWidget->defaultDialogueImage; //If you don't set the image before hand before calling it nullptr, it will blank out
 	if (scanWidget == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Scan widget not set in Mecha.cpp"));
@@ -144,10 +144,9 @@ void AMecha::Tick(float DeltaTime)
 
 	shootCooldownTimer += FApp::GetDeltaTime();
 
-
-	//Scan();
+	Scan();
 	//TODO: Just testing to get scan name as runtime and not pause. Decide on one or the other
-	if (scanning && scanWidget)
+	/*if (scanning && scanWidget)
 	{
 		if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(), camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_GameTraceChannel1)) //TransparentScan
 		{
@@ -159,23 +158,24 @@ void AMecha::Tick(float DeltaTime)
 				{
 					scanWidget->scanNameEntry = scanData->scanName;
 					scanWidget->scanEntry = scanData->scanText;
-					if (actor->FindComponentByClass<UDialogueComponent>())
+
+					if (!actor->IsA<ADialogueBox>())
 					{
-						scanWidget->bHasDialouge = true;
-						scanWidget->dialogueName = scanData->dialogueName;
-						scanWidget->dialogueImage = scanData->dialogueImage;
-					}
-					else
-					{
-						scanWidget->bHasDialouge = false;
-						scanWidget->dialogueImage = scanWidget->defaultDialogueImage;
+						if (actor->FindComponentByClass<UDialogueComponent>())
+						{
+							scanWidget->bHasDialouge = true;
+							scanWidget->dialogueName = scanData->dialogueName;
+						}
+						else
+						{
+							scanWidget->bHasDialouge = false;
+						}
 					}
 				}
 				else
 				{
 					scanWidget->bHasDialouge = true;
 					scanWidget->dialogueName = TEXT("");
-					scanWidget->dialogueImage = scanWidget->defaultDialogueImage;
 				}
 			}
 		}
@@ -189,23 +189,25 @@ void AMecha::Tick(float DeltaTime)
 				{
 					scanWidget->scanNameEntry = scanData->scanName;
 					scanWidget->scanEntry = scanData->scanText;
-					if (actor->FindComponentByClass<UDialogueComponent>())
+
+
+					if (!actor->IsA<ADialogueBox>())
 					{
-						scanWidget->bHasDialouge = true;
-						scanWidget->dialogueName = scanData->dialogueName;
-						scanWidget->dialogueImage = scanData->dialogueImage;
-					}
-					else
-					{
-						scanWidget->bHasDialouge = false;
-						scanWidget->dialogueImage = scanWidget->defaultDialogueImage;
+						if (actor->FindComponentByClass<UDialogueComponent>())
+						{
+							scanWidget->bHasDialouge = true;
+							scanWidget->dialogueName = scanData->dialogueName;
+						}
+						else
+						{
+							scanWidget->bHasDialouge = false;
+						}
 					}
 				}
 				else
 				{
 					scanWidget->bHasDialouge = false;
 					scanWidget->dialogueName = TEXT("");
-					scanWidget->dialogueImage = scanWidget->defaultDialogueImage;
 				}
 			}
 		}
@@ -213,9 +215,8 @@ void AMecha::Tick(float DeltaTime)
 		{
 			scanWidget->bHasDialouge = false;
 			scanWidget->dialogueName = TEXT("");
-			scanWidget->dialogueImage = scanWidget->defaultDialogueImage;
 		}
-	}
+	}*/
 
 
 	ScrollText();
@@ -679,7 +680,7 @@ void AMecha::MoveUp(float val)
 
 void AMecha::LookYaw(float val)
 {
-	if (canMove)
+	//if (canMove)
 	{
 		cameraRot.Yaw += cameraSpeed * val;
 	}
@@ -687,7 +688,7 @@ void AMecha::LookYaw(float val)
 
 void AMecha::LookPitch(float val)
 {
-	if (canMove)
+	//if (canMove)
 	{
 		cameraRot.Pitch -= cameraSpeed * val;
 		cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch, -70.f, 70.f);
@@ -708,18 +709,15 @@ void AMecha::SetScan()
 			postProcessMain->Settings.AddBlendable(scanPostProcess, 1.0f);
 		}
 
-		TArray<AActor*> destroyableScanActors;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADestructibleActor::StaticClass(), destroyableScanActors);
-
-		for (int i = 0; i < destroyableScanActors.Num(); i++)
+		/*TArray<AActor*> scanActors;
+		UGameplayStatics::GetAllActorsWithTag(GetWorld(), Tags::Scan, scanActors);
+		for (int i = 0; i < scanActors.Num(); i++)
 		{
-			//destroyableScanActors[i]->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, destroyableWireframeMaterial);
-		}
+			scanActors[i]->FindComponentByClass<UMeshComponent>()->SetScalarParameterValueOnMaterials("ScanOn", 1.f);
+		}*/
 
 		//Hide Weapon
 		weapons[currentWeaponIndex]->GetOwner()->SetActorHiddenInGame(true);
-
-		scanWidget->dialogueImage = scanWidget->defaultDialogueImage;
 	} 
 	else if (scanning)
 	{
@@ -728,13 +726,12 @@ void AMecha::SetScan()
 			postProcessMain->Settings.RemoveBlendable(scanPostProcess);
 		}
 
-		TArray<AActor*> destroyableScanActors;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADestructibleActor::StaticClass(), destroyableScanActors);
-
-		for (int i = 0; i < destroyableScanActors.Num(); i++)
+		/*TArray<AActor*> scanActors;
+		UGameplayStatics::GetAllActorsWithTag(GetWorld(), Tags::Scan, scanActors);
+		for (int i = 0; i < scanActors.Num(); i++)
 		{
-			//destroyableScanActors[i]->FindComponentByClass<UDestructibleComponent>()->SetMaterial(0, destroyableBaseMaterial);
-		}
+			scanActors[i]->FindComponentByClass<UMeshComponent>()->SetScalarParameterValueOnMaterials("ScanOn", 0.f);
+		}*/
 
 		//Hide Weapon
 		weapons[currentWeaponIndex]->GetOwner()->SetActorHiddenInGame(false);
@@ -779,16 +776,6 @@ void AMecha::RightMousePressed()
 	if (canMove == false)
 	{
 		return;
-	}
-
-	//USING
-	if (scanning && bDialogueClick == false)
-	{
-		if (scanHit.GetActor())
-		{
-			GetDialogue(scanHit.GetActor());
-			return;
-		}
 	}
 
 	//if (!scanning)
@@ -1001,8 +988,28 @@ void AMecha::LeftMousePressed()
 			}
 		}*/
 
-		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
+		if(!GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
+			GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_WorldStatic))
+		{
+			UChildActorComponent* weapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
+			UWeaponData* weaponData;
+
+			weaponData = weapon->GetChildActor()->FindComponentByClass<UWeaponData>();
+
+			shootCooldownTimer = 0.f;
+
+			//Beam particle 
+			USceneComponent* weaponLoc = Cast<USceneComponent>(weapons[currentWeaponIndex]); //This actually worked. Where did it get the component info from? Casting is fucking magic
+			beamShootParticle = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), beamShootParticleTemplate, weaponLoc->GetComponentLocation());
+			beamShootParticle->SetBeamSourcePoint(0, weapons[currentWeaponIndex]->GetOwner()->GetActorLocation(), 0);
+			beamShootParticle->SetBeamTargetPoint(0, weapons[currentWeaponIndex]->GetOwner()->GetActorLocation() + (camera->GetForwardVector() * attackDistance), 0);
+
+			UGameplayStatics::PlayWorldCameraShake(GetWorld(), weaponData->camShake, GetActorLocation(), 500.f, 1.f);
+
+		}
+		else if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
 			GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_WorldStatic)) 
+		
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Shot Actor: %s\n"), *shootHit.GetActor()->GetName());
 
@@ -1027,6 +1034,7 @@ void AMecha::LeftMousePressed()
 
 				UGameplayStatics::PlayWorldCameraShake(GetWorld(), weaponData->camShake, GetActorLocation(), 500.f, 1.f);
 
+				UDecalComponent* decal = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), weaponData->decal, FVector(40.f), shootHit.ImpactPoint, shootHit.ImpactNormal.Rotation(), 0.5f);
 
 				if (shotEnemy->Tags.Contains(Tags::Enemy) && shotEnemy->Tags.Contains(Tags::Destroy) == false)
 				{
@@ -1077,9 +1085,8 @@ void AMecha::LeftMousePressed()
 				return;
 			}
 		}
-
-		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
-			GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_Destructible))
+		
+		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(), GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_Destructible))
 		{
 			if (!shootHit.GetActor())
 			{
@@ -1686,10 +1693,15 @@ void AMecha::Scan()
 				{
 					scanWidget->scanEntry = scanData->scanText;
 					scanWidget->scanNameEntry = scanData->scanName;
-					if (actor->FindComponentByClass<UDialogueComponent>())
+
+
+					if (!actor->IsA<ADialogueBox>())
 					{
-						scanWidget->bHasDialouge = true;
-						scanWidget->dialogueName = scanData->dialogueName;
+						if (actor->FindComponentByClass<UDialogueComponent>())
+						{
+							scanWidget->bHasDialouge = true;
+							scanWidget->dialogueName = scanData->dialogueName;
+						}
 					}
 				}
 				else
@@ -1707,14 +1719,22 @@ void AMecha::Scan()
 			if (actor)
 			{
 				UScanData* scanData = actor->FindComponentByClass<UScanData>();
+
 				if (scanData)
 				{
 					scanWidget->scanEntry = scanData->scanText;
 					scanWidget->scanNameEntry = scanData->scanName;
-					if (actor->FindComponentByClass<UDialogueComponent>())
+
+					//UGameplayStatics::SetGamePaused(GetWorld(), true);
+
+
+					if (!actor->IsA<ADialogueBox>())
 					{
-						scanWidget->bHasDialouge = true;
-						scanWidget->dialogueName = scanData->dialogueName;
+						if (actor->FindComponentByClass<UDialogueComponent>())
+						{
+							scanWidget->bHasDialouge = true;
+							scanWidget->dialogueName = scanData->dialogueName;
+						}
 					}
 				}
 				else
