@@ -1836,7 +1836,7 @@ void AMecha::TagActor()
 	FHitResult tagResult;
 	if (GetWorld()->LineTraceSingleByChannel(tagResult, GetActorLocation(), GetActorLocation() + (camera->GetForwardVector() * scanDistance), ECC_WorldStatic, moveParams))
 	{
-		if (tagResult.GetActor())
+		if (tagResult.GetActor()->Tags.Contains(Tags::Tagable))
 		{
 			AActor* tagActor = tagResult.GetActor();
 
