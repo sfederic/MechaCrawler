@@ -144,9 +144,9 @@ void AMecha::Tick(float DeltaTime)
 
 	shootCooldownTimer += FApp::GetDeltaTime();
 
-	Scan();
+	//Scan();
 	//TODO: Just testing to get scan name as runtime and not pause. Decide on one or the other
-	/*if (scanning && scanWidget)
+	if (scanning && scanWidget)
 	{
 		if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(), camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_GameTraceChannel1)) //TransparentScan
 		{
@@ -216,7 +216,7 @@ void AMecha::Tick(float DeltaTime)
 			scanWidget->bHasDialouge = false;
 			scanWidget->dialogueName = TEXT("");
 		}
-	}*/
+	}
 
 
 	ScrollText();
@@ -353,6 +353,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAction("View", EInputEvent::IE_Pressed, this, &AMecha::SetCameraView);
 	InputComponent->BindAction("SwitchWeapon", EInputEvent::IE_Pressed, this, &AMecha::ChangeWeapon);
 	InputComponent->BindAction("DashForward", EInputEvent::IE_Pressed, this, &AMecha::DashForward);
+	InputComponent->BindAction("Tag", EInputEvent::IE_Pressed, this, &AMecha::TagActor);
 }
 
 void AMecha::MoveForward(float val)
@@ -778,6 +779,15 @@ void AMecha::RightMousePressed()
 		return;
 	}
 
+	if (scanning && bDialogueClick == false)
+	{
+		if (scanHit.GetActor()->IsA<ADialogueBox>() == false)
+		{
+			GetDialogue(scanHit.GetActor());
+			return;
+		}
+	}
+
 	//if (!scanning)
 	{
 		//Just a debug thing for moving through dialogue faster
@@ -891,6 +901,8 @@ void AMecha::LeftMousePressed()
 			ProgressText();
 			return;
 		}
+
+		return;
 	}
 
 	if (scanning)
@@ -1290,6 +1302,18 @@ void AMecha::DeleteAllNotes()
 				{
 					mesh->SetCustomDepthStencilValue(0);
 				}
+			}
+		}
+
+		TArray<AActor*> depthStencilActors;
+		UGameplayStatics::GetAllActorsWithTag(GetWorld(), Tags::Tagged, depthStencilActors);
+		for (int i = 0; i < depthStencilActors.Num(); i++)
+		{
+			UMeshComponent* mesh = depthStencilActors[i]->FindComponentByClass<UMeshComponent>();
+			if (mesh)
+			{
+				mesh->SetRenderCustomDepth(false);
+				mesh->SetCustomDepthStencilValue(0);
 			}
 		}
 
@@ -1694,14 +1718,10 @@ void AMecha::Scan()
 					scanWidget->scanEntry = scanData->scanText;
 					scanWidget->scanNameEntry = scanData->scanName;
 
-
-					if (!actor->IsA<ADialogueBox>())
+					if (actor->FindComponentByClass<UDialogueComponent>())
 					{
-						if (actor->FindComponentByClass<UDialogueComponent>())
-						{
-							scanWidget->bHasDialouge = true;
-							scanWidget->dialogueName = scanData->dialogueName;
-						}
+						scanWidget->bHasDialouge = true;
+						scanWidget->dialogueName = scanData->dialogueName;
 					}
 				}
 				else
@@ -1727,15 +1747,12 @@ void AMecha::Scan()
 
 					//UGameplayStatics::SetGamePaused(GetWorld(), true);
 
-
-					if (!actor->IsA<ADialogueBox>())
+					if (actor->FindComponentByClass<UDialogueComponent>())
 					{
-						if (actor->FindComponentByClass<UDialogueComponent>())
-						{
-							scanWidget->bHasDialouge = true;
-							scanWidget->dialogueName = scanData->dialogueName;
-						}
+						scanWidget->bHasDialouge = true;
+						scanWidget->dialogueName = scanData->dialogueName;
 					}
+				
 				}
 				else
 				{
@@ -1810,6 +1827,42 @@ void AMecha::GetDialogue(AActor* dialogueActor)
 					dialogue->bFirstTextBoxRead = true;
 				}
 			}
+		}
+	}
+}
+
+void AMecha::TagActor()
+{
+	FHitResult tagResult;
+	if (GetWorld()->LineTraceSingleByChannel(tagResult, GetActorLocation(), GetActorLocation() + (camera->GetForwardVector() * scanDistance), ECC_WorldStatic, moveParams))
+	{
+		if (tagResult.GetActor())
+		{
+			AActor* tagActor = tagResult.GetActor();
+
+			if (tagActor->Tags.Contains(Tags::Tagged) == false)
+			{
+				tagActor->Tags.Add(Tags::Tagged);
+
+				UMeshComponent* tagActorMesh = tagActor->FindComponentByClass<UMeshComponent>();
+				if (tagActorMesh)
+				{
+					tagActorMesh->SetRenderCustomDepth(true);
+					tagActorMesh->SetCustomDepthStencilValue(255);
+				}
+			}
+			else if (tagActor->Tags.Contains(Tags::Tagged) == true)
+			{
+				tagActor->Tags.Remove(Tags::Tagged);
+
+				UMeshComponent* tagActorMesh = tagActor->FindComponentByClass<UMeshComponent>();
+				if (tagActorMesh)
+				{
+					tagActorMesh->SetRenderCustomDepth(false);
+					tagActorMesh->SetCustomDepthStencilValue(0);
+				}
+			}
+
 		}
 	}
 }

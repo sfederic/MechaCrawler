@@ -39,6 +39,7 @@ public:
 	void LookYaw(float val);
 	void LookPitch(float val);
 	void SetScan();
+	void TagActor();
 	void RightMousePressed();
 	void LeftMousePressed();
 	void LeftMousePressedScan(float val);
