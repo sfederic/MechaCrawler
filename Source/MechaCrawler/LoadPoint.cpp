@@ -12,7 +12,7 @@
 
 ALoadPoint::ALoadPoint()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 }
 
@@ -77,6 +77,32 @@ void ALoadPoint::BeginPlay()
 			if (mapLoadData.pickups[j].actorName.Equals(*pickups[i]->GetName()))
 			{
 				pickup->isInInventory = mapLoadData.pickups[j].bPickedup;
+			}
+		}
+	}
+
+	//ANoteNote
+	for (int i = 0; i < mapLoadData.noteNodes.Num(); i++)
+	{
+		ANoteNode* noteNode = GetWorld()->SpawnActor<ANoteNode>(noteWidgetClass, mapLoadData.noteNodes[i].noteLocation, FRotator());
+		noteNode->noteText = mapLoadData.noteNodes[i].noteText;
+		noteNode->noteWidget->bFirstSpawn = false;
+		noteNode->bFirstSpawn = false;
+		//Lot of the note spawning stuff is in NoteWidget blueprint event construct
+	}
+
+
+	//CustomRenderDepth Marked Actors (Tags::Tagged)
+	TArray<AActor*> tagableActors;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), Tags::Tagable, tagableActors);
+	for(int i = 0; i < tagableActors.Num(); i++)
+	{
+		for (int j = 0; j < mapLoadData.actorsToTag.Num(); j++)
+		{
+			if (mapLoadData.actorsToTag[j].actorName == *tagableActors[i]->GetName())
+			{
+				tagableActors[i]->FindComponentByClass<UMeshComponent>()->SetCustomDepthStencilValue(1);
+				tagableActors[i]->Tags.Add(Tags::Tagged);
 			}
 		}
 	}

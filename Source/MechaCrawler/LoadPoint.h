@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "NoteNode.h"
 #include "LoadPoint.generated.h"
 
 //This just exists because I can't use fucking blueprints. Otherwise would be in level blueprints EventBegin
@@ -21,6 +22,9 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ANoteNode> noteWidgetClass;
 
 	UPROPERTY(VisibleAnywhere)
 	FString loadSlot;

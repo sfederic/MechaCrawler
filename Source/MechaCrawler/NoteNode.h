@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "NoteWidget.h"
+#include "Components/WidgetComponent.h"
 #include "NoteNode.generated.h"
 
 //TODO: Keep for now instead of using straight Actor. might need widget text for maps system
@@ -21,4 +23,13 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
+
+	UNoteWidget* noteWidget;
+	UWidgetComponent* widgetComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	FString noteText;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bFirstSpawn = true;
 };

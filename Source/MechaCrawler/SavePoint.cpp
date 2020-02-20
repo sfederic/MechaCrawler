@@ -8,6 +8,8 @@
 #include "DialogueBox.h"
 #include "Components/BoxComponent.h"
 #include "Pickup.h"
+#include "NoteNode.h"
+#include "NoteSaveStruct.h"
 #include "GlobalTags.h"
 
 ASavePoint::ASavePoint()
@@ -54,6 +56,7 @@ void ASavePoint::OnPlayerOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 			}
 		}
 
+
 		TArray<AActor*> dialogueBoxes;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADialogueBox::StaticClass(), dialogueBoxes);
 
@@ -65,6 +68,7 @@ void ASavePoint::OnPlayerOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 			readBox.readDialogue = dialogueBox->bHasBeenRead;
 			mapSaveData.readDialogueBoxes.Add(readBox);
 		}
+
 
 		TArray<AActor*> pickups;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APickup::StaticClass(), pickups);
@@ -78,10 +82,34 @@ void ASavePoint::OnPlayerOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 			mapSaveData.pickups.Add(pickupData);
 		}
 
+
+		TArray<AActor*> noteNodes;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANoteNode::StaticClass(), noteNodes);
+
+		for (int i = 0; i < noteNodes.Num(); i++)
+		{
+			ANoteNode* noteNode = Cast<ANoteNode>(noteNodes[i]);
+			FNoteSaveStruct noteSave;
+			noteSave.noteText = noteNode->noteText;
+			noteSave.noteLocation = noteNode->GetActorLocation();
+			mapSaveData.noteNodes.Add(noteSave);
+		}
+
+
+		TArray<AActor*> taggedActors;
+		UGameplayStatics::GetAllActorsWithTag(GetWorld(), Tags::Tagged, taggedActors);
+		for (int i = 0; i < taggedActors.Num(); i++)
+		{
+			FTaggedActorSaveStruct tagSave;
+			tagSave.actorName = *taggedActors[i]->GetName();
+			tagSave.tagged = true;
+			mapSaveData.actorsToTag.Add(tagSave);
+		}
+
+
 		mapSaveData.levelName = levelName;
 
 		save->levelData.Add(mapSaveData);
-
 
 		UGameplayStatics::SaveGameToSlot(save, SaveSlots::Slot1, SaveSlots::slotIndex);
 
