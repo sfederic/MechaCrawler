@@ -22,7 +22,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString scanText;
+	FText scanText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString scanName;

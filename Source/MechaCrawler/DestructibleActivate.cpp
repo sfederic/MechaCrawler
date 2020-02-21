@@ -72,5 +72,10 @@ bool ADestructibleActivate::CheckAllSwitches()
 		}
 	}
 
+	if (switches.Num() == 0)
+	{
+		return false;
+	}
+
 	return true;
 }

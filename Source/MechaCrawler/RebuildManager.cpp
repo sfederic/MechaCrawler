@@ -39,12 +39,12 @@ void ARebuildManager::RebuildTimers()
 
 	for (int i = 0; i < rebuildActors.Num(); i++)
 	{
-		if (rebuildTimers[i] > 0.f && rebuildTimers[i] < 1.0f)
+		if (rebuildTimers[i] > 0.f && rebuildTimers[i] < 2.0f)
 		{
-			rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->SetScalarParameterValueOnMaterials("FadeValue", 1.f - rebuildTimers[i]);
+			rebuildActors[i]->FindComponentByClass<UDestructibleComponent>()->SetScalarParameterValueOnMaterials("FadeValue", 1.f - (rebuildTimers[i] / 2.f));
 		}
 
-		if (rebuildTimers[i] > 1.0f)
+		if (rebuildTimers[i] > 2.0f)
 		{
 			rebuildActors[i]->SetActorHiddenInGame(true);
 			rebuildActors[i]->SetActorEnableCollision(false);
@@ -58,12 +58,12 @@ void ARebuildManager::RebuildTimers()
 
 	for (int i = 0; i < rebuildActorsActivate.Num(); i++)
 	{
-		if (rebuildActivateTimers[i] > 0.f && rebuildActivateTimers[i] < 1.0f)
+		if (rebuildActivateTimers[i] > 0.f && rebuildActivateTimers[i] < 2.0f)
 		{
-			rebuildActorsActivate[i]->FindComponentByClass<UDestructibleComponent>()->SetScalarParameterValueOnMaterials("FadeValue", 1.f - rebuildActivateTimers[i]);
+			rebuildActorsActivate[i]->FindComponentByClass<UDestructibleComponent>()->SetScalarParameterValueOnMaterials("FadeValue", 1.f - (rebuildActivateTimers[i] / 2.0f));
 		}
 
-		if (rebuildActivateTimers[i] > 1.0f)
+		if (rebuildActivateTimers[i] > 2.0f)
 		{
 			rebuildActorsActivate[i]->SetActorHiddenInGame(true);
 			rebuildActorsActivate[i]->SetActorEnableCollision(false);

@@ -25,12 +25,10 @@ public:
 	virtual void Rebuild() override;
 
 	void AddOverlap();
+	void Build();
 
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* rebuildMaterial;
-
-	UPROPERTY(EditAnywhere)
-	UParticleSystem* particleSpawnTemplate;
 
 	UMaterialInterface* originalMaterial;
 

@@ -1,6 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "RebuildTransparent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/MeshComponent.h"
 #include "Components/BoxComponent.h"
 
@@ -35,4 +36,13 @@ void ARebuildTransparent::Rebuild()
 void ARebuildTransparent::AddOverlap()
 {
 	FindComponentByClass<UBoxComponent>()->OnComponentBeginOverlap.AddDynamic(this, &ARebuildTransparent::OnPlayerOverlapBegin);
+}
+
+void ARebuildTransparent::Build()
+{
+	UMeshComponent* rebuildTransparentMesh = FindComponentByClass<UMeshComponent>();
+	rebuildTransparentMesh->SetMaterial(0, rebuildMaterial);
+	rebuildTransparentMesh->SetCollisionResponseToAllChannels(ECR_Block);
+	bRebuilt = true;
+	AddOverlap();
 }

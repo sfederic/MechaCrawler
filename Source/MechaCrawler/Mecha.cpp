@@ -30,6 +30,8 @@
 #include "DialogueBox.h"
 #include "Components/BoxComponent.h"
 #include "Pickup.h"
+#include "Components/DecalComponent.h"
+#include "PuzzleItem.h"
 
 AMecha::AMecha()
 {
@@ -47,7 +49,7 @@ void AMecha::BeginPlay()
 	initialMoveSpeed = moveSpeed;
 
 	//Spawn Rebuild Manager
-	instancedRebuildManager = GetWorld()->SpawnActor<ARebuildManager>();
+	//instancedRebuildManager = GetWorld()->SpawnActor<ARebuildManager>();
 
 	//SETUP WEAPONS
 	weapons = GetComponentsByClass(UChildActorComponent::StaticClass());
@@ -157,7 +159,7 @@ void AMecha::Tick(float DeltaTime)
 				if (scanData)
 				{
 					scanWidget->scanNameEntry = scanData->scanName;
-					scanWidget->scanEntry = scanData->scanText;
+					scanWidget->scanEntry = scanData->scanText.ToString();
 
 					if (!actor->IsA<ADialogueBox>())
 					{
@@ -188,7 +190,7 @@ void AMecha::Tick(float DeltaTime)
 				if (scanData)
 				{
 					scanWidget->scanNameEntry = scanData->scanName;
-					scanWidget->scanEntry = scanData->scanText;
+					scanWidget->scanEntry = scanData->scanText.ToString();
 
 
 					if (!actor->IsA<ADialogueBox>())
@@ -815,14 +817,7 @@ void AMecha::RightMousePressed()
 				ARebuildTransparent* rebuildTransparent = Cast<ARebuildTransparent>(rebuildTransparentHit.GetActor());
 				if (rebuildTransparent->bRebuilt == false)
 				{
-					UMeshComponent* rebuildTransparentMesh = rebuildTransparent->FindComponentByClass<UMeshComponent>();
-					rebuildTransparentMesh->SetMaterial(0, rebuildTransparent->rebuildMaterial);
-					rebuildTransparentMesh->SetCollisionResponseToAllChannels(ECR_Block);
-					rebuildTransparent->bRebuilt = true;
-					rebuildTransparent->AddOverlap();
-					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),
-						rebuildTransparent->particleSpawnTemplate,
-						rebuildTransparent->GetActorLocation(), FRotator(), true);
+					rebuildTransparent->Build();
 				}
 			}
 		}
@@ -1046,7 +1041,8 @@ void AMecha::LeftMousePressed()
 
 				UGameplayStatics::PlayWorldCameraShake(GetWorld(), weaponData->camShake, GetActorLocation(), 500.f, 1.f);
 
-				UDecalComponent* decal = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), weaponData->decal, FVector(40.f), shootHit.ImpactPoint, shootHit.ImpactNormal.Rotation(), 0.5f);
+				UDecalComponent* decal = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), weaponData->decal, FVector(40.f), shootHit.ImpactPoint, shootHit.ImpactNormal.Rotation(), 0.f);
+				decal->SetFadeOut(0.35f, 0.25f, true);
 
 				if (shotEnemy->Tags.Contains(Tags::Enemy) && shotEnemy->Tags.Contains(Tags::Destroy) == false)
 				{
@@ -1156,6 +1152,11 @@ void AMecha::LeftMousePressed()
 				}
 
 				dc->ApplyDamage(destructibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);	
+				if (dc->GetOwner()->IsA<APuzzleItem>())
+				{
+					APuzzleItem* puzzleItem = Cast<APuzzleItem>(dc->GetOwner());
+					puzzleItem->bActivated = true;
+				}
 
 				if (instancedRebuildManager && dc->GetOwner()->Tags.Contains(Tags::Destroy) == false)
 				{
@@ -1715,7 +1716,7 @@ void AMecha::Scan()
 				UScanData* scanData = actor->FindComponentByClass<UScanData>();
 				if (scanData)
 				{
-					scanWidget->scanEntry = scanData->scanText;
+					scanWidget->scanEntry = scanData->scanText.ToString();
 					scanWidget->scanNameEntry = scanData->scanName;
 
 					if (actor->FindComponentByClass<UDialogueComponent>())
@@ -1742,7 +1743,7 @@ void AMecha::Scan()
 
 				if (scanData)
 				{
-					scanWidget->scanEntry = scanData->scanText;
+					scanWidget->scanEntry = scanData->scanText.ToString();
 					scanWidget->scanNameEntry = scanData->scanName;
 
 					//UGameplayStatics::SetGamePaused(GetWorld(), true);
