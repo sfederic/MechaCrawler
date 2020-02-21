@@ -14,6 +14,7 @@
 #include "RebuildManager.h"
 #include "DialogueChoiceWidget.h"
 #include "Pickup.h"
+#include "TagNode.h"
 #include "Mecha.generated.h"
 
 UCLASS()
@@ -133,6 +134,9 @@ public:
 
 	//TODO: move into playerhud.h/cpp
 	//WIDGET CLASSES
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<ATagNode> tagWidgetClass;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> shootingWidgetClass;

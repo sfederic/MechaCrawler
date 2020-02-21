@@ -35,7 +35,7 @@ void AShip::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	DrawDebugLine(GetWorld(), GetActorLocation(), shootHit.ImpactPoint, FColor::Red);
+	//DrawDebugLine(GetWorld(), GetActorLocation(), shootHit.ImpactPoint, FColor::Red);
 
 	ScrollText();
 
@@ -67,7 +67,6 @@ void AShip::Tick(float DeltaTime)
 		}
 
 		SetActorLocation(GetActorLocation() + (GetActorForwardVector() * tempVel), true);
-		//TODO: Got rid of reversing. having two SetActorLocations was messing with bSweep?
 	}
 }
 
@@ -77,8 +76,8 @@ void AShip::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	
 	InputComponent->BindAxis("Right", this, &AShip::RotateRight);
 	InputComponent->BindAxis("Left", this, &AShip::RotateLeft);
-	InputComponent->BindAxis("Forward", this, &AShip::RotateUp);
-	InputComponent->BindAxis("Back", this, &AShip::RotateDown);
+	//InputComponent->BindAxis("Forward", this, &AShip::RotateUp);
+	//InputComponent->BindAxis("Back", this, &AShip::RotateDown);
 	InputComponent->BindAxis("LeftMouseHeld", this, &AShip::Accelerate);
 	InputComponent->BindAxis("RightMouseHeld", this, &AShip::Reverse);
 
@@ -121,7 +120,7 @@ void AShip::LeftMousePressed()
 			return;
 		}
 	}
-	else if (GetWorld()->LineTraceSingleByChannel(shootHit, GetActorLocation(), GetActorLocation() + (GetActorForwardVector() * shootDistance), ECC_WorldStatic, shootParams))
+	/*else if (GetWorld()->LineTraceSingleByChannel(shootHit, GetActorLocation(), GetActorLocation() + (GetActorForwardVector() * shootDistance), ECC_WorldStatic, shootParams))
 	{
 		AActor* shotActor = shootHit.GetActor();
 		if (shotActor)
@@ -133,7 +132,7 @@ void AShip::LeftMousePressed()
 				shotActor->SetLifeSpan(3.0f);
 			}
 		}
-	}
+	}*/
 }
 
 void AShip::Accelerate(float val)

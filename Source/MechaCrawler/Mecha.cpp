@@ -1845,6 +1845,16 @@ void AMecha::TagActor()
 			{
 				tagActor->Tags.Add(Tags::Tagged);
 
+				//Set Tag node and widget
+				FTransform tagTrans = FTransform();
+				tagTrans.SetLocation(tagResult.ImpactPoint);
+				ATagNode* tagNode = GetWorld()->SpawnActor<ATagNode>(tagWidgetClass, tagTrans);
+				UTagDistanceWidget* tagDistWidget = Cast<UTagDistanceWidget>(tagNode->tagWidget->GetUserWidgetObject());
+				tagDistWidget->attachedActorLocation = tagActor->GetActorLocation();
+
+				tagNode->Tags.Add(*tagActor->GetName());
+
+
 				UMeshComponent* tagActorMesh = tagActor->FindComponentByClass<UMeshComponent>();
 				if (tagActorMesh)
 				{
@@ -1855,6 +1865,15 @@ void AMecha::TagActor()
 			else if (tagActor->Tags.Contains(Tags::Tagged) == true)
 			{
 				tagActor->Tags.Remove(Tags::Tagged);
+
+				//Remove tag node(what the absolute fuck, but I guess it's still quick)
+				TArray<AActor*> tagNodesToRemove;
+				UGameplayStatics::GetAllActorsWithTag(GetWorld(), *tagActor->GetName(), tagNodesToRemove);
+				for (AActor* actor : tagNodesToRemove)
+				{
+					actor->Destroy();
+				}
+				
 
 				UMeshComponent* tagActorMesh = tagActor->FindComponentByClass<UMeshComponent>();
 				if (tagActorMesh)
