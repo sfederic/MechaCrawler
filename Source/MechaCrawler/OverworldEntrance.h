@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "OverworldEntrance.generated.h"
 
+//To be placed over levels that are shown on the overworld map to enter them and setup UI
+
 UCLASS()
 class MECHACRAWLER_API AOverworldEntrance : public AActor
 {

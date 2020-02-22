@@ -25,8 +25,11 @@ public:
 	UFUNCTION()
 	void OnPlayerOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName levelName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector levelSpawnLocation;
 
 	class UBoxComponent* box;
 };

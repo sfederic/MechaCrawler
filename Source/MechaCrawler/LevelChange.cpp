@@ -7,6 +7,8 @@
 #include "Components/BoxComponent.h"
 #include "LevelSave.h"
 #include "DialogueBox.h"
+#include "MainGameInstance.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 
 ALevelChange::ALevelChange()
 {
@@ -32,28 +34,22 @@ void ALevelChange::OnPlayerOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 	AMecha* player = Cast<AMecha>(OtherActor);
 	if (player)
 	{
-		ULevelSave* save = Cast<ULevelSave>(UGameplayStatics::CreateSaveGameObject(ULevelSave::StaticClass()));
-
-		TArray<AActor*> dialogueBoxes;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADialogueBox::StaticClass(), dialogueBoxes);
-
-		for (int i = 0; i < dialogueBoxes.Num(); i++)
+		UMainGameInstance* instance = Cast<UMainGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+		if (instance)
 		{
-			ADialogueBox* dialogueBox = Cast<ADialogueBox>(dialogueBoxes[i]);
-			FReadBox readBox = {};
-			readBox.actorName = dialogueBox->GetName();
-			readBox.readDialogue = dialogueBox->bHasBeenRead;
-			save->levelData[i].readDialogueBoxes.Add(readBox);
+			UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->StartCameraFade(1.0f, 0.f, 5.0f, FColor::Black);
+			//instance->playerSpawnLocation = this->levelSpawnLocation;
+			instance->levelLoadTag = FName(*UGameplayStatics::GetCurrentLevelName(GetWorld())); //https://wiki.unrealengine.com/String_Conversions:_FString_to_FName,_FString_to_Int32,_Float_to_FString#Converting_FString_to_FNames
+
+			TArray<UUserWidget*> widgetsToRemove;
+			UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), widgetsToRemove, UUserWidget::StaticClass());
+			for (UUserWidget* widget : widgetsToRemove)
+			{
+				widget->RemoveFromViewport();
+			}
+
+			UGameplayStatics::OpenLevel(GetWorld(), levelName);
 		}
-
-		FString slotName = TEXT("Slot1");
-		int32 slotIndex = 0;
-		UGameplayStatics::SaveGameToSlot(save, slotName, slotIndex);
-
-		UE_LOG(LogTemp, Warning, TEXT("Game Saved to %s at index %d\n"), *slotName, slotIndex);
-
-		FLatentActionInfo latentInfo;
-		UGameplayStatics::OpenLevel(GetWorld(), levelName);
 	}
 }
 
