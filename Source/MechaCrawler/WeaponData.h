@@ -23,6 +23,9 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase* shootSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UParticleSystem* weaponParticle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

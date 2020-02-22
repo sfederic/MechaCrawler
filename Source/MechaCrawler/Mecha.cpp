@@ -1012,6 +1012,7 @@ void AMecha::LeftMousePressed()
 			beamShootParticle->SetBeamTargetPoint(0, weapons[currentWeaponIndex]->GetOwner()->GetActorLocation() + (camera->GetForwardVector() * attackDistance), 0);
 
 			UGameplayStatics::PlayWorldCameraShake(GetWorld(), weaponData->camShake, GetActorLocation(), 500.f, 1.f);
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), weaponData->shootSound, GetActorLocation());
 
 		}
 		else if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
@@ -1040,6 +1041,8 @@ void AMecha::LeftMousePressed()
 				beamShootParticle->SetBeamTargetPoint(0, shootHit.ImpactPoint, 0);
 
 				UGameplayStatics::PlayWorldCameraShake(GetWorld(), weaponData->camShake, GetActorLocation(), 500.f, 1.f);
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), weaponData->shootSound, GetActorLocation());
+
 
 				UDecalComponent* decal = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), weaponData->decal, FVector(40.f), shootHit.ImpactPoint, shootHit.ImpactNormal.Rotation(), 0.f);
 				decal->SetFadeOut(0.35f, 0.25f, true);
