@@ -6,12 +6,14 @@
 #include "GameFramework/Actor.h"
 #include "Activate.h"
 #include "Rebuild.h"
+#include "PuzzleItem.h"
+#include "UseOrderManager.h"
 #include "ConstructBeacon.generated.h"
 
 //Useable actor that will light up when Use()'d. Figured would work well with "Press them in order" puzzles
 
 UCLASS()
-class MECHACRAWLER_API AConstructBeacon : public AActor, public IActivate, public IRebuild
+class MECHACRAWLER_API AConstructBeacon : public APuzzleItem
 {
 	GENERATED_BODY()
 	
@@ -31,4 +33,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* originalMaterial;
+
+	UPROPERTY(EditAnywhere)
+	AUseOrderManager* useManager;
 };

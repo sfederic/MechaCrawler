@@ -146,9 +146,9 @@ void AMecha::Tick(float DeltaTime)
 
 	shootCooldownTimer += FApp::GetDeltaTime();
 
-	//Scan();
+	Scan();
 	//TODO: Just testing to get scan name as runtime and not pause. Decide on one or the other
-	if (scanning && scanWidget)
+	/*if (scanning && scanWidget)
 	{
 		if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(), camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_GameTraceChannel1)) //TransparentScan
 		{
@@ -218,7 +218,7 @@ void AMecha::Tick(float DeltaTime)
 			scanWidget->bHasDialouge = false;
 			scanWidget->dialogueName = TEXT("");
 		}
-	}
+	}*/
 
 
 	ScrollText();
@@ -821,6 +821,7 @@ void AMecha::RightMousePressed()
 				}
 			}
 		}
+
 
 		if (GetWorld()->LineTraceSingleByChannel(useHit, GetActorLocation(), GetActorLocation() + camera->GetForwardVector() * useDistance, ECC_WorldStatic))
 		{

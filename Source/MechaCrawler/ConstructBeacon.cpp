@@ -22,15 +22,20 @@ void AConstructBeacon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	originalMaterial = FindComponentByClass<UMeshComponent>()->GetMaterial(0);
 }
 
 void AConstructBeacon::Use()
 {
-	FindComponentByClass<UMeshComponent>()->SetMaterial(0, activatedMaterial);
+	if (bActivated == false)
+	{
+		FindComponentByClass<UMeshComponent>()->SetMaterial(0, activatedMaterial);
+		bActivated = true;
+		useManager->activatedItems.Add(this->activateOrderNumber);
+	}
 }
 
 void AConstructBeacon::Rebuild()
 {
 	FindComponentByClass<UMeshComponent>()->SetMaterial(0, originalMaterial);
+	bActivated = false;
 }

@@ -27,5 +27,9 @@ public:
 	virtual void Rebuild() override;
 	virtual void Use() override;
 
+	UPROPERTY(EditAnywhere)
+	int activateOrderNumber; //Using this as the way to figure out a "which order do you press them" puzzle. Works with UseOrderManager's arrays
+
+	UPROPERTY(VisibleAnywhere)
 	bool bActivated; //This is how the puzzle manager is going to do this
 };
