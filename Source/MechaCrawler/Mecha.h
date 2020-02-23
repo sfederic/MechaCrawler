@@ -138,6 +138,12 @@ public:
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TSubclassOf<ATagNode> tagWidgetClass;
 
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UUserWidget> noteReturnFocusWidgetClass;
+
+	UPROPERTY()
+	UUserWidget* noteReturnFocusWidget;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> shootingWidgetClass;
 
@@ -187,6 +193,37 @@ public:
 	UInventoryWidget* inventoryWidget;
 	//end move to playerhud.h/cpp
 
+	//Sounds
+	UPROPERTY(EditAnywhere, Category="SFX")
+	USoundBase* soundScanOn;
+
+	UPROPERTY(EditAnywhere, Category = "SFX")
+	USoundBase* soundScanOff;
+
+	UPROPERTY(EditAnywhere, Category = "SFX")
+	USoundBase* soundScanOverlap;
+
+	UPROPERTY(EditAnywhere, Category = "SFX")
+	USoundBase* soundZoomIn;
+
+	UPROPERTY(EditAnywhere, Category = "SFX")
+	USoundBase* soundZoomOut;
+
+	UPROPERTY(EditAnywhere, Category = "SFX")
+	USoundBase* soundDeleteAll;
+
+	UPROPERTY(EditAnywhere, Category = "SFX")
+	USoundBase* soundNote;
+
+	UPROPERTY(EditAnywhere, Category = "SFX")
+	USoundBase* soundNoteLoseFocus;
+
+	UPROPERTY(EditAnywhere, Category = "SFX")
+	USoundBase* soundTagged;
+
+	UPROPERTY(EditAnywhere, Category = "SFX")
+	USoundBase* soundTaggedOff;
+
 	UPROPERTY(VisibleAnywhere)
 	FVector forwardAxis;
 
@@ -228,6 +265,7 @@ public:
 	float attackDistance;
 
 	FHitResult scanHit;
+	FHitResult previousScanHit;
 	float scanDistance = 10000.0f;
 
 	FHitResult moveHit;
@@ -249,6 +287,8 @@ public:
 
 	bool scanning = false;
 	bool zoomed = false;
+
+	bool bTypingNote = false;
 
 	UPROPERTY(VisibleAnywhere)
 	bool submerged = false;

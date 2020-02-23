@@ -28,5 +28,5 @@ public:
 	FString scanName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString dialogueName; //Name of the character you can call in scanwidget
+	FString dialogueName;
 };

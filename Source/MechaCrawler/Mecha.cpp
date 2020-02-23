@@ -70,6 +70,8 @@ void AMecha::BeginPlay()
 	}
 
 	//INIT WIDGETS
+	noteReturnFocusWidget = CreateWidget<UUserWidget>(GetWorld(), noteReturnFocusWidgetClass);
+
 	shootingWidget = CreateWidget<UUserWidget>(GetWorld(), shootingWidgetClass);
 	shootingWidget->AddToViewport();
 
@@ -707,6 +709,8 @@ void AMecha::SetScan()
 
 	if (!scanning)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), soundScanOn);
+
 		if (postProcessMain)
 		{
 			postProcessMain->Settings.AddBlendable(scanPostProcess, 1.0f);
@@ -720,10 +724,13 @@ void AMecha::SetScan()
 		}*/
 
 		//Hide Weapon
-		weapons[currentWeaponIndex]->GetOwner()->SetActorHiddenInGame(true);
+		UChildActorComponent* childWeapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
+		childWeapon->SetHiddenInGame(true);
 	} 
 	else if (scanning)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), soundScanOff);
+
 		if (postProcessMain)
 		{
 			postProcessMain->Settings.RemoveBlendable(scanPostProcess);
@@ -736,8 +743,9 @@ void AMecha::SetScan()
 			scanActors[i]->FindComponentByClass<UMeshComponent>()->SetScalarParameterValueOnMaterials("ScanOn", 0.f);
 		}*/
 
-		//Hide Weapon
-		weapons[currentWeaponIndex]->GetOwner()->SetActorHiddenInGame(false);
+		//Unhide Weapon
+		UChildActorComponent* childWeapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
+		childWeapon->SetHiddenInGame(false);
 
 		//reset zoom in and out
 		camera->FieldOfView = maxFOV;
@@ -776,6 +784,14 @@ void AMecha::SetWayPoint()
 
 void AMecha::RightMousePressed()
 {
+	if (bTypingNote)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), soundNoteLoseFocus);
+		noteReturnFocusWidget->RemoveFromViewport();
+		bTypingNote = false;
+		return;
+	}
+
 	if (canMove == false)
 	{
 		return;
@@ -890,6 +906,14 @@ void AMecha::RightMousePressed()
 //SHOOTING
 void AMecha::LeftMousePressed()
 {
+	if (bTypingNote)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), soundNoteLoseFocus);
+		noteReturnFocusWidget->RemoveFromViewport();
+		bTypingNote = false;
+		return;
+	}
+
 	if (bDialogueClick)
 	{
 		if (textBoxWidget->bScrollFinished)
@@ -1200,6 +1224,13 @@ void AMecha::LeftMousePressed()
 //Also starts level from crane
 void AMecha::StartLevel()
 {
+	if (bTypingNote)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), soundNoteLoseFocus);
+		bTypingNote = false;
+		return;
+	}
+
 	/*if (bStartLevelOnShip == true)
 	{
 		bStartLevelOnShip = false;
@@ -1209,7 +1240,7 @@ void AMecha::StartLevel()
 	}*/
 
 	//TODO: Function was previously open inventory. Decide if need to keep
-	if (inventoryWidget && controller)
+	/*if (inventoryWidget && controller)
 	{
 		if (inventoryWidget->IsInViewport() == false)
 		{
@@ -1225,7 +1256,7 @@ void AMecha::StartLevel()
 			controller->bShowMouseCursor = false;
 			inventoryWidget->RemoveFromViewport();
 		}
-	}
+	}*/
 }
 
 //TODO: Set in binocular UI for later. Don't need for now.
@@ -1260,22 +1291,10 @@ void AMecha::AddNote()
 			transform.SetRotation(FQuat(noteHit.ImpactNormal.Rotation()));
 			ANoteNode* noteNode = GetWorld()->SpawnActor<ANoteNode>(noteWidgetClass, transform);
 
-			//highlight actor
-			AActor* noteActor = noteHit.GetActor();
+			bTypingNote = true;
 
-			if (noteActor->Tags.Contains(Tags::ScanMarked) == false)
-			{
-				noteActor->Tags.Add(Tags::ScanMarked);
-				//bRenderCustomDepth needs to be true before runtime, not changed during to work
-				UStaticMeshComponent* mesh = noteActor->FindComponentByClass<UStaticMeshComponent>();
-				if (mesh)
-				{
-					if (mesh->bRenderCustomDepth == true)
-					{
-						mesh->SetCustomDepthStencilValue(1);
-					}
-				}
-			}
+			UGameplayStatics::PlaySound2D(GetWorld(), soundNote);
+			noteReturnFocusWidget->AddToViewport();
 		}
 	}
 }
@@ -1284,6 +1303,8 @@ void AMecha::DeleteAllNotes()
 {
 	if (GetActorLocation().Equals(nextLoc))
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), soundDeleteAll);
+
 		//Delete all notes
 		TArray<AActor*> noteActorsToDelete;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANoteNode::StaticClass(), noteActorsToDelete);
@@ -1322,25 +1343,36 @@ void AMecha::DeleteAllNotes()
 			}
 		}
 
+		TArray<AActor*> tagNotes;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATagNode::StaticClass(), tagNotes);
+		for (int i = 0; i < tagNotes.Num(); i++)
+		{
+			tagNotes[i]->Destroy();
+		}
+
 		RebuildAllDestroyedActors();
 	}
 }
 
 void AMecha::ZoomIn(float val)
 {
-	if (camera && scanning)
+	if (camera && scanning && val)
 	{
 		camera->FieldOfView += 5.0f * val; //TODO: Figure out how feels with different mice (TODO: Google plural of mouses)
+		UGameplayStatics::PlaySound2D(GetWorld(), soundZoomIn);
 		camera->FieldOfView = FMath::Clamp(camera->FieldOfView, 5.0f, maxFOV);
+
 	}
 }
 
 void AMecha::ZoomOut(float val)
 {
-	if (camera && scanning)
+	if (camera && scanning && val)
 	{
 		camera->FieldOfView -= 5.0f * val;
+		UGameplayStatics::PlaySound2D(GetWorld(), soundZoomOut);
 		camera->FieldOfView = FMath::Clamp(camera->FieldOfView, 5.0f, maxFOV);
+
 	}
 }
 
@@ -1638,8 +1670,13 @@ void AMecha::ProgressText()
 					scanWidget->AddToViewport();
 				}
 
-				choiceWidget->choice1Taken = false;
+				choiceWidget->choice1Taken = false; 
 				choiceWidget->choice2Taken = false;
+
+				if (scanWidget->IsInViewport() == false)
+				{
+					scanWidget->AddToViewport();
+				}
 			}
 		}
 	}
@@ -1723,6 +1760,14 @@ void AMecha::Scan()
 					scanWidget->scanEntry = scanData->scanText.ToString();
 					scanWidget->scanNameEntry = scanData->scanName;
 
+					if (previousScanHit.GetActor() == nullptr || previousScanHit.GetActor() != scanHit.GetActor())
+					{
+						UGameplayStatics::PlaySound2D(GetWorld(), soundScanOverlap);
+					}
+
+					previousScanHit = scanHit;
+
+
 					if (actor->FindComponentByClass<UDialogueComponent>())
 					{
 						scanWidget->bHasDialouge = true;
@@ -1735,6 +1780,8 @@ void AMecha::Scan()
 					scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
 					scanWidget->bHasDialouge = false;
 					scanWidget->dialogueName = TEXT("");
+
+					previousScanHit = FHitResult();
 				}
 			}
 		}
@@ -1750,7 +1797,12 @@ void AMecha::Scan()
 					scanWidget->scanEntry = scanData->scanText.ToString();
 					scanWidget->scanNameEntry = scanData->scanName;
 
-					//UGameplayStatics::SetGamePaused(GetWorld(), true);
+					if (previousScanHit.GetActor() == nullptr || previousScanHit.GetActor() != scanHit.GetActor())
+					{
+						UGameplayStatics::PlaySound2D(GetWorld(), soundScanOverlap);
+					}
+
+					previousScanHit = scanHit;
 
 					if (actor->FindComponentByClass<UDialogueComponent>())
 					{
@@ -1765,6 +1817,8 @@ void AMecha::Scan()
 					scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
 					scanWidget->bHasDialouge = false;
 					scanWidget->dialogueName = TEXT("");
+
+					previousScanHit = FHitResult();
 				}
 			}
 		}
@@ -1774,6 +1828,8 @@ void AMecha::Scan()
 			scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
 			scanWidget->bHasDialouge = false;
 			scanWidget->dialogueName = TEXT("");
+
+			previousScanHit = FHitResult();
 		}
 	}
 }
@@ -1785,6 +1841,11 @@ void AMecha::GetDialogue(AActor* dialogueActor)
 	{
 		if (textBoxWidget->IsInViewport() == false)
 		{
+			if (scanWidget->IsInViewport())
+			{
+				scanWidget->RemoveFromViewport();
+			}
+
 			bDialogueClick = true;
 
 			if (dialogue->mainTextBoxTable)
@@ -1849,12 +1910,14 @@ void AMecha::TagActor()
 			{
 				tagActor->Tags.Add(Tags::Tagged);
 
+				UGameplayStatics::PlaySound2D(GetWorld(), soundTagged);
+
 				//Set Tag node and widget
 				FTransform tagTrans = FTransform();
 				tagTrans.SetLocation(tagResult.ImpactPoint);
 				ATagNode* tagNode = GetWorld()->SpawnActor<ATagNode>(tagWidgetClass, tagTrans);
 				UTagDistanceWidget* tagDistWidget = Cast<UTagDistanceWidget>(tagNode->tagWidget->GetUserWidgetObject());
-				tagDistWidget->attachedActorLocation = tagActor->GetActorLocation();
+				tagDistWidget->attachedActorLocation = tagResult.ImpactPoint;
 
 				tagNode->Tags.Add(*tagActor->GetName());
 
@@ -1878,6 +1941,7 @@ void AMecha::TagActor()
 					actor->Destroy();
 				}
 				
+				UGameplayStatics::PlaySound2D(GetWorld(), soundTaggedOff);
 
 				UMeshComponent* tagActorMesh = tagActor->FindComponentByClass<UMeshComponent>();
 				if (tagActorMesh)

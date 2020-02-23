@@ -32,12 +32,12 @@ void AUseOrderManager::Tick(float DeltaTime)
 		}
 
 		activatedItems.Empty();
+
 		IActivate* activate = Cast<IActivate>(useActor);
-			if (activate)
-			{
+		if (activate)
+		{
 				activate->Use();
-			}
-		UE_LOG(LogTemp, Warning, TEXT("Done"));
+		}
 	}
 }
 
