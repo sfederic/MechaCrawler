@@ -56,6 +56,7 @@ public:
 	void RebuildAllDestroyedActors();
 	void UseObject();
 	void ChangeWeapon();
+	void AddDestructibleToRebuildManager(AActor* hitActor);
 
 	UFUNCTION(BlueprintCallable)
 	void ProgressText();
@@ -223,6 +224,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "SFX")
 	USoundBase* soundTaggedOff;
+
+	UPROPERTY(EditAnywhere, Category = "SFX")
+	USoundBase* soundWaypointSet;
 
 	UPROPERTY(VisibleAnywhere)
 	FVector forwardAxis;

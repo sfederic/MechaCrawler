@@ -21,5 +21,9 @@ void ATagNode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (taggedActor)
+	{
+		SetActorLocation(taggedActor->GetActorLocation());
+	}
 }
 

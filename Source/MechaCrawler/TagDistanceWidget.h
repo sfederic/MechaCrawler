@@ -16,7 +16,7 @@ class MECHACRAWLER_API UTagDistanceWidget : public UUserWidget
 public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FVector attachedActorLocation;
+    AActor* taggedActor; //for tagged objects that move around, can update the text with this
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float distanceToPlayer;

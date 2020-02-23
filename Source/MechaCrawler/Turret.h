@@ -20,6 +20,20 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere)
+	FCollisionQueryParams shootParams;
+
+	UPROPERTY(VisibleAnywhere)
 	AActor* target;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* laserParticleTemplate;
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* shootSound;
+
+	UPROPERTY(VisibleAnywhere)
+	float attackTimer;
+
+	UPROPERTY(EditAnywhere)
+	float attackInterval;
 };

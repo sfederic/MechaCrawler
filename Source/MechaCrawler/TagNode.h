@@ -22,4 +22,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	class UWidgetComponent* tagWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	AActor* taggedActor;
 };

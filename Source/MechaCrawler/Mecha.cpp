@@ -711,10 +711,10 @@ void AMecha::SetScan()
 	{
 		UGameplayStatics::PlaySound2D(GetWorld(), soundScanOn);
 
-		if (postProcessMain)
+		/*if (postProcessMain)
 		{
 			postProcessMain->Settings.AddBlendable(scanPostProcess, 1.0f);
-		}
+		}*/
 
 		/*TArray<AActor*> scanActors;
 		UGameplayStatics::GetAllActorsWithTag(GetWorld(), Tags::Scan, scanActors);
@@ -731,10 +731,10 @@ void AMecha::SetScan()
 	{
 		UGameplayStatics::PlaySound2D(GetWorld(), soundScanOff);
 
-		if (postProcessMain)
+		/*if (postProcessMain)
 		{
 			postProcessMain->Settings.RemoveBlendable(scanPostProcess);
-		}
+		}*/
 
 		/*TArray<AActor*> scanActors;
 		UGameplayStatics::GetAllActorsWithTag(GetWorld(), Tags::Scan, scanActors);
@@ -778,6 +778,8 @@ void AMecha::SetWayPoint()
 			wayPoint->SetVisibility(true); //Only here because initial visibility is off
 			wayPoint->SetWorldLocation(wayPointHit.ImpactPoint);
 			wayPoint->SetWorldRotation(wayPointHit.ImpactNormal.Rotation());
+
+			UGameplayStatics::PlaySound2D(GetWorld(), soundWaypointSet);
 		}
 	}
 }
@@ -1093,9 +1095,12 @@ void AMecha::LeftMousePressed()
 
 							//shotEnemy->Destroy();
 							shotEnemy->FindComponentByClass<UMeshComponent>()->SetSimulatePhysics(true);
-							shotEnemy->FindComponentByClass<UMeshComponent>()->AddImpulse(shotEnemy->GetActorForwardVector() * 10000.f);
+							shotEnemy->FindComponentByClass<UMeshComponent>()->AddImpulse(shootHit.ImpactNormal * 50000.f);
 							shotEnemy->SetActorTickEnabled(false);
-							shotEnemy->FindComponentByClass<UBoxComponent>()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+							if (shotEnemy->FindComponentByClass<UBoxComponent>())
+							{
+								shotEnemy->FindComponentByClass<UBoxComponent>()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+							}
 							shotEnemy->Tags.Add(Tags::Destroy);
 						}
 					}
@@ -1180,15 +1185,16 @@ void AMecha::LeftMousePressed()
 				}
 
 				dc->ApplyDamage(destructibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);	
+
 				if (dc->GetOwner()->IsA<APuzzleItem>())
 				{
 					APuzzleItem* puzzleItem = Cast<APuzzleItem>(dc->GetOwner());
 					puzzleItem->bActivated = true;
 				}
 
-				if (instancedRebuildManager && dc->GetOwner()->Tags.Contains(Tags::Destroy) == false)
+				//if (instancedRebuildManager && dc->GetOwner()->Tags.Contains(Tags::Destroy) == false)
 				{
-					if (rebuildActor && rebuildActor->IsA<ADestructibleActor>())
+					/*if (rebuildActor && rebuildActor->IsA<ADestructibleActor>())
 					{
 						if (rebuildActor->Tags.Contains(Tags::DontRebuild) == false)
 						{
@@ -1202,7 +1208,9 @@ void AMecha::LeftMousePressed()
 						}
 					}
 
-					instancedRebuildManager->rebuildTimers.Add(0.f);
+					instancedRebuildManager->rebuildTimers.Add(0.f);*/
+
+					AddDestructibleToRebuildManager(dc->GetOwner());
 
 					//FOR DESTRUCTIBLE SWITCHES
 					if (dc->GetOwner()->IsA<ADestructibleSwitch>())
@@ -1215,7 +1223,7 @@ void AMecha::LeftMousePressed()
 					}
 				}
 
-				dc->GetOwner()->Tags.Add(Tags::Destroy);
+				//dc->GetOwner()->Tags.Add(Tags::Destroy);
 			}
 		}
 	}
@@ -1286,6 +1294,23 @@ void AMecha::AddNote()
 		if (noteWidgetClass)
 		{
 			//Place note
+			FTransform transform = FTransform();
+			transform.SetLocation(noteHit.ImpactPoint);
+			transform.SetRotation(FQuat(noteHit.ImpactNormal.Rotation()));
+			ANoteNode* noteNode = GetWorld()->SpawnActor<ANoteNode>(noteWidgetClass, transform);
+
+			bTypingNote = true;
+
+			UGameplayStatics::PlaySound2D(GetWorld(), soundNote);
+			noteReturnFocusWidget->AddToViewport();
+		}
+	}
+	else if (GetWorld()->LineTraceSingleByChannel(noteHit, camera->GetComponentLocation(),
+		camera->GetComponentLocation() + camera->GetForwardVector() * scanDistance, ECC_GameTraceChannel1, moveParams))
+	{
+		if (noteWidgetClass)
+		{
+			//Place note for transparent objects
 			FTransform transform = FTransform();
 			transform.SetLocation(noteHit.ImpactPoint);
 			transform.SetRotation(FQuat(noteHit.ImpactNormal.Rotation()));
@@ -1589,6 +1614,8 @@ void AMecha::ProgressText()
 
 		Start: //Lazy way of looping through the table rows fror choie dialogue
 
+			UGameplayStatics::PlaySound2D(GetWorld(), soundTagged);
+
 			textBoxWidget->textBoxIndex++;
 
 			if (textBoxWidget->textBoxIndex <= (textBoxWidget->textBoxRows.Num() - 1))
@@ -1839,6 +1866,8 @@ void AMecha::GetDialogue(AActor* dialogueActor)
 	UDialogueComponent* dialogue = dialogueActor->FindComponentByClass<UDialogueComponent>();
 	if (dialogue)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), soundTagged);
+
 		if (textBoxWidget->IsInViewport() == false)
 		{
 			if (scanWidget->IsInViewport())
@@ -1917,9 +1946,10 @@ void AMecha::TagActor()
 				tagTrans.SetLocation(tagResult.ImpactPoint);
 				ATagNode* tagNode = GetWorld()->SpawnActor<ATagNode>(tagWidgetClass, tagTrans);
 				UTagDistanceWidget* tagDistWidget = Cast<UTagDistanceWidget>(tagNode->tagWidget->GetUserWidgetObject());
-				tagDistWidget->attachedActorLocation = tagResult.ImpactPoint;
+				tagDistWidget->taggedActor = tagResult.GetActor();
+				tagNode->taggedActor = tagResult.GetActor();
 
-				tagNode->Tags.Add(*tagActor->GetName());
+				tagNode->Tags.Add(*tagActor->GetName()); //Used when need to delte tag node
 
 
 				UMeshComponent* tagActorMesh = tagActor->FindComponentByClass<UMeshComponent>();
@@ -1951,6 +1981,30 @@ void AMecha::TagActor()
 				}
 			}
 
+		}
+	}
+}
+
+void AMecha::AddDestructibleToRebuildManager(AActor* hitActor)
+{
+	ADestructibleActor* rebuildActor = Cast<ADestructibleActor>(hitActor);
+
+	if (instancedRebuildManager && hitActor->Tags.Contains(Tags::Destroy) == false)
+	{
+		hitActor->Tags.Add(Tags::Destroy);
+
+		if (rebuildActor && rebuildActor->IsA<ADestructibleActor>())
+		{
+			if (rebuildActor->Tags.Contains(Tags::DontRebuild) == false)
+			{
+				instancedRebuildManager->rebuildActors.Add(rebuildActor);
+				instancedRebuildManager->rebuildTimers.Add(0.f);
+				instancedRebuildManager->rebuildActorFadeMaterials.Add(rebuildActor->FindComponentByClass<UDestructibleComponent>()->GetMaterial(0));
+			}
+			else
+			{
+				rebuildActor->SetLifeSpan(2.0f);
+			}
 		}
 	}
 }
