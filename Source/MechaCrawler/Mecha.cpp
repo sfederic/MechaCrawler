@@ -696,7 +696,7 @@ void AMecha::LookPitch(float val)
 	//if (canMove)
 	{
 		cameraRot.Pitch -= cameraSpeed * val;
-		cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch, -70.f, 70.f);
+		cameraRot.Pitch = FMath::Clamp(cameraRot.Pitch, -89.f, 89.f);
 	}
 }
 
@@ -1073,6 +1073,18 @@ void AMecha::LeftMousePressed()
 
 				UDecalComponent* decal = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), weaponData->decal, FVector(40.f), shootHit.ImpactPoint, shootHit.ImpactNormal.Rotation(), 0.f);
 				decal->SetFadeOut(0.35f, 0.25f, true);
+
+
+				//For actors that can be used on shooting them (like Zelda's arrow switches)
+				if (shotEnemy->Tags.Contains(Tags::UseableShoot))
+				{
+					IActivate* activate = Cast<IActivate>(shotEnemy);
+					if (activate)
+					{
+						activate->Use();
+					}
+				}
+
 
 				if (shotEnemy->Tags.Contains(Tags::Enemy) && shotEnemy->Tags.Contains(Tags::Destroy) == false)
 				{

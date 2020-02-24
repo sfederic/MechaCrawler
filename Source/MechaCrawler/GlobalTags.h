@@ -19,7 +19,8 @@ namespace Tags
 	static const FName DontRebuild = "DontRebuild"; //Flaging actors that don't need to be rebuilt (ice block spawns etc.)
 	static const FName MechaFirstTime = "MechaFirstTime"; //When mecha first found.
 	static const FName Tagged = "Tagged"; //Actors that have had their depth/stencil masks set
-	static const FName Tagable = "Tagable";
+	static const FName Tagable = "Tagable"; //Actor that CAN be tagged
+	static const FName UseableShoot = "UseableShoot"; //For switches that can be shot to activate
 }
 
 namespace LevelNames

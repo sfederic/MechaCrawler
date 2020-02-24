@@ -30,11 +30,13 @@ void ABlockSwitch::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//TODO: fix this shit, this is awful
 	for (int i = 0; i < pushableActors.Num(); i++)
 	{
 		if (pushableActors[i]->GetActorLocation().Equals(this->GetActorLocation()))
 		{
 			mesh->SetMaterial(0, activatedMat);
+			pushableActors.Empty();
 			ActivateConnection();
 			return;
 		}
@@ -53,8 +55,11 @@ void ABlockSwitch::ActivateConnection()
 {
 	if (connectedActor)
 	{
-		//IActivate* connect = Cast<IActivate>(connectedActor);
-		//connect->Use();
+		IActivate* connect = Cast<IActivate>(connectedActor);
+		if (connect)
+		{
+			connect->Use();
+		}
 
 		if (connectedActor->IsA<ADestructibleActor>())
 		{

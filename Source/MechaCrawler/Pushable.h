@@ -34,6 +34,8 @@ public:
 
 	FTimerHandle playerMoveTimer;
 
+	FVector originalGravityVector;
+
 	UPROPERTY(EditAnywhere)
 	FVector gravityVector;
 
@@ -48,6 +50,8 @@ public:
 	bool falling;
 
 	bool bMoving = false;
+
+	TArray<AActor*> allRotatingActorsInLevel;
 
 private:
 	float maxFallDistance = 10000.f;

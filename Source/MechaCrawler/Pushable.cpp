@@ -4,6 +4,7 @@
 #include "Kismet/GameplayStatics.h" 
 #include "Mecha.h"
 #include "Runtime/Engine/Public/TimerManager.h"
+#include "RotatingGridActor.h"
 
 APushable::APushable()
 {
@@ -18,6 +19,7 @@ void APushable::BeginPlay()
 
 	originalLoc = GetActorLocation();
 	nextLoc = GetActorLocation();
+	originalGravityVector = gravityVector;
 
 	APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	player = Cast<AMecha>(playerPawn);
@@ -26,11 +28,22 @@ void APushable::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Move Speed not set on %s"), *GetNameSafe(this));
 	}
+
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ARotatingGridActor::StaticClass(), allRotatingActorsInLevel);
 }
 
 void APushable::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	for (AActor* rotatingActor : allRotatingActorsInLevel)
+	{
+		AGridActor* gridActor = Cast<AGridActor>(rotatingActor);
+		if (!gridActor->GetActorRotation().Equals(gridActor->nextRot.Rotator()))
+		{
+			return;
+		}
+	}
 
 	//FALLING/GRAVITY
 	if (nextLoc.Equals(GetActorLocation()))
@@ -113,6 +126,7 @@ void APushable::Rebuild()
 	{
 		this->nextLoc = this->originalLoc;
 		this->SetActorLocation(this->originalLoc);
+		gravityVector = originalGravityVector;
 	}
 	else
 	{

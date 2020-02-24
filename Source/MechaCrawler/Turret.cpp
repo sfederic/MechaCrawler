@@ -54,6 +54,7 @@ void ATurret::Tick(float DeltaTime)
 						player->AddDestructibleToRebuildManager(shootHit.GetActor());
 					}
 
+					//Old method of AddDestructibleToRebuildManager(). Keep just incase...
 					/*ADestructibleActor* rebuildActor = Cast<ADestructibleActor>(shootHit.GetActor());
 
 					if (player->instancedRebuildManager && dc->GetOwner()->Tags.Contains(Tags::Destroy) == false)
