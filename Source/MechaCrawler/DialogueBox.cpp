@@ -5,11 +5,12 @@
 #include "Mecha.h"
 #include "Ship.h"
 #include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
+#include "LevelAudio.h"
 
 ADialogueBox::ADialogueBox()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
 }
 
 void ADialogueBox::BeginPlay()
@@ -18,6 +19,8 @@ void ADialogueBox::BeginPlay()
 	
 	box = FindComponentByClass<UBoxComponent>();
 	box->OnComponentBeginOverlap.AddDynamic(this, &ADialogueBox::OnPlayerOverlap);
+
+	audioComponent = FindComponentByClass<UAudioComponent>();
 
 	if (bIsActivated)
 	{
@@ -64,6 +67,20 @@ void ADialogueBox::OnPlayerOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 			{
 				eventActors[i]->Activate();
 			}
+
+			///Hand music to change to
+			if (audioComponent->Sound)
+			{
+				TArray<AActor*> levelAudios;
+				UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALevelAudio::StaticClass(), levelAudios);
+				for (int i = 0; i < levelAudios.Num(); i++)
+				{
+					ALevelAudio* audio = Cast<ALevelAudio>(levelAudios[i]);
+					audio->FadeOutAudioAndStopOnTimer();
+				}
+
+				audioComponent->FadeIn(3.0f);
+			}
 		}
 		else if (ship)
 		{
@@ -88,6 +105,20 @@ void ADialogueBox::OnPlayerOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 			for (int i = 0; i < eventActors.Num(); i++)
 			{
 				eventActors[i]->Activate();
+			}
+
+			///Hand music to change to
+			if (audioComponent->Sound)
+			{
+				TArray<AActor*> levelAudios;
+				UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALevelAudio::StaticClass(), levelAudios);
+				for (int i = 0; i < levelAudios.Num(); i++)
+				{
+					ALevelAudio* audio = Cast<ALevelAudio>(levelAudios[i]);
+					audio->FadeOutAudioAndStopOnTimer();
+				}
+
+				audioComponent->FadeIn(3.0f);
 			}
 		}
 	}

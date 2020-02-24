@@ -44,4 +44,6 @@ public:
 	TArray<ACinematicEventActor*> eventActors;
 
 	class UBoxComponent* box;
+
+	class UAudioComponent* audioComponent;
 };
