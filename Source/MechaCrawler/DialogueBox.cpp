@@ -53,19 +53,28 @@ void ADialogueBox::OnPlayerOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 			//Handle dialogue boxes that daisey chain
 			for (int i = 0; i < dialogueBoxesToActivate.Num(); i++)
 			{
-				dialogueBoxesToActivate[i]->Activate();
+				if (dialogueBoxesToActivate[i])
+				{
+					dialogueBoxesToActivate[i]->Activate();
+				}
 			}
 
 			//Handle decorative actors
 			for (int i = 0; i < actorsToActivate.Num(); i++)
 			{
-				actorsToActivate[i]->SetActorHiddenInGame(false);
+				if (actorsToActivate[i])
+				{
+					actorsToActivate[i]->SetActorHiddenInGame(false);
+				}
 			}
 
 			//Handle in-level events to spawn
 			for (int i = 0; i < eventActors.Num(); i++)
 			{
-				eventActors[i]->Activate();
+				if (eventActors[i])
+				{
+					eventActors[i]->Activate();
+				}
 			}
 
 			///Hand music to change to
