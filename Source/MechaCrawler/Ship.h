@@ -6,6 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "EnterLevelWidget.h"
 #include "TextBoxWidget.h"
+#include "NoteNode.h"
 #include "Ship.generated.h"
 
 //Pawn used to travel world map
@@ -31,6 +32,9 @@ public:
 	void RotateDown(float val);
 	void Accelerate(float val);
 	void Reverse(float val);
+	void SetScan();
+	void TagActor();
+	void AddNote();
 
 	UFUNCTION(BlueprintCallable)
 	void GetDialogue(AActor* dialogueActor);
@@ -48,6 +52,18 @@ public:
 	//Widgets
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> levelEntryWidgetClass;
+
+	UPROPERTY(EditAnywhere, Category="Widget")
+	TSubclassOf<ANoteNode> noteWidgetClass;
+
+	UPROPERTY(EditAnywhere, Category = "Widgets")
+	TSubclassOf<UUserWidget> noteReturnFocusWidgetClass;
+
+	UPROPERTY(EditAnywhere, Category = "Widgets")
+	TSubclassOf<class ATagNode> tagWidgetClass;
+
+	UPROPERTY()
+	UUserWidget* noteReturnFocusWidget;
 
 	UPROPERTY()
 	UEnterLevelWidget* levelEntryWidget;
@@ -90,6 +106,8 @@ public:
 
 	float shootDistance = 5000.f;
 
+	float scanDistance = 10000.f;
+
 	UPROPERTY(VisibleAnywhere)
 	bool bReversing;
 
@@ -97,4 +115,6 @@ public:
 	bool bMovingForward;
 
 	bool bDialogueClick;
+
+	bool bTypingNote = false;
 };

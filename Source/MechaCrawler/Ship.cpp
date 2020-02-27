@@ -7,6 +7,8 @@
 #include "DestructibleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
+#include "GlobalTags.h"
+#include "TagNode.h"
 
 AShip::AShip()
 {
@@ -19,6 +21,8 @@ void AShip::BeginPlay()
 	Super::BeginPlay();
 	
 	controller = Cast<APlayerController>(this->GetController());
+	
+	controller->bShowMouseCursor = true;
 
 	//Init Widgets
 	levelEntryWidget = CreateWidget<UEnterLevelWidget>(GetWorld(), levelEntryWidgetClass);
@@ -82,6 +86,9 @@ void AShip::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAxis("RightMouseHeld", this, &AShip::Reverse);
 
 	InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AShip::LeftMousePressed);
+	InputComponent->BindAction("Scan", EInputEvent::IE_Pressed, this, &AShip::SetScan);
+	InputComponent->BindAction("Tag", EInputEvent::IE_Pressed, this, &AShip::TagActor);
+	InputComponent->BindAction("Note", EInputEvent::IE_Pressed, this, &AShip::AddNote);
 }
 
 void AShip::RotateRight(float val)
@@ -276,3 +283,84 @@ void AShip::RotateDown(float val)
 		}
 	}
 }
+
+void AShip::SetScan()
+{
+
+}
+
+void AShip::AddNote()
+{
+
+}
+
+void AShip::TagActor()
+{
+	FHitResult noteHit;
+
+	FVector mouseWorld, mouseDirection;
+	controller->DeprojectMousePositionToWorld(mouseWorld, mouseDirection);
+
+	UE_LOG(LogTemp, Warning, TEXT("mouse world: %f %f %f"), mouseWorld.X, mouseWorld.Y, mouseWorld.Z);
+	UE_LOG(LogTemp, Warning, TEXT("mouse direction: %f %f %f"), mouseDirection.X, mouseDirection.Y, mouseDirection.Z);
+
+	FHitResult tagResult;
+	if (GetWorld()->LineTraceSingleByChannel(tagResult, GetActorLocation(), camera->GetComponentLocation() + (mouseDirection * scanDistance), ECC_WorldStatic, shootParams))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TaggedActor: %s"), *tagResult.GetActor()->GetName());
+
+
+		if (tagResult.GetActor()->Tags.Contains(Tags::Tagable))
+		{
+			AActor* tagActor = tagResult.GetActor();
+
+			if (tagActor->Tags.Contains(Tags::Tagged) == false)
+			{
+				tagActor->Tags.Add(Tags::Tagged);
+
+				//UGameplayStatics::PlaySound2D(GetWorld(), soundTagged);
+
+				//Set Tag node and widget
+				FTransform tagTrans = FTransform();
+				tagTrans.SetLocation(tagResult.ImpactPoint);
+				ATagNode* tagNode = GetWorld()->SpawnActor<ATagNode>(tagWidgetClass, tagTrans);
+				UTagDistanceWidget* tagDistWidget = Cast<UTagDistanceWidget>(tagNode->tagWidget->GetUserWidgetObject());
+				tagDistWidget->taggedActor = tagResult.GetActor();
+				tagNode->taggedActor = tagResult.GetActor();
+
+				tagNode->Tags.Add(*tagActor->GetName()); //Used when need to delte tag node
+
+
+				UMeshComponent* tagActorMesh = tagActor->FindComponentByClass<UMeshComponent>();
+				if (tagActorMesh)
+				{
+					tagActorMesh->SetRenderCustomDepth(true);
+					tagActorMesh->SetCustomDepthStencilValue(255);
+				}
+			}
+			else if (tagActor->Tags.Contains(Tags::Tagged) == true)
+			{
+				tagActor->Tags.Remove(Tags::Tagged);
+
+				//Remove tag node(what the absolute fuck, but I guess it's still quick)
+				TArray<AActor*> tagNodesToRemove;
+				UGameplayStatics::GetAllActorsWithTag(GetWorld(), *tagActor->GetName(), tagNodesToRemove);
+				for (AActor* actor : tagNodesToRemove)
+				{
+					actor->Destroy();
+				}
+
+				//UGameplayStatics::PlaySound2D(GetWorld(), soundTaggedOff);
+
+				UMeshComponent* tagActorMesh = tagActor->FindComponentByClass<UMeshComponent>();
+				if (tagActorMesh)
+				{
+					tagActorMesh->SetRenderCustomDepth(false);
+					tagActorMesh->SetCustomDepthStencilValue(0);
+				}
+			}
+
+		}
+	}
+}
+
