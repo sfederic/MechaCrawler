@@ -7,6 +7,7 @@
 #include "EnterLevelWidget.h"
 #include "TextBoxWidget.h"
 #include "NoteNode.h"
+#include "ScanWidget.h"
 #include "Ship.generated.h"
 
 //Pawn used to travel world map
@@ -35,6 +36,7 @@ public:
 	void SetScan();
 	void TagActor();
 	void AddNote();
+	void Scan();
 
 	UFUNCTION(BlueprintCallable)
 	void GetDialogue(AActor* dialogueActor);
@@ -42,9 +44,11 @@ public:
 	void ProgressText();
 	void ScrollText();
 	void LeftMousePressed();
+	void RightMousePressed();
 
 public:
 	FHitResult shootHit;
+	FHitResult scanHit, previousScanHit;
 	FCollisionQueryParams shootParams;
 	class UCameraComponent* camera;
 	class APlayerController* controller;
@@ -61,6 +65,18 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Widgets")
 	TSubclassOf<class ATagNode> tagWidgetClass;
+
+	UPROPERTY(EditAnywhere, Category = "Widgets")
+	TSubclassOf<UUserWidget> scanCursorWidgetClass;
+
+	UPROPERTY(EditAnywhere, Category = "Widgets")
+	TSubclassOf<UScanWidget> scanWidgetClass;
+
+	UPROPERTY()
+	UScanWidget* scanWidget;
+
+	UPROPERTY()
+	UUserWidget* scanCursorWidget;
 
 	UPROPERTY()
 	UUserWidget* noteReturnFocusWidget;
@@ -110,6 +126,8 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	bool bReversing;
+
+	bool bIsScanning;
 
 	UPROPERTY(VisibleAnywhere)
 	bool bMovingForward;

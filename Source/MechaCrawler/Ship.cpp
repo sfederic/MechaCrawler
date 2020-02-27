@@ -9,6 +9,7 @@
 #include "DrawDebugHelpers.h"
 #include "GlobalTags.h"
 #include "TagNode.h"
+#include "ScanData.h"
 
 AShip::AShip()
 {
@@ -31,6 +32,18 @@ void AShip::BeginPlay()
 	textBoxWidget = CreateWidget<UTextBoxWidget>(GetWorld(), textBoxWidgetClass);
 	check(textBoxWidget);
 
+	noteReturnFocusWidget = CreateWidget<UUserWidget>(GetWorld(), noteReturnFocusWidgetClass);
+	check(noteReturnFocusWidget);
+
+	scanCursorWidget = CreateWidget<UUserWidget>(GetWorld(), scanCursorWidgetClass);
+	check(scanCursorWidget);
+
+	controller->SetMouseCursorWidget(EMouseCursor::Default, scanCursorWidget);
+
+	scanWidget = CreateWidget<UScanWidget>(GetWorld(), scanWidgetClass);
+	check(scanWidget);
+
+	//Init camera
 	camera = FindComponentByClass<UCameraComponent>();
 	check(camera);
 }
@@ -41,6 +54,7 @@ void AShip::Tick(float DeltaTime)
 
 	//DrawDebugLine(GetWorld(), GetActorLocation(), shootHit.ImpactPoint, FColor::Red);
 
+	Scan();
 	ScrollText();
 
 	if (velocity <= velocityMin)
@@ -86,6 +100,7 @@ void AShip::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAxis("RightMouseHeld", this, &AShip::Reverse);
 
 	InputComponent->BindAction("LeftMouse", EInputEvent::IE_Pressed, this, &AShip::LeftMousePressed);
+	InputComponent->BindAction("RightMouse", EInputEvent::IE_Pressed, this, &AShip::RightMousePressed);
 	InputComponent->BindAction("Scan", EInputEvent::IE_Pressed, this, &AShip::SetScan);
 	InputComponent->BindAction("Tag", EInputEvent::IE_Pressed, this, &AShip::TagActor);
 	InputComponent->BindAction("Note", EInputEvent::IE_Pressed, this, &AShip::AddNote);
@@ -117,8 +132,27 @@ void AShip::RotateLeft(float val)
 	}
 }
 
+void AShip::RightMousePressed()
+{
+	if (bTypingNote)
+	{
+		//UGameplayStatics::PlaySound2D(GetWorld(), soundNoteLoseFocus);
+		noteReturnFocusWidget->RemoveFromViewport();
+		bTypingNote = false;
+		return;
+	}
+}
+
 void AShip::LeftMousePressed()
 {
+	if (bTypingNote)
+	{
+		//UGameplayStatics::PlaySound2D(GetWorld(), soundNoteLoseFocus);
+		noteReturnFocusWidget->RemoveFromViewport();
+		bTypingNote = false;
+		return;
+	}
+
 	if (bDialogueClick)
 	{
 		if (textBoxWidget->bScrollFinished)
@@ -286,12 +320,61 @@ void AShip::RotateDown(float val)
 
 void AShip::SetScan()
 {
+	bIsScanning = !bIsScanning;
 
+	if (bIsScanning)
+	{
+		scanWidget->AddToViewport();
+	}
+	else if (!bIsScanning)
+	{
+		scanWidget->RemoveFromViewport();
+	}
 }
 
 void AShip::AddNote()
 {
+	FVector mouseWorld, mouseDirection;
+	controller->DeprojectMousePositionToWorld(mouseWorld, mouseDirection);
 
+	UE_LOG(LogTemp, Warning, TEXT("mouse world: %f %f %f"), mouseWorld.X, mouseWorld.Y, mouseWorld.Z);
+	UE_LOG(LogTemp, Warning, TEXT("mouse direction: %f %f %f"), mouseDirection.X, mouseDirection.Y, mouseDirection.Z);
+
+	FHitResult noteHit;
+	if (GetWorld()->LineTraceSingleByChannel(noteHit, camera->GetComponentLocation(),
+		camera->GetComponentLocation() + mouseDirection * scanDistance, ECC_WorldStatic, shootParams))
+	{
+		if (noteWidgetClass)
+		{
+			//Place note
+			FTransform transform = FTransform();
+			transform.SetLocation(noteHit.ImpactPoint);
+			transform.SetRotation(FQuat(noteHit.ImpactNormal.Rotation()));
+			ANoteNode* noteNode = GetWorld()->SpawnActor<ANoteNode>(noteWidgetClass, transform);
+
+			bTypingNote = true;
+
+			//UGameplayStatics::PlaySound2D(GetWorld(), soundNote);
+			noteReturnFocusWidget->AddToViewport();
+		}
+	}
+	else if (GetWorld()->LineTraceSingleByChannel(noteHit, camera->GetComponentLocation(),
+		camera->GetComponentLocation() + mouseDirection * scanDistance, ECC_GameTraceChannel1, shootParams))
+	{
+		if (noteWidgetClass)
+		{
+			//Place note for transparent objects
+			FTransform transform = FTransform();
+			transform.SetLocation(noteHit.ImpactPoint);
+			transform.SetRotation(FQuat(noteHit.ImpactNormal.Rotation()));
+			ANoteNode* noteNode = GetWorld()->SpawnActor<ANoteNode>(noteWidgetClass, transform);
+
+			bTypingNote = true;
+
+			//UGameplayStatics::PlaySound2D(GetWorld(), soundNote);
+			noteReturnFocusWidget->AddToViewport();
+		}
+	}
 }
 
 void AShip::TagActor()
@@ -364,3 +447,96 @@ void AShip::TagActor()
 	}
 }
 
+
+void AShip::Scan()
+{
+	//SCANNING
+	if (bIsScanning && scanWidget)
+	{
+		FVector mouseWorld, mouseDirection;
+		controller->DeprojectMousePositionToWorld(mouseWorld, mouseDirection);
+
+		if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(), camera->GetComponentLocation() + mouseDirection * scanDistance, ECC_GameTraceChannel1)) //TransparentScan
+		{
+			AActor* actor = scanHit.GetActor();
+			if (actor)
+			{
+				UScanData* scanData = actor->FindComponentByClass<UScanData>();
+				if (scanData)
+				{
+					scanWidget->scanEntry = scanData->scanText.ToString();
+					scanWidget->scanNameEntry = scanData->scanName;
+
+					if (previousScanHit.GetActor() == nullptr || previousScanHit.GetActor() != scanHit.GetActor())
+					{
+						//UGameplayStatics::PlaySound2D(GetWorld(), soundScanOverlap);
+					}
+
+					previousScanHit = scanHit;
+
+
+					if (actor->FindComponentByClass<UDialogueComponent>())
+					{
+						scanWidget->bHasDialouge = true;
+						scanWidget->dialogueName = scanData->dialogueName;
+					}
+				}
+				else
+				{
+					scanWidget->scanEntry = FString(TEXT("No Scan data."));
+					scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
+					scanWidget->bHasDialouge = false;
+					scanWidget->dialogueName = TEXT("");
+
+					previousScanHit = FHitResult();
+				}
+			}
+		}
+		else if (GetWorld()->LineTraceSingleByChannel(scanHit, camera->GetComponentLocation(), camera->GetComponentLocation() + mouseDirection * scanDistance, ECC_WorldStatic))
+		{
+			AActor* actor = scanHit.GetActor();
+			if (actor)
+			{
+				UScanData* scanData = actor->FindComponentByClass<UScanData>();
+
+				if (scanData)
+				{
+					scanWidget->scanEntry = scanData->scanText.ToString();
+					scanWidget->scanNameEntry = scanData->scanName;
+
+					if (previousScanHit.GetActor() == nullptr || previousScanHit.GetActor() != scanHit.GetActor())
+					{
+						//UGameplayStatics::PlaySound2D(GetWorld(), soundScanOverlap);
+					}
+
+					previousScanHit = scanHit;
+
+					if (actor->FindComponentByClass<UDialogueComponent>())
+					{
+						scanWidget->bHasDialouge = true;
+						scanWidget->dialogueName = scanData->dialogueName;
+					}
+
+				}
+				else
+				{
+					scanWidget->scanEntry = FString(TEXT("No Scan data."));
+					scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
+					scanWidget->bHasDialouge = false;
+					scanWidget->dialogueName = TEXT("");
+
+					previousScanHit = FHitResult();
+				}
+			}
+		}
+		else
+		{
+			scanWidget->scanEntry = FString(TEXT("No Scan data."));
+			scanWidget->scanNameEntry = FString(TEXT("Scanning..."));
+			scanWidget->bHasDialouge = false;
+			scanWidget->dialogueName = TEXT("");
+
+			previousScanHit = FHitResult();
+		}
+	}
+}
