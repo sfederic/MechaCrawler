@@ -18,7 +18,7 @@ AWallEnemy::AWallEnemy()
 void AWallEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	currentLoc = GetActorLocation();
 	nextLoc = GetActorLocation();
 

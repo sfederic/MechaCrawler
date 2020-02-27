@@ -88,6 +88,17 @@ void ADialogueBox::OnPlayerOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 					audio->FadeOutAudioAndStopOnTimer();
 				}
 
+				TArray<AActor*> dialogueBoxes;
+				UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADialogueBox::StaticClass(), dialogueBoxes);
+				for (int i = 0; i < dialogueBoxes.Num(); i++)
+				{
+					UAudioComponent* audio = dialogueBoxes[i]->FindComponentByClass<UAudioComponent>();
+					if (audio->GetOwner() != this)
+					{
+						audio->FadeOut(1.5f, 0.0f);
+					}
+				}
+
 				audioComponent->FadeIn(3.0f);
 			}
 		}

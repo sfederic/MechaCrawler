@@ -30,9 +30,9 @@ void ALevelAudio::Tick(float DeltaTime)
 
 void ALevelAudio::FadeOutAudioAndStopOnTimer()
 {
-	song->FadeOut(3.0f, 0.f);
+	song->FadeOut(1.5f, 0.f);
 	FTimerHandle handle;
-	GetWorldTimerManager().SetTimer(handle, this, &ALevelAudio::StopAudio, 3.0f);
+	//GetWorldTimerManager().SetTimer(handle, this, &ALevelAudio::StopAudio, 3.0f);
 }
 
 void ALevelAudio::StopAudio()
