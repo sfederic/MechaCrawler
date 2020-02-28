@@ -31,7 +31,7 @@ void AShip::BeginPlay()
 
 	textBoxWidget = CreateWidget<UTextBoxWidget>(GetWorld(), textBoxWidgetClass);
 	check(textBoxWidget);
-
+	
 	noteReturnFocusWidget = CreateWidget<UUserWidget>(GetWorld(), noteReturnFocusWidgetClass);
 	check(noteReturnFocusWidget);
 

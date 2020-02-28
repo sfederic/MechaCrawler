@@ -277,7 +277,7 @@ public:
 	float moveDistance = 100.f;
 	float traceDistance = 125.f; //If traceDistance is equal to moveDistance, players falls through
 	float previousMoveSpeed;
-	float maxFallDistance = 10000.f;
+	float maxFallDistance = 500000.f; //TODO: See if this works for other levels as well as planet shield
 	float maxFOV = 110.f;
 	float initialZoomFOV = 80.f;
 	
