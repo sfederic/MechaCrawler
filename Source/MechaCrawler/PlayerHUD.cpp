@@ -15,9 +15,9 @@ double endTextTimer;
 
 void APlayerHUD::BeginPlay()
 {
-	text = FString(TEXT("\"You did know you can shoot those bricks right?\""));
-	textIndex = 0;
-	newText.Reset();
+	//text = FString(TEXT("\"You did know you can shoot those bricks right?\""));
+	//textIndex = 0;
+	//newText.Reset();
 
 	/*if (activateWidget)
 	{

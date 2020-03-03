@@ -87,18 +87,18 @@ void APushable::Use()
 			FVector playerForward = player->forwardAxis;
 
 			//This was something about the player pushing upwards on ground
-			/*if (playerForward.Equals(FVector::UpVector))
+			if (playerForward.Equals(-this->gravityVector))
 			{
 				return;
-			}*/
+			}
 
 			if (!GetWorld()->LineTraceSingleByChannel(moveHit, GetActorLocation(), GetActorLocation() + playerForward * moveDistance,
 				ECC_WorldStatic, moveParams))
 			{
 				nextLoc += player->rootAxes[player->forwardAxisIndex] * moveDistance;
-				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+				//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 				bMoving = true;
 

@@ -84,9 +84,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<EPickupType> pickups;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float cash;
-
 	UPROPERTY(EditAnywhere)
 	class UMaterialParameterCollection* outlineParams;
 

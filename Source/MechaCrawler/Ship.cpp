@@ -94,8 +94,8 @@ void AShip::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	
 	InputComponent->BindAxis("Right", this, &AShip::RotateRight);
 	InputComponent->BindAxis("Left", this, &AShip::RotateLeft);
-	//InputComponent->BindAxis("Forward", this, &AShip::RotateUp);
-	//InputComponent->BindAxis("Back", this, &AShip::RotateDown);
+	InputComponent->BindAxis("Forward", this, &AShip::RotateUp);
+	InputComponent->BindAxis("Back", this, &AShip::RotateDown);
 	InputComponent->BindAxis("LeftMouseHeld", this, &AShip::Accelerate);
 	InputComponent->BindAxis("RightMouseHeld", this, &AShip::Reverse);
 
