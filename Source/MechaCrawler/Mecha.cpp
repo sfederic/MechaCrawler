@@ -383,9 +383,9 @@ void AMecha::MoveForward(float val)
 					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
 					{
 						nextLoc = loc + (forwardAxis * moveDistance);
-						//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-						//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-						//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+						nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+						nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+						nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 						return;
 					}
@@ -420,9 +420,9 @@ void AMecha::MoveForward(float val)
 
 				//nextRot.Normalize();
 
-				//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 			}
 			else
 			{
@@ -430,9 +430,9 @@ void AMecha::MoveForward(float val)
 				lastLoc = currentLoc;
 
 				nextLoc = loc + (forwardAxis * moveDistance);
-				//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 				if (!GetWorld()->LineTraceSingleByChannel(moveHit, nextLoc, nextLoc - GetActorUpVector() * maxFallDistance, ECC_WorldStatic, moveParams))
 				{
@@ -465,9 +465,9 @@ void AMecha::MoveBack(float val)
 					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
 					{
 						nextLoc = loc - (forwardAxis * moveDistance);
-						//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-						//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-						//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+						nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+						nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+						nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 						return;
 					}
@@ -507,9 +507,9 @@ void AMecha::MoveBack(float val)
 				lastLoc = currentLoc;
 
 				nextLoc = loc - (forwardAxis * moveDistance);
-				//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 				if (!GetWorld()->LineTraceSingleByChannel(moveHit, nextLoc, nextLoc - GetActorUpVector() * maxFallDistance, ECC_WorldStatic, moveParams))
 				{
@@ -542,9 +542,9 @@ void AMecha::MoveLeft(float val)
 					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
 					{
 						nextLoc = loc - (rightAxis * moveDistance);
-						//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-						//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-						//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+						nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+						nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+						nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 						return;
 					}
@@ -584,9 +584,9 @@ void AMecha::MoveLeft(float val)
 				lastLoc = currentLoc;
 
 				nextLoc = loc - (rightAxis * moveDistance);
-				//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 				if (!GetWorld()->LineTraceSingleByChannel(moveHit, nextLoc, nextLoc - GetActorUpVector() * maxFallDistance, ECC_WorldStatic, moveParams))
 				{
@@ -619,9 +619,9 @@ void AMecha::MoveRight(float val)
 					if (results[i].GetActor()->Tags.Contains(Tags::MoveThrough))
 					{
 						nextLoc = loc + (rightAxis * moveDistance);
-						//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-						//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-						//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+						nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+						nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+						nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 						return;
 					}
@@ -654,6 +654,7 @@ void AMecha::MoveRight(float val)
 				}
 
 				//nextRot.Normalize();
+				
 			}
 			else
 			{
@@ -661,9 +662,9 @@ void AMecha::MoveRight(float val)
 				lastLoc = currentLoc;
 
 				nextLoc = loc + (rightAxis * moveDistance);
-				//nextLoc.X = FMath::RoundToFloat(nextLoc.X);
-				//nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
-				//nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
+				nextLoc.X = FMath::RoundToFloat(nextLoc.X);
+				nextLoc.Y = FMath::RoundToFloat(nextLoc.Y);
+				nextLoc.Z = FMath::RoundToFloat(nextLoc.Z);
 
 				if (!GetWorld()->LineTraceSingleByChannel(moveHit, nextLoc, nextLoc - GetActorUpVector() * maxFallDistance, ECC_WorldStatic, moveParams))
 				{
