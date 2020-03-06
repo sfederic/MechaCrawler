@@ -37,7 +37,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	float openSpeed;
 
-	float openDistance = 100.f;
+	UPROPERTY(EditAnywhere)
+	float openDistance;
 
 	UPROPERTY(EditAnywhere)
 	bool openState;

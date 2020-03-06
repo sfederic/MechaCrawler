@@ -22,7 +22,8 @@ void AShip::BeginPlay()
 	Super::BeginPlay();
 	
 	controller = Cast<APlayerController>(this->GetController());
-	
+	controller->SetInputMode(FInputModeGameAndUI()); //moving from levels in the world map caused the UI to still be in focus and thus needed two clicks for the ship to move. This fixes that
+
 	controller->bShowMouseCursor = true;
 
 	//Init Widgets

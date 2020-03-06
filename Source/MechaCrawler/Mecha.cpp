@@ -874,7 +874,7 @@ void AMecha::RightMousePressed()
 					return;
 				}*/
 
-				if (useActor->Tags.Contains(Tags::Destroy) == false) //Keep this for interactiable actors that can be destroyed and respawned
+				if (useActor->Tags.Contains(Tags::Destroy) == false && useActor->Tags.Contains(Tags::Useable)) //Keep this for interactiable actors that can be destroyed and respawned
 				{
 					IActivate* useable = Cast<IActivate>(useActor);
 					if (useable)
