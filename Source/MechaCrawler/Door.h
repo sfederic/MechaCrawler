@@ -32,6 +32,12 @@ public:
 	virtual UScanData* Scan() override;
 
 	UPROPERTY(EditAnywhere)
+	USoundBase* openSound;
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* closeSound;
+
+	UPROPERTY(EditAnywhere)
 	FVector openDirection;
 
 	UPROPERTY(EditAnywhere)

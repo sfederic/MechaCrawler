@@ -4,6 +4,7 @@
 #include "ConstructBeacon.h"
 #include "GlobalTags.h"
 #include "Components/MeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AConstructBeacon::AConstructBeacon()
 {
@@ -31,6 +32,10 @@ void AConstructBeacon::Use()
 		FindComponentByClass<UMeshComponent>()->SetMaterial(0, activatedMaterial);
 		bActivated = true;
 		useManager->activatedItems.Add(this->activateOrderNumber);
+
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), activateSound, GetActorLocation(), 2.f, 1.6f);
+
+		Tags.Remove(Tags::ScanUse);
 	}
 }
 
@@ -38,4 +43,5 @@ void AConstructBeacon::Rebuild()
 {
 	FindComponentByClass<UMeshComponent>()->SetMaterial(0, originalMaterial);
 	bActivated = false;
+	Tags.Add(Tags::ScanUse);
 }

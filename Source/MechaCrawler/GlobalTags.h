@@ -21,6 +21,7 @@ namespace Tags
 	static const FName Tagged = "Tagged"; //Actors that have had their depth/stencil masks set
 	static const FName Tagable = "Tagable"; //Actor that CAN be tagged
 	static const FName UseableShoot = "UseableShoot"; //For switches that can be shot to activate
+	static const FName ScanUse = "ScanUse"; //Use() for scanner from a distance (like Metroid Prime)
 }
 
 namespace LevelNames

@@ -29,6 +29,9 @@ public:
 	virtual void Rebuild() override;
 
 	UPROPERTY(EditAnywhere)
+	USoundBase* activateSound;
+
+	UPROPERTY(EditAnywhere)
 	UMaterialInterface* activatedMaterial;
 
 	UPROPERTY(EditAnywhere)

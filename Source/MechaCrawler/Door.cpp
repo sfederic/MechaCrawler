@@ -3,6 +3,7 @@
 #include "Door.h"
 #include "Engine/World.h"
 #include "Components/ArrowComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 UArrowComponent* arrow;
 
@@ -55,6 +56,8 @@ void ADoor::Use()
 		nextLoc += openDirection * openDistance;
 		arrow->SetWorldRotation(openDirection.Rotation().GetInverse());
 		openState = true;
+
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), openSound, GetActorLocation());
 	}
 	else if (openState == true && currentLoc == nextLoc)
 	{
@@ -67,6 +70,8 @@ void ADoor::Use()
 		nextLoc -= openDirection * openDistance;
 		arrow->SetWorldRotation(openDirection.Rotation());
 		openState = false;
+
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), closeSound, GetActorLocation());
 	}
 
 

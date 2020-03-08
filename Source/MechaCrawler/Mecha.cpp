@@ -748,6 +748,8 @@ void AMecha::SetScan()
 		UChildActorComponent* childWeapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
 		childWeapon->SetHiddenInGame(false);
 
+		useWidget->RemoveFromViewport();
+
 		//reset zoom in and out
 		camera->FieldOfView = maxFOV;
 	}
@@ -805,7 +807,13 @@ void AMecha::RightMousePressed()
 		if (scanHit.GetActor()->IsA<ADialogueBox>() == false)
 		{
 			GetDialogue(scanHit.GetActor());
-			return;
+			//return;
+		}
+		
+		if(scanHit.GetActor()->Tags.Contains(Tags::ScanUse))
+		{
+			IActivate* activate = Cast<IActivate>(scanHit.GetActor());
+			activate->Use();
 		}
 	}
 
@@ -1794,6 +1802,19 @@ void AMecha::Scan()
 			AActor* actor = scanHit.GetActor();
 			if (actor)
 			{
+				if (actor->Tags.Contains(Tags::ScanUse))
+				{
+					if (!useWidget->IsInViewport())
+					{
+						useWidget->AddToViewport();
+						useWidget->useText = TEXT("Activate");
+					}
+				}
+				else
+				{
+					useWidget->RemoveFromViewport();
+				}
+
 				UScanData* scanData = actor->FindComponentByClass<UScanData>();
 				if (scanData)
 				{
@@ -1830,6 +1851,19 @@ void AMecha::Scan()
 			AActor* actor = scanHit.GetActor();
 			if (actor)
 			{
+				if (actor->Tags.Contains(Tags::ScanUse))
+				{
+					if (!useWidget->IsInViewport())
+					{
+						useWidget->AddToViewport();
+						useWidget->useText = TEXT("Activate");
+					}
+				}
+				else 
+				{
+					useWidget->RemoveFromViewport();
+				}
+
 				UScanData* scanData = actor->FindComponentByClass<UScanData>();
 
 				if (scanData)
