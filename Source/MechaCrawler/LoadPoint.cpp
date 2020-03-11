@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "LoadPoint.h"
+#include "Mecha.h"
 #include "Kismet/GameplayStatics.h"
 #include "LevelSave.h"
 #include "DialogueBox.h"
@@ -8,6 +9,7 @@
 #include "LevelSave.h"
 #include "MapSaveData.h"
 #include "Pickup.h"
+#include "Ship.h"
 #include "GlobalTags.h"
 
 ALoadPoint::ALoadPoint()
@@ -104,6 +106,28 @@ void ALoadPoint::BeginPlay()
 				tagableActors[i]->FindComponentByClass<UMeshComponent>()->SetCustomDepthStencilValue(1);
 				tagableActors[i]->Tags.Add(Tags::Tagged);
 			}
+		}
+	}
+
+
+	//Memories
+	APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	AMecha* player = Cast<AMecha>(playerPawn);
+	if (player)
+	{
+		player->memories.Empty();
+		for (int i = 0; i < load->heldMemories.Num(); i++)
+		{
+			player->memories.Add(load->heldMemories[i]);
+		}
+	}
+	else
+	{
+		AShip* ship = Cast<AShip>(playerPawn);
+		ship->memories.Empty();
+		for (int i = 0; i < load->heldMemories.Num(); i++)
+		{
+			ship->memories.Add(load->heldMemories[i]);
 		}
 	}
 

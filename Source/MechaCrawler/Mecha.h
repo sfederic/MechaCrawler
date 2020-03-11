@@ -15,6 +15,7 @@
 #include "DialogueChoiceWidget.h"
 #include "Pickup.h"
 #include "TagNode.h"
+#include "Memories.h"
 #include "Mecha.generated.h"
 
 UCLASS()
@@ -80,6 +81,9 @@ public:
 	FQuat nextRot;
 
 	FRotator cameraRot;
+
+	UPROPERTY(VisibleAnywhere, Category="Memories")
+	TArray<EMemories> memories;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<EPickupType> pickups;

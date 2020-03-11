@@ -5,11 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
 #include "MapSaveData.h"
+#include "Memories.h"
 #include "LevelSave.generated.h"
 
 /**
- * Test save for dialogue bools
+ * Main save file. Called levelsave just because, holds globals too
  */
+
 UCLASS()
 class MECHACRAWLER_API ULevelSave : public USaveGame
 {
@@ -17,6 +19,11 @@ class MECHACRAWLER_API ULevelSave : public USaveGame
 
 public:
 
+    //Level save data
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TArray<FMapSaveData> levelData; //TMap too much hassle with USTRUCT() for keys
+
+    //Global save data
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TArray<EMemories> heldMemories;
 };

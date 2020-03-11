@@ -10,6 +10,7 @@
 #include "Pickup.h"
 #include "NoteNode.h"
 #include "NoteSaveStruct.h"
+#include "Ship.h"
 #include "GlobalTags.h"
 
 ASavePoint::ASavePoint()
@@ -34,7 +35,8 @@ void ASavePoint::Tick(float DeltaTime)
 void ASavePoint::OnPlayerOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AMecha* player = Cast<AMecha>(OtherActor);
-	if (player)
+	AShip* ship = Cast<AShip>(OtherActor);
+	if (player || ship)
 	{
 		FMapSaveData mapSaveData = {};
 		int levelSaveDataIndex = 0;
@@ -104,6 +106,25 @@ void ASavePoint::OnPlayerOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 			tagSave.actorName = *taggedActors[i]->GetName();
 			tagSave.tagged = true;
 			mapSaveData.actorsToTag.Add(tagSave);
+		}
+
+
+		//Memories
+		save->heldMemories.Empty(); //TODO: Better way to do this
+
+		if (player)
+		{
+			for (int i = 0; i < player->memories.Num(); i++)
+			{
+				save->heldMemories.Add(player->memories[i]);
+			}
+		}
+		else if (ship)
+		{
+			for (int i = 0; i < ship->memories.Num(); i++)
+			{
+				save->heldMemories.Add(ship->memories[i]);
+			}
 		}
 
 

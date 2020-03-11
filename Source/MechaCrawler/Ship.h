@@ -8,6 +8,7 @@
 #include "TextBoxWidget.h"
 #include "NoteNode.h"
 #include "ScanWidget.h"
+#include "Memories.h"
 #include "Ship.generated.h"
 
 //Pawn used to travel world map
@@ -52,6 +53,9 @@ public:
 	FCollisionQueryParams shootParams;
 	class UCameraComponent* camera;
 	class APlayerController* controller;
+
+	UPROPERTY(VisibleAnywhere, Category="Memories")
+	TArray<EMemories> memories;
 
 	//Widgets
 	UPROPERTY(EditAnywhere)

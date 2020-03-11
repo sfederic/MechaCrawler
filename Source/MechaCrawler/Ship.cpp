@@ -28,21 +28,16 @@ void AShip::BeginPlay()
 
 	//Init Widgets
 	levelEntryWidget = CreateWidget<UEnterLevelWidget>(GetWorld(), levelEntryWidgetClass);
-	check(levelEntryWidget);
 
 	textBoxWidget = CreateWidget<UTextBoxWidget>(GetWorld(), textBoxWidgetClass);
-	check(textBoxWidget);
 	
 	noteReturnFocusWidget = CreateWidget<UUserWidget>(GetWorld(), noteReturnFocusWidgetClass);
-	check(noteReturnFocusWidget);
 
 	scanCursorWidget = CreateWidget<UUserWidget>(GetWorld(), scanCursorWidgetClass);
-	check(scanCursorWidget);
 
 	controller->SetMouseCursorWidget(EMouseCursor::Default, scanCursorWidget);
 
 	scanWidget = CreateWidget<UScanWidget>(GetWorld(), scanWidgetClass);
-	check(scanWidget);
 
 	//Init camera
 	camera = FindComponentByClass<UCameraComponent>();

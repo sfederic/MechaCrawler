@@ -804,16 +804,16 @@ void AMecha::RightMousePressed()
 
 	if (scanning && bDialogueClick == false)
 	{
-		if (scanHit.GetActor()->IsA<ADialogueBox>() == false)
-		{
-			GetDialogue(scanHit.GetActor());
-			//return;
-		}
-		
-		if(scanHit.GetActor()->Tags.Contains(Tags::ScanUse))
+		if (scanHit.GetActor()->Tags.Contains(Tags::ScanUse))
 		{
 			IActivate* activate = Cast<IActivate>(scanHit.GetActor());
 			activate->Use();
+		}
+
+		if (scanHit.GetActor()->IsA<ADialogueBox>() == false)
+		{
+			GetDialogue(scanHit.GetActor());
+			return;
 		}
 	}
 
