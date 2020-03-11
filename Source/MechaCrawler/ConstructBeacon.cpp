@@ -31,7 +31,11 @@ void AConstructBeacon::Use()
 	{
 		FindComponentByClass<UMeshComponent>()->SetMaterial(0, activatedMaterial);
 		bActivated = true;
-		useManager->activatedItems.Add(this->activateOrderNumber);
+
+		if (useManager)
+		{
+			useManager->activatedItems.Add(this->activateOrderNumber);
+		}
 
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), activateSound, GetActorLocation(), 2.f, 1.6f);
 
