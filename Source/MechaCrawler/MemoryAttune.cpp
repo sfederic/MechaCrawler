@@ -7,6 +7,7 @@
 #include "GlobalTags.h"
 #include "Runtime/Engine/Public/TimerManager.h"
 #include "GameFramework/RotatingMovementComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 
 AMemoryAttune::AMemoryAttune()
 {
@@ -74,6 +75,7 @@ void AMemoryAttune::Use()
 		bActivated = true;
 		Tags.Add(Tags::Useable);		
 		FindComponentByClass<URotatingMovementComponent>()->RotationRate.Yaw = 3.0f;
+		FindComponentByClass<UParticleSystemComponent>()->Activate();
 	}
 }
 

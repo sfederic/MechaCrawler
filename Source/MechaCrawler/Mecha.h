@@ -149,7 +149,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> shootingWidgetClass;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UUserWidget* shootingWidget;
 
 	UPROPERTY(EditAnywhere)
