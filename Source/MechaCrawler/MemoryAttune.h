@@ -35,4 +35,13 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	EMemories memoryName;
+
+	//Had to be the same as 'Blend' in mat
+	float activateIncrement = 0.1f; 
+	
+	UPROPERTY(EditAnywhere)
+	float activateSpeed;
+
+	UPROPERTY(EditAnywhere)
+	bool bActivated;
 };

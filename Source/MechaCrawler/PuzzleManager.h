@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "PuzzleItem.h"
+#include "LevelSequenceActor.h"
 #include "PuzzleManager.generated.h"
 
 //I guess it's a class for managing puzzle peices that will use Use() and Rebuild() interfaces
@@ -22,8 +23,21 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-	void Activate();
+
+	UFUNCTION()
+	void OnCinematicStop();
+
+	UPROPERTY(EditAnywhere)
+	AActor* useActor;
+
+	UPROPERTY(EditAnywhere)
+	ULevelSequence* puzzleCompleteShot;
+
+	ALevelSequenceActor* sequenceActor;
 
 	UPROPERTY(EditAnywhere)
 	TArray<APuzzleItem*> puzzleItems;
+
+	UPROPERTY(VisibleAnywhere)
+	bool bActivated = false;
 };
