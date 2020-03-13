@@ -4,6 +4,7 @@
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Ship.h"
+#include "Mecha.h"
 
 AOverworldEntrance::AOverworldEntrance()
 {
@@ -28,6 +29,7 @@ void AOverworldEntrance::Tick(float DeltaTime)
 void AOverworldEntrance::LoadLevel(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AShip* playerShip = Cast<AShip>(OtherActor);
+	AMecha* playerMecha = Cast<AMecha>(OtherActor);
 	if(playerShip)
 	{ 
 		playerShip->levelEntryWidget->levelName = this->levelName;
@@ -38,5 +40,17 @@ void AOverworldEntrance::LoadLevel(UPrimitiveComponent* OverlappedComp, AActor* 
 		APlayerController* shipController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 		shipController->SetInputMode(FInputModeUIOnly());
 		shipController->bShowMouseCursor = true;
+	}
+	else if (playerMecha)
+	{
+		playerMecha->levelExitWidget->levelName = this->levelName;
+		playerMecha->levelExitWidget->AddToViewport();
+		playerMecha->canMove = false;
+		//playerMecha->currentLoc = GetActorLocation();
+		//playerMecha->nextLoc = GetActorLocation();
+
+		APlayerController* mechController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		mechController->SetInputMode(FInputModeUIOnly());
+		mechController->bShowMouseCursor = true;
 	}
 }

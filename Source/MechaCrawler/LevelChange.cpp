@@ -38,7 +38,6 @@ void ALevelChange::OnPlayerOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 		if (instance)
 		{
 			UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->StartCameraFade(1.0f, 0.f, 5.0f, FColor::Black);
-			//instance->playerSpawnLocation = this->levelSpawnLocation;
 			instance->levelLoadTag = FName(*UGameplayStatics::GetCurrentLevelName(GetWorld())); //https://wiki.unrealengine.com/String_Conversions:_FString_to_FName,_FString_to_Int32,_Float_to_FString#Converting_FString_to_FNames
 
 			TArray<UUserWidget*> widgetsToRemove;

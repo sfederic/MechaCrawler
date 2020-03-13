@@ -16,6 +16,7 @@
 #include "Pickup.h"
 #include "TagNode.h"
 #include "Memories.h"
+#include "EnterLevelWidget.h"
 #include "Mecha.generated.h"
 
 UCLASS()
@@ -142,6 +143,12 @@ public:
 
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TSubclassOf<UUserWidget> noteReturnFocusWidgetClass;
+
+	UPROPERTY(EditAnywhere, Category = "Widgets")
+	TSubclassOf<UEnterLevelWidget> levelExitWidgetClass;
+
+	UPROPERTY()
+	UEnterLevelWidget* levelExitWidget;
 
 	UPROPERTY()
 	UUserWidget* noteReturnFocusWidget;

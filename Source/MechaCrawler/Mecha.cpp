@@ -70,6 +70,8 @@ void AMecha::BeginPlay()
 	}
 
 	//INIT WIDGETS
+	levelExitWidget = CreateWidget<UEnterLevelWidget>(GetWorld(), levelExitWidgetClass);
+
 	noteReturnFocusWidget = CreateWidget<UUserWidget>(GetWorld(), noteReturnFocusWidgetClass);
 
 	shootingWidget = CreateWidget<UUserWidget>(GetWorld(), shootingWidgetClass);

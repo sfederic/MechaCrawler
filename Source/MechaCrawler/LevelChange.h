@@ -28,14 +28,5 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName levelName;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector levelSpawnLocation;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> levelChangeConfirmWidgetClass;
-
-	UPROPERTY()
-	UUserWidget* levelChangeConfirmWidget;
-
 	class UBoxComponent* box;
 };

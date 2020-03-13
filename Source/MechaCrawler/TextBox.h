@@ -2,6 +2,7 @@
 
 #include "Engine/DataTable.h"
 #include "Engine/Texture2D.h"
+#include "Activate.h"
 #include "TextBox.generated.h"
 
 //Dialogue UI for codec calls. Keep in mind that Uproperty() is needed 
