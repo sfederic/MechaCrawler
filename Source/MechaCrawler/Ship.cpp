@@ -224,7 +224,7 @@ void AShip::GetDialogue(AActor* dialogueActor)
 
 				if (textBoxWidget->textBoxRows.Num() > 0)
 				{
-					textBoxWidget->name = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name;
+					textBoxWidget->name = *GETENUMSTRING("ECharacterNames", textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name);
 					textBoxWidget->scrollIndex = 0;
 					textBoxWidget->text.Empty();
 					textBoxWidget->text.AppendChar(textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text[textBoxWidget->scrollIndex]); //Just get the first char, scroll it in ProgressText()
@@ -245,7 +245,7 @@ void AShip::ProgressText()
 			textBoxWidget->textBoxIndex++;
 			textBoxWidget->bScrollFinished = false;
 
-			textBoxWidget->name = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name;
+			textBoxWidget->name = *GETENUMSTRING("ECharacterNames", textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name);
 			textBoxWidget->scrollIndex = 0;
 			textBoxWidget->text.Empty();
 			textBoxWidget->text.AppendChar(textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text[textBoxWidget->scrollIndex]);
@@ -461,7 +461,7 @@ void AShip::Scan()
 				if (scanData)
 				{
 					scanWidget->scanEntry = scanData->scanText.ToString();
-					scanWidget->scanNameEntry = scanData->scanName;
+					scanWidget->scanNameEntry = scanData->scanName.ToString();
 
 					if (previousScanHit.GetActor() == nullptr || previousScanHit.GetActor() != scanHit.GetActor())
 					{
@@ -474,7 +474,7 @@ void AShip::Scan()
 					if (actor->FindComponentByClass<UDialogueComponent>())
 					{
 						scanWidget->bHasDialouge = true;
-						scanWidget->dialogueName = scanData->dialogueName;
+						scanWidget->dialogueName = *GETENUMSTRING("ECharacterNames", scanData->dialogueName);
 					}
 				}
 				else
@@ -498,7 +498,7 @@ void AShip::Scan()
 				if (scanData)
 				{
 					scanWidget->scanEntry = scanData->scanText.ToString();
-					scanWidget->scanNameEntry = scanData->scanName;
+					scanWidget->scanNameEntry = scanData->scanName.ToString();
 
 					if (previousScanHit.GetActor() == nullptr || previousScanHit.GetActor() != scanHit.GetActor())
 					{
@@ -510,7 +510,7 @@ void AShip::Scan()
 					if (actor->FindComponentByClass<UDialogueComponent>())
 					{
 						scanWidget->bHasDialouge = true;
-						scanWidget->dialogueName = scanData->dialogueName;
+						scanWidget->dialogueName = *GETENUMSTRING("ECharacterNames", scanData->dialogueName);
 					}
 
 				}

@@ -59,6 +59,7 @@ public:
 	void UseObject();
 	void ChangeWeapon();
 	void AddDestructibleToRebuildManager(AActor* hitActor);
+	void TorchOnOff();
 
 	UFUNCTION(BlueprintCallable)
 	void ProgressText();

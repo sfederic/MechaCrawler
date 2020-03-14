@@ -7,6 +7,16 @@
 
 //Dialogue UI for codec calls. Keep in mind that Uproperty() is needed 
 
+UENUM()
+enum class ECharacterNames : uint8
+{
+	None UMETA(DisplayName="None"),
+	Aden UMETA(DisplayName="Aden"),
+	Enyel UMETA(DisplayName="Enyel"),
+	Gavol UMETA(DisplayName="Gavol"),
+	NO_COMM_ID UMETA(DisplayName="NO_COMM_ID"),
+};
+
 USTRUCT(BlueprintType)
 struct FTextBox : public FTableRowBase
 {
@@ -16,7 +26,7 @@ struct FTextBox : public FTableRowBase
 	FString text;
 
 	UPROPERTY(EditAnywhere)
-	FString name;
+	ECharacterNames name;
 
 	UPROPERTY(EditAnywhere)
 	UTexture2D* image;

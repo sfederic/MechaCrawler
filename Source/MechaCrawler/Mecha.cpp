@@ -32,6 +32,7 @@
 #include "Pickup.h"
 #include "Components/DecalComponent.h"
 #include "PuzzleItem.h"
+#include "Components/SpotLightComponent.h" 
 
 AMecha::AMecha()
 {
@@ -47,6 +48,8 @@ void AMecha::BeginPlay()
 	Super::BeginPlay();
 
 	initialMoveSpeed = moveSpeed;
+
+	FindComponentByClass<USpotLightComponent>()->SetHiddenInGame(true);
 
 	//Spawn Rebuild Manager
 	//instancedRebuildManager = GetWorld()->SpawnActor<ARebuildManager>();
@@ -71,6 +74,7 @@ void AMecha::BeginPlay()
 
 	//INIT WIDGETS
 	levelExitWidget = CreateWidget<UEnterLevelWidget>(GetWorld(), levelExitWidgetClass);
+
 
 	noteReturnFocusWidget = CreateWidget<UUserWidget>(GetWorld(), noteReturnFocusWidgetClass);
 
@@ -360,6 +364,7 @@ void AMecha::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAction("SwitchWeapon", EInputEvent::IE_Pressed, this, &AMecha::ChangeWeapon);
 	InputComponent->BindAction("DashForward", EInputEvent::IE_Pressed, this, &AMecha::DashForward);
 	InputComponent->BindAction("Tag", EInputEvent::IE_Pressed, this, &AMecha::TagActor);
+	InputComponent->BindAction("Torch", EInputEvent::IE_Pressed, this, &AMecha::TorchOnOff);
 }
 
 void AMecha::MoveForward(float val)
@@ -1666,7 +1671,7 @@ void AMecha::ProgressText()
 						{
 							textBoxWidget->bScrollFinished = false;
 
-							textBoxWidget->name = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name;
+							textBoxWidget->name = *GETENUMSTRING("ECharacterNames", textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name);
 							textBoxWidget->scrollIndex = 0;
 							textBoxWidget->text.Empty();
 							textBoxWidget->text.AppendChar(textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text[textBoxWidget->scrollIndex]);
@@ -1684,7 +1689,7 @@ void AMecha::ProgressText()
 						{
 							textBoxWidget->bScrollFinished = false;
 
-							textBoxWidget->name = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name;
+							textBoxWidget->name = *GETENUMSTRING("ECharacterNames", textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name);
 							textBoxWidget->scrollIndex = 0;
 							textBoxWidget->text.Empty();
 							textBoxWidget->text.AppendChar(textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text[textBoxWidget->scrollIndex]);
@@ -1700,7 +1705,7 @@ void AMecha::ProgressText()
 					{
 						textBoxWidget->bScrollFinished = false;
 
-						textBoxWidget->name = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name;
+						textBoxWidget->name = *GETENUMSTRING("ECharacterNames", textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name);
 						textBoxWidget->scrollIndex = 0;
 						textBoxWidget->text.Empty();
 						textBoxWidget->text.AppendChar(textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text[textBoxWidget->scrollIndex]);
@@ -1821,7 +1826,7 @@ void AMecha::Scan()
 				if (scanData)
 				{
 					scanWidget->scanEntry = scanData->scanText.ToString();
-					scanWidget->scanNameEntry = scanData->scanName;
+					scanWidget->scanNameEntry = scanData->scanName.ToString();
 
 					if (previousScanHit.GetActor() == nullptr || previousScanHit.GetActor() != scanHit.GetActor())
 					{
@@ -1834,7 +1839,7 @@ void AMecha::Scan()
 					if (actor->FindComponentByClass<UDialogueComponent>())
 					{
 						scanWidget->bHasDialouge = true;
-						scanWidget->dialogueName = scanData->dialogueName;
+						scanWidget->dialogueName = *GETENUMSTRING("ECharacterNames", scanData->dialogueName);
 					}
 				}
 				else
@@ -1871,7 +1876,7 @@ void AMecha::Scan()
 				if (scanData)
 				{
 					scanWidget->scanEntry = scanData->scanText.ToString();
-					scanWidget->scanNameEntry = scanData->scanName;
+					scanWidget->scanNameEntry = scanData->scanName.ToString();
 
 					if (previousScanHit.GetActor() == nullptr || previousScanHit.GetActor() != scanHit.GetActor())
 					{
@@ -1883,7 +1888,7 @@ void AMecha::Scan()
 					if (actor->FindComponentByClass<UDialogueComponent>())
 					{
 						scanWidget->bHasDialouge = true;
-						scanWidget->dialogueName = scanData->dialogueName;
+						scanWidget->dialogueName = *GETENUMSTRING("ECharacterNames", scanData->dialogueName);
 					}
 				
 				}
@@ -1942,7 +1947,7 @@ void AMecha::GetDialogue(AActor* dialogueActor)
 
 				if (textBoxWidget->textBoxRows.Num() > 0)
 				{
-					textBoxWidget->name = textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name;
+					textBoxWidget->name = *GETENUMSTRING("ECharacterNames", textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->name);
 					textBoxWidget->scrollIndex = 0;
 					textBoxWidget->text.Empty();
 					textBoxWidget->text.AppendChar(textBoxWidget->textBoxRows[textBoxWidget->textBoxIndex]->text[textBoxWidget->scrollIndex]); //Just get the first char, scroll it in ProgressText()
@@ -2055,5 +2060,20 @@ void AMecha::AddDestructibleToRebuildManager(AActor* hitActor)
 				rebuildActor->SetLifeSpan(2.0f);
 			}
 		}
+	}
+}
+
+void AMecha::TorchOnOff()
+{
+	USpotLightComponent* torch = FindComponentByClass<USpotLightComponent>();
+	if (!torch->bHiddenInGame)
+	{
+		torch->SetHiddenInGame(true);
+		UGameplayStatics::PlaySound2D(GetWorld(), soundZoomIn);
+	}
+	else if (torch->bHiddenInGame)
+	{
+		torch->SetHiddenInGame(false);
+		UGameplayStatics::PlaySound2D(GetWorld(), soundZoomOut);
 	}
 }

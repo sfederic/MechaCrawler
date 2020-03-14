@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "TextBox.h"
 #include "ScanData.generated.h"
 
 
@@ -25,8 +26,8 @@ public:
 	FText scanText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString scanName;
+	FText scanName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString dialogueName;
+	ECharacterNames dialogueName;
 };
