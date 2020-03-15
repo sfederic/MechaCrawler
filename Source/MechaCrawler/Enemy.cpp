@@ -27,3 +27,8 @@ void AEnemy::DropLoot()
 {
 
 }
+
+void AEnemy::ActivateHitEffect()
+{
+
+}

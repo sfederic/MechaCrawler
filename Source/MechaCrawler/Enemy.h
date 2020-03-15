@@ -21,7 +21,14 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void DropLoot();
+	virtual void ActivateHitEffect();
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> loot;
+
+	bool bIsHit = false;
+	bool bCanBeHit = true;
+
+	UPROPERTY(EditAnywhere)
+	int health;
 };

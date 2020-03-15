@@ -75,3 +75,16 @@ void ARebuildManager::RebuildTimers()
 		}
 	}
 }
+
+void ARebuildManager::ClearAll()
+{
+	rebuildActors.Empty();
+	rebuildActorFadeMaterials.Empty();
+	rebuildActorActivateFadeMaterials.Empty();
+	normalRebuildActors.Empty();
+	rebuildActorsActivate.Empty();
+	rebuildTimers.Empty();
+	rebuildActivateTimers.Empty();
+	movingGridActors.Empty();
+	pushableActors.Empty();
+}

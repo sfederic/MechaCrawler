@@ -36,6 +36,7 @@ void ARebuildSwitch::BeginPlay()
 	rebuildSwitchPlayer = Cast<AMecha>(rebuildSwitchPlayerPawn);
 
 	paramInstance = GetWorld()->GetParameterCollectionInstance(outlineParams);
+	paramInstance->SetVectorParameterValue("StartingPosition", GetActorLocation());
 }
 
 void ARebuildSwitch::Tick(float DeltaTime)

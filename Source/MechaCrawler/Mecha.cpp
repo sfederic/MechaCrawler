@@ -1091,6 +1091,15 @@ void AMecha::LeftMousePressed()
 				decal->SetFadeOut(0.35f, 0.25f, true);
 
 
+				if (shotEnemy->IsA<AEnemy>())
+				{
+					AEnemy* hitEnemy = Cast<AEnemy>(shotEnemy);
+					if (hitEnemy->bCanBeHit)
+					{
+						hitEnemy->ActivateHitEffect();
+					}
+				}
+
 				//For actors that can be used on shooting them (like Zelda's arrow switches)
 				if (shotEnemy->Tags.Contains(Tags::UseableShoot))
 				{
@@ -1119,6 +1128,7 @@ void AMecha::LeftMousePressed()
 							if (enemyCast)
 							{
 								enemyCast->DropLoot();
+								enemyCast->ActivateHitEffect();
 							}
 
 							//shotEnemy->Destroy();
