@@ -17,7 +17,7 @@
 ARotatingBoss::ARotatingBoss()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	Tags.Add(Tags::CantDestroy);
+	Tags.Add(Tags::CantMove);
 }
 
 void ARotatingBoss::BeginPlay()
@@ -55,6 +55,11 @@ void ARotatingBoss::Tick(float DeltaTime)
 			rotatingComponent->RotationRate.Yaw = FMath::RandRange(-720.f, 720.f);
 			rotatingComponent->RotationRate.Roll = FMath::RandRange(-720.f, 720.f);
 			rotatingComponent->RotationRate.Pitch = FMath::RandRange(-720.f, 720.f);
+			break;
+		case 4:
+			rotatingComponent->RotationRate.Yaw = 0.f;
+			rotatingComponent->RotationRate.Roll = 0.f;
+			rotatingComponent->RotationRate.Pitch = 0.f;
 			break;
 		}
 	}
@@ -97,7 +102,7 @@ void ARotatingBoss::Tick(float DeltaTime)
 			}
 		}
 	}
-	else if (bossStage >= 3)
+	else if (bossStage == 3)
 	{
 		bCanBeHit = true;
 	}
@@ -140,6 +145,8 @@ void ARotatingBoss::ActivateHitEffect()
 	}
 	else if (bossStage >= 3)
 	{
+		bossStage++;
+		spinTimer = spinTimerMax;
 		FindComponentByClass<UStaticMeshComponent>()->SetSimulatePhysics(true);
 		bCanBeHit = false;
 		FTimerHandle timerHandle;
@@ -191,6 +198,9 @@ void ARotatingBoss::SpawnNewBody()
 
 void ARotatingBoss::BossDeath()
 {
+	AMecha* player = Cast<AMecha>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	player->instancedRebuildManager->ClearAll();
+
 	//Open level door
 	doorToOpen->Destroy();
 

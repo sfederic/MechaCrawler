@@ -8,6 +8,8 @@
 #include "Runtime/Engine/Public/TimerManager.h"
 #include "GameFramework/RotatingMovementComponent.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "MainGameInstance.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 
 AMemoryAttune::AMemoryAttune()
 {
@@ -63,10 +65,16 @@ void AMemoryAttune::Use()
 		attuneWidget->AddToViewport();
 
 		FTimerHandle timerHandle;
-		GetWorldTimerManager().SetTimer(timerHandle, this, &AMemoryAttune::UnpauseLevelSong, 6.0f, false);
+		if (bEndLevelOnTouch == false)
+		{
+			GetWorldTimerManager().SetTimer(timerHandle, this, &AMemoryAttune::UnpauseLevelSong, 6.0f, false);
+		} 
+		else if (bEndLevelOnTouch == true)
+		{
+			GetWorldTimerManager().SetTimer(timerHandle, this, &AMemoryAttune::ExitLevel, 6.0f, false);
+		}
 
 		UE_LOG(LogTemp, Warning, TEXT("Name: %s"), *GETENUMSTRING("EMemories", memoryName));
-
 		Tags.Remove(Tags::Useable);
 
 	}
@@ -87,5 +95,25 @@ void AMemoryAttune::UnpauseLevelSong()
 	{
 		ALevelAudio* audio = Cast<ALevelAudio>(song);
 		audio->song->FadeIn(4.0f, 1.0f);
+	}
+}
+
+void AMemoryAttune::ExitLevel()
+{
+	//Just copy and pasted from ALevelChange instead of OverWorldEntrace widget. Don't have to deal with menu 'Yes/No' then
+	UMainGameInstance* instance = Cast<UMainGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	if (instance)
+	{
+		UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->StartCameraFade(1.0f, 0.f, 5.0f, FColor::Black);
+		instance->levelLoadTag = FName(*UGameplayStatics::GetCurrentLevelName(GetWorld())); //https://wiki.unrealengine.com/String_Conversions:_FString_to_FName,_FString_to_Int32,_Float_to_FString#Converting_FString_to_FNames
+
+		TArray<UUserWidget*> widgetsToRemove;
+		UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), widgetsToRemove, UUserWidget::StaticClass());
+		for (UUserWidget* widget : widgetsToRemove)
+		{
+			widget->RemoveFromViewport();
+		}
+
+		UGameplayStatics::OpenLevel(GetWorld(), levelToExitToName);
 	}
 }

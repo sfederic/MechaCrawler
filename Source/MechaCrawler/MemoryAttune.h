@@ -23,6 +23,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void Use() override;
 	void UnpauseLevelSong();
+	void ExitLevel();
+
+	UPROPERTY(EditAnywhere)
+	FName levelToExitToName;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> attuneWidgetClass;
@@ -44,4 +48,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	bool bActivated;
+
+	UPROPERTY(EditAnywhere)
+	bool bEndLevelOnTouch;
 };

@@ -75,6 +75,8 @@ void AMecha::BeginPlay()
 	//INIT WIDGETS
 	levelExitWidget = CreateWidget<UEnterLevelWidget>(GetWorld(), levelExitWidgetClass);
 
+	salvagePointsWidget = CreateWidget<USalvagePointPopupWidget>(GetWorld(), salvagePointsWidgetClass);
+	salvagePointsWidget->AddToViewport();
 
 	noteReturnFocusWidget = CreateWidget<UUserWidget>(GetWorld(), noteReturnFocusWidgetClass);
 
@@ -153,6 +155,7 @@ void AMecha::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	shootCooldownTimer += FApp::GetDeltaTime();
+	salvagePointsWidget->currentSalvagePoints = salvagePoints;
 
 	Scan();
 	//TODO: Just testing to get scan name as runtime and not pause. Decide on one or the other
@@ -835,9 +838,9 @@ void AMecha::RightMousePressed()
 			textBoxWidget->RemoveFromViewport();
 
 			//if (textBoxWidget->bScrollFinished)
-			{
+			//{
 				//ProgressText();
-			}
+			//}
 
 			return;
 		}
@@ -869,26 +872,6 @@ void AMecha::RightMousePressed()
 					return;
 				}
 
-				//TODO: Cleanup
-				/*UDialogueComponent* dialogueComponent = useActor->FindComponentByClass<UDialogueComponent>();
-				if (dialogueComponent && textBoxWidget->IsInViewport() == false)
-				{
-					bDialogueClick = true;
-
-					FString context;
-					dialogueComponent->mainTextBoxTable->GetAllRows<FTextBox>(context, textBoxRows);
-					textBoxIndex = 0;
-					if (textBoxRows.Num() > 0)
-					{
-						textBoxWidget->name = textBoxRows[textBoxIndex]->name;
-						textBoxWidget->text = textBoxRows[textBoxIndex]->text;
-						textBoxWidget->image = textBoxRows[textBoxIndex]->image;
-						textBoxWidget->AddToViewport();
-					}
-
-					return;
-				}*/
-
 				if (useActor->Tags.Contains(Tags::Destroy) == false && useActor->Tags.Contains(Tags::Useable)) //Keep this for interactiable actors that can be destroyed and respawned
 				{
 					IActivate* useable = Cast<IActivate>(useActor);
@@ -900,11 +883,19 @@ void AMecha::RightMousePressed()
 
 				if (useActor->Tags.Contains(Tags::Pickup))
 				{
+					UGameplayStatics::PlaySound2D(GetWorld(), soundNote, 1.0f, 2.0f);
+
 					//TODO: Add to some invecntory and a particle effect
 					//useActor->Destroy();
 					useActor->SetActorHiddenInGame(true);
 					useActor->SetActorEnableCollision(false);
-					//useActor->SetActorTickEnabled(false);
+					useActor->SetActorTickEnabled(false);
+
+					if (useActor->IsA<AEnemy>())
+					{
+						AEnemy* enemy = Cast<AEnemy>(useActor);
+						this->salvagePoints += enemy->salvageValue;
+					}
 
 					if (useActor->IsA<APickup>())
 					{
@@ -986,282 +977,161 @@ void AMecha::LeftMousePressed()
 		return;
 	}
 
-	//if (val)
+	if(!GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(), GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_WorldStatic))
 	{
-		//TODO: put cam shake into weapon blueprint
-		//UGameplayStatics::PlayWorldCameraShake(GetWorld(), cameraShake, FVector(0.f), 500.f, 1.f); 
+		UChildActorComponent* weapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
+		UWeaponData* weaponData;
 
-		/*UChildActorComponent* iceWeapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
-		if (iceWeapon)
+		weaponData = weapon->GetChildActor()->FindComponentByClass<UWeaponData>();
+
+		shootCooldownTimer = 0.f;
+
+		//Beam particle 
+		USceneComponent* weaponLoc = Cast<USceneComponent>(weapons[currentWeaponIndex]); //This actually worked. Where did it get the component info from? Casting is fucking magic
+		beamShootParticle = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), beamShootParticleTemplate, weaponLoc->GetComponentLocation());
+		beamShootParticle->SetBeamSourcePoint(0, weapons[currentWeaponIndex]->GetOwner()->GetActorLocation(), 0);
+		beamShootParticle->SetBeamTargetPoint(0, weapons[currentWeaponIndex]->GetOwner()->GetActorLocation() + (camera->GetForwardVector() * attackDistance), 0);
+
+		UGameplayStatics::PlayWorldCameraShake(GetWorld(), weaponData->camShake, GetActorLocation(), 500.f, 1.f);
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), weaponData->shootSound, GetActorLocation());
+
+	}
+	else if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(), GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_WorldStatic)) 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Shot Actor: %s\n"), *shootHit.GetActor()->GetName());
+
+		AActor* shotEnemy = shootHit.GetActor();
+
+		UChildActorComponent* weapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
+		UWeaponData* weaponData;
+
+
+		weaponData = weapon->GetChildActor()->FindComponentByClass<UWeaponData>();
+
+		//TODO: Decide on weapon cooldown shooting
+		//if (shootCooldownTimer > weaponData->cooldown)
 		{
-			UWeaponData* weaponData = iceWeapon->GetChildActor()->FindComponentByClass<UWeaponData>();
-			if (weaponData)
-			{
-				if (weaponData->ice)
-				{
-					if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
-						GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_GameTraceChannel1))
-					{
-						if (shootHit.GetActor()->Tags.Contains(Tags::Water))
-						{
-							FTransform transform = {};
-							transform.SetLocation(shootHit.GetActor()->GetActorLocation());
-							transform.SetScale3D(shootHit.GetActor()->GetActorScale3D());
-							transform.SetRotation(FQuat(shootHit.GetActor()->GetActorRotation()));
-
-							if (iceBlockClass)
-							{
-								TArray<AActor*> existingIceBlocks;
-								UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld(), ADestructibleActor::StaticClass(), Tags::Ice, existingIceBlocks);
-								for (int i = 0; i < existingIceBlocks.Num(); i++)
-								{
-									if (existingIceBlocks[i]->GetActorLocation().Equals(transform.GetLocation()))
-									{
-										UE_LOG(LogTemp, Warning, TEXT("Create ice block conflicting with existing location"));
-										return;
-									}
-								}
-
-								instancedRebuildManager->normalRebuildActors.Add(shootHit.GetActor());
-								shootHit.GetActor()->SetActorHiddenInGame(true);
-								shootHit.GetActor()->SetActorEnableCollision(false);
-
-								ADestructibleActor* iceBlock = GetWorld()->SpawnActor<ADestructibleActor>(iceBlockClass, transform);
-								//iceBlock->SetActorScale3D(shootHit.GetActor()->GetActorScale3D);
-
-								iceBlock->Tags.Add(Tags::DontRebuild);
-								return;
-							}
-						}
-					}
-				}
-			}
-		}*/
-
-		if(!GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
-			GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_WorldStatic))
-		{
-			UChildActorComponent* weapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
-			UWeaponData* weaponData;
-
-			weaponData = weapon->GetChildActor()->FindComponentByClass<UWeaponData>();
-
 			shootCooldownTimer = 0.f;
 
 			//Beam particle 
 			USceneComponent* weaponLoc = Cast<USceneComponent>(weapons[currentWeaponIndex]); //This actually worked. Where did it get the component info from? Casting is fucking magic
 			beamShootParticle = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), beamShootParticleTemplate, weaponLoc->GetComponentLocation());
 			beamShootParticle->SetBeamSourcePoint(0, weapons[currentWeaponIndex]->GetOwner()->GetActorLocation(), 0);
-			beamShootParticle->SetBeamTargetPoint(0, weapons[currentWeaponIndex]->GetOwner()->GetActorLocation() + (camera->GetForwardVector() * attackDistance), 0);
+			beamShootParticle->SetBeamTargetPoint(0, shootHit.ImpactPoint, 0);
 
 			UGameplayStatics::PlayWorldCameraShake(GetWorld(), weaponData->camShake, GetActorLocation(), 500.f, 1.f);
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), weaponData->shootSound, GetActorLocation());
 
-		}
-		else if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(),
-			GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_WorldStatic)) 
-		
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Shot Actor: %s\n"), *shootHit.GetActor()->GetName());
 
-			AActor* shotEnemy = shootHit.GetActor();
+			UDecalComponent* decal = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), weaponData->decal, FVector(40.f), shootHit.ImpactPoint, shootHit.ImpactNormal.Rotation(), 0.f);
+			decal->SetFadeOut(0.35f, 0.25f, true);
 
-			UChildActorComponent* weapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
-			UWeaponData* weaponData;
-
-
-			weaponData = weapon->GetChildActor()->FindComponentByClass<UWeaponData>();
-
-			//TODO: Decide on weapon cooldown shooting
-			//if (shootCooldownTimer > weaponData->cooldown)
+			//ENEMY
+			if (shotEnemy->IsA<AEnemy>())
 			{
-				shootCooldownTimer = 0.f;
-
-				//Beam particle 
-				USceneComponent* weaponLoc = Cast<USceneComponent>(weapons[currentWeaponIndex]); //This actually worked. Where did it get the component info from? Casting is fucking magic
-				beamShootParticle = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), beamShootParticleTemplate, weaponLoc->GetComponentLocation());
-				beamShootParticle->SetBeamSourcePoint(0, weapons[currentWeaponIndex]->GetOwner()->GetActorLocation(), 0);
-				beamShootParticle->SetBeamTargetPoint(0, shootHit.ImpactPoint, 0);
-
-				UGameplayStatics::PlayWorldCameraShake(GetWorld(), weaponData->camShake, GetActorLocation(), 500.f, 1.f);
-				UGameplayStatics::PlaySoundAtLocation(GetWorld(), weaponData->shootSound, GetActorLocation());
-
-
-				UDecalComponent* decal = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), weaponData->decal, FVector(40.f), shootHit.ImpactPoint, shootHit.ImpactNormal.Rotation(), 0.f);
-				decal->SetFadeOut(0.35f, 0.25f, true);
-
-
-				if (shotEnemy->IsA<AEnemy>())
+				AEnemy* hitEnemy = Cast<AEnemy>(shotEnemy);
+				if (hitEnemy->bCanBeHit)
 				{
-					AEnemy* hitEnemy = Cast<AEnemy>(shotEnemy);
-					if (hitEnemy->bCanBeHit)
-					{
-						hitEnemy->ActivateHitEffect();
-					}
-				}
-
-				//For actors that can be used on shooting them (like Zelda's arrow switches)
-				if (shotEnemy->Tags.Contains(Tags::UseableShoot))
-				{
-					IActivate* activate = Cast<IActivate>(shotEnemy);
-					if (activate)
-					{
-						activate->Use();
-					}
-				}
-
-
-				if (shotEnemy->Tags.Contains(Tags::Enemy) && shotEnemy->Tags.Contains(Tags::Destroy) == false)
-				{
-					UDestructibleComponent* enemyDc = shotEnemy->FindComponentByClass<UDestructibleComponent>();
-					if (enemyDc && enemyDc->GetOwner()->Tags.Contains(Tags::CantDestroy) == false)
-					{
-						enemyDc->ApplyDamage(destructibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
-						shotEnemy->SetLifeSpan(3.0);
-						shotEnemy->Tags.Add(Tags::Destroy);
-					}
-					else
-					{
-						if (shotEnemy->Tags.Contains(Tags::Destroy) == false)
-						{
-							AEnemy* enemyCast = Cast<AEnemy>(shotEnemy);
-							if (enemyCast)
-							{
-								enemyCast->DropLoot();
-								enemyCast->ActivateHitEffect();
-							}
-
-							//shotEnemy->Destroy();
-							shotEnemy->FindComponentByClass<UMeshComponent>()->SetSimulatePhysics(true);
-							shotEnemy->FindComponentByClass<UMeshComponent>()->AddImpulse(shootHit.ImpactNormal * 50000.f);
-							shotEnemy->SetActorTickEnabled(false);
-							if (shotEnemy->FindComponentByClass<UBoxComponent>())
-							{
-								shotEnemy->FindComponentByClass<UBoxComponent>()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-							}
-							shotEnemy->Tags.Add(Tags::Destroy);
-						}
-					}
-
-					return;
+					hitEnemy->ActivateHitEffect();
 				}
 			}
 
-			//MESH SLICING (why did I add this to the game...)
-			UProceduralMeshComponent* cutMesh = shootHit.GetActor()->FindComponentByClass<UProceduralMeshComponent>();
-			if (cutMesh)
+			//For actors that can be used on shooting them (like Zelda's arrow switches)
+			if (shotEnemy->Tags.Contains(Tags::UseableShoot))
 			{
-				cutMesh->GetOwner()->Tags.Add(Tags::Destroy);
-				cutMesh->SetSimulatePhysics(true);
+				IActivate* activate = Cast<IActivate>(shotEnemy);
+				if (activate)
+				{
+					activate->Use();
+				}
+			}
+		}
 
-				UProceduralMeshComponent* newHalfCutMesh;
-				UKismetProceduralMeshLibrary::SliceProceduralMesh(cutMesh, shootHit.ImpactPoint, shootHit.ImpactPoint,
-					true, newHalfCutMesh, EProcMeshSliceCapOption::CreateNewSectionForCap, destroyableBaseMaterial); //TODO: Change material
-				newHalfCutMesh->SetSimulatePhysics(true);
-				newHalfCutMesh->AddImpulse(FVector(10000.f));
-				newHalfCutMesh->GetOwner()->Tags.Add(Tags::Destroy);
+		return;
+	}
 
+	//MESH SLICING (why did I add this to the game...)
+	UProceduralMeshComponent* cutMesh = shootHit.GetActor()->FindComponentByClass<UProceduralMeshComponent>();
+	if (cutMesh)
+	{
+		cutMesh->GetOwner()->Tags.Add(Tags::Destroy);
+		cutMesh->SetSimulatePhysics(true);
+
+		UProceduralMeshComponent* newHalfCutMesh;
+		UKismetProceduralMeshLibrary::SliceProceduralMesh(cutMesh, shootHit.ImpactPoint, shootHit.ImpactPoint,
+			true, newHalfCutMesh, EProcMeshSliceCapOption::CreateNewSectionForCap, destroyableBaseMaterial); //TODO: Change material
+		newHalfCutMesh->SetSimulatePhysics(true);
+		newHalfCutMesh->AddImpulse(FVector(10000.f));
+		newHalfCutMesh->GetOwner()->Tags.Add(Tags::Destroy);
+
+		return;
+	}
+		
+	if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(), GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_Destructible))
+	{
+		if (!shootHit.GetActor())
+		{
+			return; //Works as a fallthrough for the rebuild mechanic.
+		}
+
+		UDestructibleComponent* dc = Cast<UDestructibleComponent>(shootHit.GetComponent());
+
+		//For destructible activators
+		if (dc)
+		{
+			if (dc->GetOwner()->IsA<ADestructibleActivate>())
+			{
 				return;
 			}
 		}
-		
-		if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(), GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_Destructible))
+
+		ADestructibleActor* rebuildActor = nullptr;
+		if (dc)
 		{
-			if (!shootHit.GetActor())
-			{
-				return; //Works as a fallthrough for the rebuild mechanic.
-			}
-
-
-			//Old tag method
-			/*if (shootHit.GetActor()->Tags.Contains(Tags::Destroy))
-			{
-				UDestructibleComponent* dc = Cast<UDestructibleComponent>(shootHit.GetComponent());
-
-				dc->ApplyDamage(destrutibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
-				return;
-			}*/
-
-			UDestructibleComponent* dc = Cast<UDestructibleComponent>(shootHit.GetComponent());
-
-			//For destructible activators
-			if (dc)
-			{
-				if (dc->GetOwner()->IsA<ADestructibleActivate>())
-				{
-					return;
-				}
-			}
-
-			ADestructibleActor* rebuildActor = nullptr;
-			if (dc)
-			{
-				rebuildActor = Cast<ADestructibleActor>(dc->GetOwner());
-			}
+			rebuildActor = Cast<ADestructibleActor>(dc->GetOwner());
+		}
 			
-			if (dc)
+		if (dc)
+		{
+			UChildActorComponent* weapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
+			if (weapon)
 			{
-				UChildActorComponent* weapon = Cast<UChildActorComponent>(weapons[currentWeaponIndex]);
-				if (weapon)
+				UWeaponData* weaponData = weapon->GetChildActor()->FindComponentByClass<UWeaponData>();
+				if (weaponData)
 				{
-					UWeaponData* weaponData = weapon->GetChildActor()->FindComponentByClass<UWeaponData>();
-					if (weaponData)
+					if (weaponData->explosive)
 					{
-						if (weaponData->explosive)
+						if (dc->GetOwner()->Tags.Contains(Tags::Destroy) == false)
 						{
-							if (dc->GetOwner()->Tags.Contains(Tags::Destroy) == false)
-							{
-								UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), explosionParticle, shootHit.ImpactPoint);
-							}
-						}
-
-						if (weaponData->weaponParticle)
-						{
-							UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), weaponData->weaponParticle, shootHit.ImpactPoint);
-						}
-					}
-				}
-
-				dc->ApplyDamage(destructibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);	
-
-				if (dc->GetOwner()->IsA<APuzzleItem>())
-				{
-					APuzzleItem* puzzleItem = Cast<APuzzleItem>(dc->GetOwner());
-					puzzleItem->bActivated = true;
-				}
-
-				//if (instancedRebuildManager && dc->GetOwner()->Tags.Contains(Tags::Destroy) == false)
-				{
-					/*if (rebuildActor && rebuildActor->IsA<ADestructibleActor>())
-					{
-						if (rebuildActor->Tags.Contains(Tags::DontRebuild) == false)
-						{
-							instancedRebuildManager->rebuildActors.Add(rebuildActor);
-
-							instancedRebuildManager->rebuildActorFadeMaterials.Add(rebuildActor->FindComponentByClass<UDestructibleComponent>()->GetMaterial(0));
-						}
-						else
-						{
-							rebuildActor->SetLifeSpan(2.0f);
+							UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), explosionParticle, shootHit.ImpactPoint);
 						}
 					}
 
-					instancedRebuildManager->rebuildTimers.Add(0.f);*/
-
-					AddDestructibleToRebuildManager(dc->GetOwner());
-
-					//FOR DESTRUCTIBLE SWITCHES
-					if (dc->GetOwner()->IsA<ADestructibleSwitch>())
+					if (weaponData->weaponParticle)
 					{
-						ADestructibleSwitch* destSwitch = Cast<ADestructibleSwitch>(dc->GetOwner());
-						if (destSwitch)
-						{
-							destSwitch->bDestroyed = true;
-						}
+						UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), weaponData->weaponParticle, shootHit.ImpactPoint);
 					}
 				}
+			}
 
-				//dc->GetOwner()->Tags.Add(Tags::Destroy);
+			dc->ApplyDamage(destructibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);	
+
+			if (dc->GetOwner()->IsA<APuzzleItem>())
+			{
+				APuzzleItem* puzzleItem = Cast<APuzzleItem>(dc->GetOwner());
+				puzzleItem->bActivated = true;
+			}
+
+			AddDestructibleToRebuildManager(dc->GetOwner());
+
+			//FOR DESTRUCTIBLE SWITCHES
+			if (dc->GetOwner()->IsA<ADestructibleSwitch>())
+			{
+				ADestructibleSwitch* destSwitch = Cast<ADestructibleSwitch>(dc->GetOwner());
+				if (destSwitch)
+				{
+					destSwitch->bDestroyed = true;
+				}
 			}
 		}
 	}

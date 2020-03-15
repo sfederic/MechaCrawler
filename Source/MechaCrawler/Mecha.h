@@ -17,6 +17,7 @@
 #include "TagNode.h"
 #include "Memories.h"
 #include "EnterLevelWidget.h"
+#include "SalvagePointPopupWidget.h"
 #include "Mecha.generated.h"
 
 UCLASS()
@@ -147,6 +148,12 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Widgets")
 	TSubclassOf<UEnterLevelWidget> levelExitWidgetClass;
+
+	UPROPERTY(EditAnywhere, Category = "Widgets")
+	TSubclassOf<USalvagePointPopupWidget> salvagePointsWidgetClass;
+
+	UPROPERTY()
+	USalvagePointPopupWidget* salvagePointsWidget;
 
 	UPROPERTY()
 	UEnterLevelWidget* levelExitWidget;
@@ -294,6 +301,9 @@ public:
 	float dashSpeed;
 
 	FVector rootAxes[6];
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int salvagePoints; //game currency, guess it works like souls
 
 	UPROPERTY(VisibleAnywhere)
 	bool falling = false;

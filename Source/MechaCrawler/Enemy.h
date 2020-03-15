@@ -27,8 +27,13 @@ public:
 	TSubclassOf<AActor> loot;
 
 	bool bIsHit = false;
+
+	UPROPERTY(EditAnywhere)
 	bool bCanBeHit = true;
 
 	UPROPERTY(EditAnywhere)
 	int health;
+
+	UPROPERTY(EditAnywhere)
+	int salvageValue;
 };
