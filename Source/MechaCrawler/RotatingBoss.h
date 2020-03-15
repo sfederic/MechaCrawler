@@ -25,6 +25,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void ActivateHitEffect() override;
 	void SpawnNewBody();
+	void BossDeath();
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> bodyToSpawn;
@@ -53,9 +54,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	float pulseSpeed;
 
+	UPROPERTY(EditAnywhere)
+	int bossStage; //Stages of the boss fight
+
+	UPROPERTY(EditAnywhere)
+	AActor* doorToOpen;
+
 	bool bNextRotate;
 	bool bRebuildPulseEffect = false;
-	bool bStage1 = true; 
-	bool bStage2 = false; 
-	bool bStage3 = false; 
 };

@@ -5,6 +5,7 @@
 namespace Tags
 {
 	static const FName Destroy = "Destroy"; //Object HAS been destroyed (in APEX sense)
+	static const FName CantDestroy = "CantDestroy"; //Object CAN'T been destroyed in game
 	static const FName Useable = "Useable"; //Object will activate Use widget (Interface still called regardless)
 	static const FName Pushable = "Pushable"; 
 	static const FName Scan = "Scan"; 

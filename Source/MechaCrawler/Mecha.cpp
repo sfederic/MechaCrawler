@@ -1114,7 +1114,7 @@ void AMecha::LeftMousePressed()
 				if (shotEnemy->Tags.Contains(Tags::Enemy) && shotEnemy->Tags.Contains(Tags::Destroy) == false)
 				{
 					UDestructibleComponent* enemyDc = shotEnemy->FindComponentByClass<UDestructibleComponent>();
-					if (enemyDc)
+					if (enemyDc && enemyDc->GetOwner()->Tags.Contains(Tags::CantDestroy) == false)
 					{
 						enemyDc->ApplyDamage(destructibleDamageAmount, shootHit.ImpactPoint, camera->GetForwardVector(), destructibleDamageStrength);
 						shotEnemy->SetLifeSpan(3.0);
@@ -1270,6 +1270,7 @@ void AMecha::LeftMousePressed()
 //Also starts level from crane
 void AMecha::StartLevel()
 {
+
 	if (bTypingNote)
 	{
 		UGameplayStatics::PlaySound2D(GetWorld(), soundNoteLoseFocus);
@@ -1277,13 +1278,13 @@ void AMecha::StartLevel()
 		return;
 	}
 
-	/*if (bStartLevelOnShip == true)
+	if (bStartLevelOnShip == true)
 	{
 		bStartLevelOnShip = false;
 		startLevelWidget->RemoveFromViewport();
 		UGameplayStatics::PlayWorldCameraShake(GetWorld(), cameraShake, GetActorLocation(), 500.f, 1.f); 
 		camera->FieldOfView = maxFOV;
-	}*/
+	}
 
 	//TODO: Function was previously open inventory. Decide if need to keep
 	/*if (inventoryWidget && controller)
