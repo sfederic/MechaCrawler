@@ -25,9 +25,11 @@ void AMemoryAttune::BeginPlay()
 	{
 		Tags.Remove(Tags::Useable);
 	}
-	else 
+	else if(bActivated)
 	{
 		Tags.Add(Tags::Useable);
+		FindComponentByClass<UParticleSystemComponent>()->Activate();
+		FindComponentByClass<UStaticMeshComponent>()->SetScalarParameterValueOnMaterials("Blend", 1.0f);
 	}
 }
 
