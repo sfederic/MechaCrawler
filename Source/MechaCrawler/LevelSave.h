@@ -19,11 +19,11 @@ class MECHACRAWLER_API ULevelSave : public USaveGame
 
 public:
 
-    //Level save data
+    //Level save data, gets level by string comparison
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TArray<FMapSaveData> levelData; //TMap too much hassle with USTRUCT() for keys
 
-    //Global save data
+    //Global save data, needed everywhere
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TArray<EMemories> heldMemories;
 };

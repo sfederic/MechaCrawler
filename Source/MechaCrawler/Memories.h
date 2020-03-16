@@ -6,5 +6,6 @@
 UENUM()
 enum class EMemories : uint8
 {
-	TagLevelMemory UMETA(DisplayName="TagLevelMemory")
+	TagLevelMemory UMETA(DisplayName="TagLevelMemory"),
+	TestMemory UMETA(DisplayName="TestMemory"),
 };

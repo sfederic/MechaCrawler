@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Memories.h"
 #include "OverworldEntrance.generated.h"
 
 //To be placed over levels that are shown on the overworld map to enter them and setup UI
@@ -29,4 +30,20 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString levelName;
+
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface* lockedMaterial;
+
+	UPROPERTY()
+	TArray<UMaterialInterface*> originalMaterials;
+
+	UPROPERTY(EditAnywhere)
+	EMemories memoryToUnlockLevel;
+
+	class UStaticMeshComponent* mesh;
+
+	class AShip* player;
+
+	UPROPERTY(EditAnywhere)
+	bool bLocked;
 };

@@ -11,6 +11,7 @@
 #include "Pickup.h"
 #include "Ship.h"
 #include "GlobalTags.h"
+#include "OverworldEntrance.h"
 
 ALoadPoint::ALoadPoint()
 {
@@ -130,6 +131,15 @@ void ALoadPoint::BeginPlay()
 			ship->memories.Add(load->heldMemories[i]);
 		}
 	}
+
+
+	//Memories: To change level visual
+	/*TArray<AActor*> levelEntraces;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AOverworldEntrance::StaticClass(), levelEntraces);
+	for (int i = 0; i < levelEntraces.Num(); i++)
+	{
+
+	}*/
 
 	UE_LOG(LogTemp, Warning, TEXT("Game %s loaded from index %d\n"), *SaveSlots::Slot1, SaveSlots::slotIndex);
 }
