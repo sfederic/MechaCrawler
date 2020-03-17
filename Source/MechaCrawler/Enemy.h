@@ -27,6 +27,7 @@ public:
 	TSubclassOf<AActor> loot;
 
 	bool bIsHit = false;
+	bool bIsAlive = true;
 
 	UPROPERTY(EditAnywhere)
 	bool bCanBeHit = true;

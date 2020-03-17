@@ -12,6 +12,8 @@
 #include "Materials/MaterialParameterCollectionInstance.h" 
 #include "Engine/PostProcessVolume.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Components/BoxComponent.h"
 
 
 ARotatingBoss::ARotatingBoss()
@@ -24,6 +26,7 @@ void ARotatingBoss::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	minionSpawningBox = FindComponentByClass<UBoxComponent>();
 	rotatingComponent = FindComponentByClass<URotatingMovementComponent>();
 	paramInstance = GetWorld()->GetParameterCollectionInstance(outlineParams);
 	paramInstance->SetVectorParameterValue("StartingPosition", GetActorLocation());
@@ -39,12 +42,29 @@ void ARotatingBoss::Tick(float DeltaTime)
 	{
 		spinTimer = 0.f;
 
+		FVector spawnPoint = UKismetMathLibrary::RandomPointInBoundingBox(minionSpawningBox->GetComponentLocation(), minionSpawningBox->Bounds.BoxExtent);
+		/*FQuat spawnQuat;
+		FCollisionShape spawnBox;
+		spawnBox.SetBox(FVector(50.f));
+		TArray<FOverlapResult> spawnOverlaps;
+		GetWorld()->OverlapMultiByChannel(spawnOverlaps, spawnPoint, spawnQuat, ECC_WorldStatic, spawnBox);
+
+		while(spawnOverlaps.Num() != 0)
+		{
+			spawnOverlaps.Empty();
+			spawnPoint = UKismetMathLibrary::RandomPointInBoundingBox(minionSpawningBox->GetComponentLocation(), minionSpawningBox->Bounds.BoxExtent);
+			GetWorld()->OverlapMultiByChannel(spawnOverlaps, spawnPoint, spawnQuat, ECC_WorldStatic, spawnBox);
+		}*/
+
 		switch (bossStage)
 		{
 		case 1:
 			rotatingComponent->RotationRate.Yaw = FMath::RandRange(-180.f, 180.f);
 			rotatingComponent->RotationRate.Roll = FMath::RandRange(-180.f, 180.f);
 			rotatingComponent->RotationRate.Pitch = FMath::RandRange(-180.f, 180.f);
+
+			GetWorld()->SpawnActor<AActor>(minionClass, spawnPoint, FRotator());
+
 			break;
 		case 2:
 			rotatingComponent->RotationRate.Yaw = FMath::RandRange(-360.f, 360.f);

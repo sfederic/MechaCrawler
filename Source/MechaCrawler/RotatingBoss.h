@@ -27,6 +27,8 @@ public:
 	void SpawnNewBody();
 	void BossDeath();
 
+	class UBoxComponent* minionSpawningBox;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> bodyToSpawn;
 
@@ -39,13 +41,16 @@ public:
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* postProcessOutline;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> minionClass;
+
 	class UMaterialParameterCollectionInstance* paramInstance;
 
 	UPROPERTY(EditAnywhere)
 	class UMaterialParameterCollection* outlineParams;
 
-	float spinTimer = 3.f; //Keep it same as spinTimerMax so actor doesn't start not spinning;
-	float spinTimerMax = 3.f;
+	float spinTimer = 5.f; //Keep it same as spinTimerMax so actor doesn't start not spinning;
+	float spinTimerMax = 5.f;
 	float timerOnSpawn = 2.0f;
 	float rebuildPulseEffectTimer = 0.f;
 	float pulseTimerMax = 3.0f;

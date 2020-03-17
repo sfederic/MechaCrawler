@@ -276,7 +276,10 @@ void AMecha::Tick(float DeltaTime)
 	//GRAVITY
 	if (!GetWorld()->LineTraceSingleByChannel(moveHit, GetActorLocation(), GetActorLocation() - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
 	{
-		falling = true;
+		if (moveHit.GetActor()->Tags.Contains(Tags::Destroy) == false)
+		{
+			falling = true;
+		}
 	}
 
 	if (currentLoc == nextLoc && currentRot == nextRot && bStartLevelOnShip == false)
@@ -814,16 +817,19 @@ void AMecha::RightMousePressed()
 
 	if (scanning && bDialogueClick == false)
 	{
-		if (scanHit.GetActor()->Tags.Contains(Tags::ScanUse))
+		if (scanHit.GetActor())
 		{
-			IActivate* activate = Cast<IActivate>(scanHit.GetActor());
-			activate->Use();
-		}
+			if (scanHit.GetActor()->Tags.Contains(Tags::ScanUse))
+			{
+				IActivate* activate = Cast<IActivate>(scanHit.GetActor());
+				activate->Use();
+			}
 
-		if (scanHit.GetActor()->IsA<ADialogueBox>() == false)
-		{
-			GetDialogue(scanHit.GetActor());
-			return;
+			if (scanHit.GetActor()->IsA<ADialogueBox>() == false)
+			{
+				GetDialogue(scanHit.GetActor());
+				return;
+			}
 		}
 	}
 
@@ -1046,12 +1052,10 @@ void AMecha::LeftMousePressed()
 				}
 			}
 		}
-
-		return;
 	}
 
 	//MESH SLICING (why did I add this to the game...)
-	UProceduralMeshComponent* cutMesh = shootHit.GetActor()->FindComponentByClass<UProceduralMeshComponent>();
+	/*UProceduralMeshComponent* cutMesh = shootHit.GetActor()->FindComponentByClass<UProceduralMeshComponent>();
 	if (cutMesh)
 	{
 		cutMesh->GetOwner()->Tags.Add(Tags::Destroy);
@@ -1065,7 +1069,7 @@ void AMecha::LeftMousePressed()
 		newHalfCutMesh->GetOwner()->Tags.Add(Tags::Destroy);
 
 		return;
-	}
+	}*/
 		
 	if (GetWorld()->LineTraceSingleByChannel(shootHit, camera->GetComponentLocation(), GetActorLocation() + camera->GetForwardVector() * attackDistance, ECC_Destructible))
 	{

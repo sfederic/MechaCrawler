@@ -31,6 +31,7 @@ void ARebuildSwitch::BeginPlay()
 
 	UBoxComponent* box = FindComponentByClass<UBoxComponent>();
 	box->OnComponentBeginOverlap.AddDynamic(this, &ARebuildSwitch::OnPlayerOverlapBegin);
+	//box->OnComponentEndOverlap.AddDynamic(this, &ARebuildSwitch::OnPlayerOverlapEnd);
 
 	rebuildSwitchPlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	rebuildSwitchPlayer = Cast<AMecha>(rebuildSwitchPlayerPawn);
@@ -132,6 +133,16 @@ void ARebuildSwitch::OnPlayerOverlapBegin(UPrimitiveComponent* OverlappedComp, A
 		if (switchActivated == false)
 		{
 			switchActivated = true;
+			rebuildSwitchPlayer->canMove = false; //Nicer to make the player always stop on entry, not like before where you could move through
 		}
+	}
+}
+
+void ARebuildSwitch::OnPlayerOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor->IsA<AMecha>())
+	{
+		switchActivated = false;
+		rebuildTimer = 0.f;
 	}
 }

@@ -23,4 +23,23 @@ public:
     virtual void ActivateHitEffect() override;
     void DestroyDestructible();
 
+    FHitResult shootHit;
+    FCollisionQueryParams shootParams;
+
+    UPROPERTY(EditAnywhere)
+    class UParticleSystem* shootParticleTemplate;
+
+    UPROPERTY(EditAnywhere)
+    USoundBase* soundShoot;
+
+    class URotatingMovementComponent* rotatingComponent;
+
+    UPROPERTY(VisibleAnywhere)
+    float shootTimer = 0.f;
+
+    UPROPERTY(EditAnywhere)
+    float shootTimerMax = 5.0f;
+
+    UPROPERTY(EditAnywhere)
+    float shootDistance;
 };
