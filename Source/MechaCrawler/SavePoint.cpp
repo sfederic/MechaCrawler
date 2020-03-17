@@ -49,6 +49,10 @@ void ASavePoint::OnPlayerOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 			save->levelData.Add(FMapSaveData(levelName));
 		}
 
+		//Save level name for Load Game
+		save->levelToLoadInto = FName(*levelName);
+		save->loadLocation = GetActorLocation();
+
 		//Delete previouslevel
 		for (int i = 0; i < save->levelData.Num(); i++)
 		{

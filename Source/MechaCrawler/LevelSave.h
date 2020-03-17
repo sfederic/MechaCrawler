@@ -26,4 +26,10 @@ public:
     //Global save data, needed everywhere
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TArray<EMemories> heldMemories;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FName levelToLoadInto;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FVector loadLocation; //Location to load into
 };
