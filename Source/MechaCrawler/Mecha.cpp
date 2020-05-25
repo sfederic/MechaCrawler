@@ -276,9 +276,12 @@ void AMecha::Tick(float DeltaTime)
 	//GRAVITY
 	if (!GetWorld()->LineTraceSingleByChannel(moveHit, GetActorLocation(), GetActorLocation() - (RootComponent->GetUpVector() * traceDistance), ECC_WorldStatic, moveParams))
 	{
-		if (moveHit.GetActor()->Tags.Contains(Tags::Destroy) == false)
+		if (moveHit.GetActor())
 		{
-			falling = true;
+			if (moveHit.GetActor()->Tags.Contains(Tags::Destroy) == false)
+			{
+				falling = true;
+			}
 		}
 	}
 

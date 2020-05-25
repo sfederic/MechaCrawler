@@ -220,7 +220,7 @@ void ARotatingBoss::BossDeath()
 {
 	AMecha* player = Cast<AMecha>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 	player->instancedRebuildManager->ClearAll();
-
+	
 	//Open level door
 	doorToOpen->Destroy();
 
